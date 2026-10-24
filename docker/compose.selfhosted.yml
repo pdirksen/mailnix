@@ -23,6 +23,8 @@ services:
       Mailnix__Bootstrap__AdminPassword: ${MAILNIX_ADMIN_PASSWORD:-}
       # Behind a reverse proxy: trust X-Forwarded-* so cookies are marked Secure on HTTPS.
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: ${MAILNIX_BEHIND_PROXY:-false}
+      # Allow plain-text IMAP (not recommended):
+      # Mailnix__Mail__AllowInsecureConnections: "true"
       # PostgreSQL instead of SQLite:
       # Mailnix__Database__Provider: Postgres
       # Mailnix__Database__ConnectionString: Host=postgres;Database=mailnix;Username=mailnix;Password=change-me

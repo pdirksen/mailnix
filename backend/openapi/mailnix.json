@@ -122,10 +122,387 @@
           }
         }
       }
+    },
+    "/api/accounts": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/accounts/{id}": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/accounts/test": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestConnectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/accounts/{id}/test": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionTestResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/accounts/{id}/folders": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "counts",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AccountResponse": {
+        "required": [
+          "id",
+          "name",
+          "provider",
+          "host",
+          "port",
+          "security",
+          "username",
+          "enabled",
+          "status",
+          "lastErrorCode",
+          "lastError",
+          "lastCheckedAt",
+          "watchedFolders",
+          "specialFolders",
+          "capabilities",
+          "blastRadiusLimit",
+          "purgeTrashAfterDays",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/MailProvider"
+          },
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "security": {
+            "$ref": "#/components/schemas/ImapSecurity"
+          },
+          "username": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MailAccountStatus"
+          },
+          "lastErrorCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ConnectionErrorCode"
+              }
+            ]
+          },
+          "lastError": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "lastCheckedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "watchedFolders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "specialFolders": {
+            "$ref": "#/components/schemas/SpecialFolderMap"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blastRadiusLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "purgeTrashAfterDays": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "AuthConfigResponse": {
         "required": [
           "registrationOpen"
@@ -134,6 +511,144 @@
         "properties": {
           "registrationOpen": {
             "type": "boolean"
+          }
+        }
+      },
+      "ConnectionErrorCode": {
+        "enum": [
+          "HostNotFound",
+          "ConnectionRefused",
+          "ConnectionFailed",
+          "Timeout",
+          "TlsFailed",
+          "AuthenticationFailed",
+          "ProtocolError",
+          "InsecureConnectionNotAllowed",
+          "AddressNotAllowed",
+          "Unknown",
+          null
+        ]
+      },
+      "ConnectionTestResponse": {
+        "required": [
+          "success",
+          "errorCode",
+          "errorMessage",
+          "mailbox"
+        ],
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ConnectionErrorCode"
+              }
+            ]
+          },
+          "errorMessage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "mailbox": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MailboxOverview"
+              }
+            ]
+          }
+        }
+      },
+      "CreateAccountRequest": {
+        "required": [
+          "name",
+          "host",
+          "port",
+          "security",
+          "username",
+          "password",
+          "watchedFolders"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "security": {
+            "$ref": "#/components/schemas/ImapSecurity"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "watchedFolders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "specialFolders": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SpecialFolderMap"
+              }
+            ]
+          },
+          "blastRadiusLimit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 200
+          },
+          "purgeTrashAfterDays": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "FolderListResponse": {
+        "required": [
+          "delimiter",
+          "folders",
+          "specialFolders"
+        ],
+        "type": "object",
+        "properties": {
+          "delimiter": {
+            "type": "string"
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MailFolderInfo"
+            }
+          },
+          "specialFolders": {
+            "$ref": "#/components/schemas/SpecialFolderMap"
           }
         }
       },
@@ -153,11 +668,9 @@
             ]
           },
           "status": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
               "null",
-              "integer",
-              "string"
+              "integer"
             ],
             "format": "int32"
           },
@@ -184,6 +697,13 @@
           }
         }
       },
+      "ImapSecurity": {
+        "enum": [
+          "SslOnConnect",
+          "StartTls",
+          "None"
+        ]
+      },
       "LoginRequest": {
         "required": [
           "email",
@@ -202,6 +722,145 @@
             "type": "boolean"
           }
         }
+      },
+      "MailAccountStatus": {
+        "enum": [
+          "Unknown",
+          "Ok",
+          "Error"
+        ]
+      },
+      "MailboxCapabilities": {
+        "required": [
+          "move",
+          "uidPlus",
+          "condStore",
+          "qResync",
+          "idle",
+          "specialUse",
+          "gmailExtensions",
+          "statusSize",
+          "all"
+        ],
+        "type": "object",
+        "properties": {
+          "move": {
+            "type": "boolean"
+          },
+          "uidPlus": {
+            "type": "boolean"
+          },
+          "condStore": {
+            "type": "boolean"
+          },
+          "qResync": {
+            "type": "boolean"
+          },
+          "idle": {
+            "type": "boolean"
+          },
+          "specialUse": {
+            "type": "boolean"
+          },
+          "gmailExtensions": {
+            "type": "boolean"
+          },
+          "statusSize": {
+            "type": "boolean"
+          },
+          "all": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MailboxOverview": {
+        "required": [
+          "capabilities",
+          "delimiter",
+          "folders",
+          "specialFolders"
+        ],
+        "type": "object",
+        "properties": {
+          "capabilities": {
+            "$ref": "#/components/schemas/MailboxCapabilities"
+          },
+          "delimiter": {
+            "type": "string"
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MailFolderInfo"
+            }
+          },
+          "specialFolders": {
+            "$ref": "#/components/schemas/SpecialFolderMap"
+          }
+        }
+      },
+      "MailFolderInfo": {
+        "required": [
+          "path",
+          "name",
+          "parentPath",
+          "canSelect",
+          "specialUse",
+          "messages",
+          "unread"
+        ],
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentPath": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "canSelect": {
+            "type": "boolean"
+          },
+          "specialUse": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SpecialFolderKind"
+              }
+            ]
+          },
+          "messages": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "unread": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "MailProvider": {
+        "enum": [
+          "Imap",
+          "Google",
+          "Microsoft"
+        ]
       },
       "MeResponse": {
         "required": [
@@ -261,12 +920,160 @@
             ]
           }
         }
+      },
+      "SpecialFolderKind": {
+        "enum": [
+          "Inbox",
+          "Sent",
+          "Drafts",
+          "Trash",
+          "Junk",
+          "Archive",
+          "All",
+          "Flagged",
+          null
+        ]
+      },
+      "SpecialFolderMap": {
+        "required": [
+          "sent",
+          "drafts",
+          "trash",
+          "junk",
+          "archive"
+        ],
+        "type": "object",
+        "properties": {
+          "sent": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "drafts": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "trash": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "junk": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "archive": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "TestConnectionRequest": {
+        "required": [
+          "host",
+          "port",
+          "security",
+          "username",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "security": {
+            "$ref": "#/components/schemas/ImapSecurity"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateAccountRequest": {
+        "required": [
+          "name",
+          "host",
+          "port",
+          "security",
+          "username",
+          "watchedFolders",
+          "specialFolders",
+          "enabled",
+          "blastRadiusLimit",
+          "purgeTrashAfterDays"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "security": {
+            "$ref": "#/components/schemas/ImapSecurity"
+          },
+          "username": {
+            "type": "string"
+          },
+          "watchedFolders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "specialFolders": {
+            "$ref": "#/components/schemas/SpecialFolderMap"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "blastRadiusLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "purgeTrashAfterDays": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "password": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       }
     }
   },
   "tags": [
     {
       "name": "Auth"
+    },
+    {
+      "name": "Accounts"
     }
   ]
 }

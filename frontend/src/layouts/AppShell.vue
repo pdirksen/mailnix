@@ -22,7 +22,7 @@ import {
 import { useAuthStore } from '@/stores/auth'
 import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
-import { navigation } from './navigation'
+import { type NavigationItem, navigation } from './navigation'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -30,8 +30,9 @@ const router = useRouter()
 
 const items = computed(() => navigation.filter((item) => !item.adminOnly || auth.isAdmin))
 
-function isActive(to: (typeof navigation)[number]['to']) {
-  return router.resolve(to).name === route.name
+function isActive(item: NavigationItem) {
+  const name = String(route.name)
+  return router.resolve(item.to).name === name || (item.matches?.includes(name) ?? false)
 }
 </script>
 
@@ -55,7 +56,7 @@ function isActive(to: (typeof navigation)[number]['to']) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem v-for="item in items" :key="item.labelKey">
-                <SidebarMenuButton as-child :is-active="isActive(item.to)" :tooltip="$t(item.labelKey)">
+                <SidebarMenuButton as-child :is-active="isActive(item)" :tooltip="$t(item.labelKey)">
                   <RouterLink :to="item.to">
                     <component :is="item.icon" />
                     <span>{{ $t(item.labelKey) }}</span>

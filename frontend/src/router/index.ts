@@ -29,6 +29,25 @@ export const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/HomePage.vue'),
         meta: { titleKey: 'nav.dashboard' },
       },
+      {
+        path: 'accounts',
+        name: 'accounts',
+        component: () => import('@/pages/accounts/AccountsPage.vue'),
+        meta: { titleKey: 'nav.accounts' },
+      },
+      {
+        path: 'accounts/new',
+        name: 'account-new',
+        component: () => import('@/pages/accounts/AddAccountPage.vue'),
+        meta: { titleKey: 'accounts.wizard.title' },
+      },
+      {
+        path: 'accounts/:id',
+        name: 'account-detail',
+        component: () => import('@/pages/accounts/AccountDetailPage.vue'),
+        props: true,
+        meta: { titleKey: 'nav.accounts' },
+      },
     ],
   },
   {

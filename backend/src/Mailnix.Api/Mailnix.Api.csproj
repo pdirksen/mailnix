@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Mailnix.Infrastructure\Mailnix.Infrastructure.csproj" />
+    <ProjectReference Include="..\Mailnix.Mail\Mailnix.Mail.csproj" />
   </ItemGroup>
 
   <ItemGroup>

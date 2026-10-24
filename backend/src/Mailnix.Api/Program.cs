@@ -1,9 +1,12 @@
 using System.Globalization;
 using System.Reflection;
+using System.Text.Json.Serialization;
+using Mailnix.Api.Accounts;
 using Mailnix.Api.Auth;
 using Mailnix.Api.Hosting;
 using Mailnix.Infrastructure;
 using Mailnix.Infrastructure.Data;
+using Mailnix.Mail;
 using Microsoft.Net.Http.Headers;
 using Scalar.AspNetCore;
 using Serilog;
@@ -23,7 +26,14 @@ var hostOptions = builder.Configuration.GetSection(MailnixHostOptions.Section).G
 builder.Services.AddOptions<MailnixHostOptions>().Bind(builder.Configuration.GetSection(MailnixHostOptions.Section));
 
 builder.Services.AddMailnixInfrastructure(builder.Configuration, persistDataProtectionKeys: !isOpenApiGeneration);
+builder.Services.AddMailnixMail(builder.Configuration);
 builder.Services.AddMailnixAuth(builder.Configuration);
+builder.Services.AddMailnixRateLimiting(builder.Configuration);
+builder.Services.ConfigureHttpJsonOptions(json =>
+{
+    json.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    json.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+});
 builder.Services.AddProblemDetails();
 builder.Services.AddValidation();
 builder.Services.AddOpenApi();
@@ -59,6 +69,7 @@ if (hostOptions.ServesApi)
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.UseMiddleware<CsrfHeaderMiddleware>();
 
 app.MapHealthChecks("/healthz").AllowAnonymous();
@@ -73,6 +84,7 @@ if (hostOptions.ServesApi)
 
     var api = app.MapGroup("/api");
     api.MapAuthEndpoints();
+    api.MapAccountEndpoints();
     api.MapFallback("{**path}", () => TypedResults.NotFound()).AllowAnonymous();
 
     app.MapFallbackToFile("index.html", new StaticFileOptions

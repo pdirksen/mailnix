@@ -1,5 +1,6 @@
 import type { TypedSchema, TypedSchemaError } from 'vee-validate'
 import type { z } from 'zod'
+import { type MaybeRefOrGetter, ref, toValue } from 'vue'
 
 /** vee-validate field path: `items[0].name` */
 function toFieldPath(path: readonly PropertyKey[]): string {
@@ -28,4 +29,28 @@ export function toTypedSchema<TSchema extends z.ZodType>(schema: TSchema): Typed
       return { errors: [...byPath].map(([path, errors]): TypedSchemaError => ({ path, errors })) }
     },
   }
+}
+
+/**
+ * Minimal schema validation for forms spread over several components (e.g. wizard steps):
+ * `validate(values)` returns the parsed values or null and fills `errors` (first message per field path).
+ */
+export function useSchemaValidation<TSchema extends z.ZodType>(schema: MaybeRefOrGetter<TSchema>) {
+  const errors = ref<Record<string, string>>({})
+
+  function validate(values: unknown): z.output<TSchema> | null {
+    const result = toValue(schema).safeParse(values)
+    if (result.success) {
+      errors.value = {}
+      return result.data
+    }
+    const next: Record<string, string> = {}
+    for (const issue of result.error.issues) {
+      next[toFieldPath(issue.path)] ??= issue.message
+    }
+    errors.value = next
+    return null
+  }
+
+  return { errors, validate }
 }

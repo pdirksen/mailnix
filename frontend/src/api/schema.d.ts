@@ -194,29 +194,427 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccountResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateAccountRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccountResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccountResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateAccountRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccountResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TestConnectionRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConnectionTestResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/{id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConnectionTestResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/{id}/folders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    counts?: boolean;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FolderListResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AccountResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            provider: components["schemas"]["MailProvider"];
+            host: string;
+            /** Format: int32 */
+            port: number;
+            security: components["schemas"]["ImapSecurity"];
+            username: string;
+            enabled: boolean;
+            status: components["schemas"]["MailAccountStatus"];
+            lastErrorCode: null | components["schemas"]["ConnectionErrorCode"];
+            lastError: null | string;
+            /** Format: date-time */
+            lastCheckedAt: null | string;
+            watchedFolders: string[];
+            specialFolders: components["schemas"]["SpecialFolderMap"];
+            capabilities: string[];
+            /** Format: int32 */
+            blastRadiusLimit: number;
+            /** Format: int32 */
+            purgeTrashAfterDays: null | number;
+            /** Format: date-time */
+            createdAt: string;
+        };
         AuthConfigResponse: {
             registrationOpen: boolean;
+        };
+        /** @enum {unknown} */
+        ConnectionErrorCode: "HostNotFound" | "ConnectionRefused" | "ConnectionFailed" | "Timeout" | "TlsFailed" | "AuthenticationFailed" | "ProtocolError" | "InsecureConnectionNotAllowed" | "AddressNotAllowed" | "Unknown" | null;
+        ConnectionTestResponse: {
+            success: boolean;
+            errorCode: null | components["schemas"]["ConnectionErrorCode"];
+            errorMessage: null | string;
+            mailbox: null | components["schemas"]["MailboxOverview"];
+        };
+        CreateAccountRequest: {
+            name: string;
+            host: string;
+            /** Format: int32 */
+            port: number;
+            security: components["schemas"]["ImapSecurity"];
+            username: string;
+            password: string;
+            watchedFolders: string[];
+            specialFolders?: null | components["schemas"]["SpecialFolderMap"];
+            /**
+             * Format: int32
+             * @default 200
+             */
+            blastRadiusLimit: number;
+            /** Format: int32 */
+            purgeTrashAfterDays?: null | number;
+        };
+        FolderListResponse: {
+            delimiter: string;
+            folders: components["schemas"]["MailFolderInfo"][];
+            specialFolders: components["schemas"]["SpecialFolderMap"];
         };
         HttpValidationProblemDetails: {
             type?: null | string;
             title?: null | string;
             /** Format: int32 */
-            status?: null | number | string;
+            status?: null | number;
             detail?: null | string;
             instance?: null | string;
             errors?: {
                 [key: string]: string[];
             };
         };
+        /** @enum {unknown} */
+        ImapSecurity: "SslOnConnect" | "StartTls" | "None";
         LoginRequest: {
             email: string;
             password: string;
             rememberMe: boolean;
         };
+        /** @enum {unknown} */
+        MailAccountStatus: "Unknown" | "Ok" | "Error";
+        MailboxCapabilities: {
+            move: boolean;
+            uidPlus: boolean;
+            condStore: boolean;
+            qResync: boolean;
+            idle: boolean;
+            specialUse: boolean;
+            gmailExtensions: boolean;
+            statusSize: boolean;
+            all: string[];
+        };
+        MailboxOverview: {
+            capabilities: components["schemas"]["MailboxCapabilities"];
+            delimiter: string;
+            folders: components["schemas"]["MailFolderInfo"][];
+            specialFolders: components["schemas"]["SpecialFolderMap"];
+        };
+        MailFolderInfo: {
+            path: string;
+            name: string;
+            parentPath: null | string;
+            canSelect: boolean;
+            specialUse: null | components["schemas"]["SpecialFolderKind"];
+            /** Format: int32 */
+            messages: null | number;
+            /** Format: int32 */
+            unread: null | number;
+        };
+        /** @enum {unknown} */
+        MailProvider: "Imap" | "Google" | "Microsoft";
         MeResponse: {
             /** Format: uuid */
             id: string;
@@ -230,6 +628,39 @@ export interface components {
             email: string;
             password: string;
             displayName?: null | string;
+        };
+        /** @enum {unknown} */
+        SpecialFolderKind: "Inbox" | "Sent" | "Drafts" | "Trash" | "Junk" | "Archive" | "All" | "Flagged" | null;
+        SpecialFolderMap: {
+            sent: null | string;
+            drafts: null | string;
+            trash: null | string;
+            junk: null | string;
+            archive: null | string;
+        };
+        TestConnectionRequest: {
+            host: string;
+            /** Format: int32 */
+            port: number;
+            security: components["schemas"]["ImapSecurity"];
+            username: string;
+            password: string;
+        };
+        UpdateAccountRequest: {
+            name: string;
+            host: string;
+            /** Format: int32 */
+            port: number;
+            security: components["schemas"]["ImapSecurity"];
+            username: string;
+            watchedFolders: string[];
+            specialFolders: components["schemas"]["SpecialFolderMap"];
+            enabled: boolean;
+            /** Format: int32 */
+            blastRadiusLimit: number;
+            /** Format: int32 */
+            purgeTrashAfterDays: null | number;
+            password?: null | string;
         };
     };
     responses: never;

@@ -5,7 +5,8 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "toggleSidebar": "Seitenleiste ein-/ausblenden"
+    "toggleSidebar": "Seitenleiste ein-/ausblenden",
+    "accounts": "Konten"
   },
   "common": {
     "language": "Sprache",
@@ -14,7 +15,16 @@
     "themeDark": "Dunkel",
     "themeSystem": "System",
     "loading": "Wird geladen…",
-    "unexpectedError": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+    "unexpectedError": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "retry": "Erneut versuchen",
+    "refresh": "Aktualisieren",
+    "none": "Keiner",
+    "comingSoon": "Demnächst",
+    "saved": "Änderungen gespeichert."
   },
   "auth": {
     "email": "E-Mail",
@@ -41,13 +51,16 @@
     "email": "Gib eine gültige E-Mail-Adresse ein.",
     "passwordLength": "Verwende mindestens {min} Zeichen.",
     "passwordMismatch": "Die Passwörter stimmen nicht überein.",
-    "maxLength": "Verwende höchstens {max} Zeichen."
+    "maxLength": "Verwende höchstens {max} Zeichen.",
+    "portRange": "Verwende einen Port zwischen 1 und 65535.",
+    "watchedRequired": "Wähle mindestens einen Ordner aus.",
+    "numberRange": "Gib eine Zahl zwischen {min} und {max} ein."
   },
   "home": {
     "welcome": "Willkommen, {name}",
     "intro": "mailnix überwacht deine Postfächer und sortiert eingehende E-Mails mit Regeln, die du grafisch erstellst – inklusive Vorschau, was eine Regel tun würde, bevor sie etwas verändert.",
     "nextStepsTitle": "Erste Schritte",
-    "nextSteps": "Postfächer verbinden und Regeln erstellen folgt als Nächstes. Du bist angemeldet als {role}.",
+    "nextSteps": "Als Nächstes: Regeln für deine Postfächer erstellen. Du bist angemeldet als {role}.",
     "roleAdmin": "Administrator",
     "roleUser": "Benutzer"
   },
@@ -55,5 +68,135 @@
     "title": "Seite nicht gefunden",
     "description": "Die gesuchte Seite existiert nicht.",
     "back": "Zurück zum Dashboard"
+  },
+  "accounts": {
+    "title": "Konten",
+    "subtitle": "Postfächer, die mailnix überwacht und sortiert.",
+    "add": "Konto hinzufügen",
+    "empty": "Noch keine Konten",
+    "emptyHint": "Verbinde ein Postfach, um E-Mails mit Regeln zu sortieren.",
+    "status": {
+      "Ok": "Verbunden",
+      "Error": "Fehler",
+      "Unknown": "Nicht geprüft"
+    },
+    "disabled": "Pausiert",
+    "lastChecked": "Zuletzt geprüft {time}",
+    "neverChecked": "Noch nie geprüft",
+    "test": "Verbindung testen",
+    "testOk": "Verbindung funktioniert.",
+    "testFailed": "Verbindung fehlgeschlagen",
+    "delete": "Konto löschen",
+    "deleteTitle": "„{name}“ löschen?",
+    "deleteText": "mailnix verarbeitet dieses Postfach nicht mehr. Die E-Mails auf dem Server bleiben unverändert.",
+    "deleted": "Konto gelöscht.",
+    "created": "Konto erstellt.",
+    "notFound": "Dieses Konto existiert nicht.",
+    "provider": {
+      "Imap": "IMAP",
+      "ImapDescription": "Jeder Mailserver mit IMAP und Passwort.",
+      "Google": "Google",
+      "GoogleDescription": "Gmail und Google Workspace per OAuth.",
+      "Microsoft": "Microsoft 365",
+      "MicrosoftDescription": "Outlook.com und Microsoft 365 per OAuth."
+    },
+    "wizard": {
+      "title": "Konto hinzufügen",
+      "stepProvider": "Anbieter",
+      "stepProviderDescription": "Wo deine E-Mails liegen",
+      "stepServer": "Server",
+      "stepServerDescription": "Adresse und Anmeldung",
+      "stepConnection": "Verbindung",
+      "stepConnectionDescription": "Zugriff prüfen",
+      "stepFolders": "Ordner & Sicherheit",
+      "stepFoldersDescription": "Was mailnix anfassen darf",
+      "connecting": "Verbinde mit {host}…",
+      "connectionOk": "Verbunden mit {host}",
+      "foldersFound": "{count} Ordner gefunden | {count} Ordner gefunden",
+      "create": "Konto erstellen"
+    },
+    "fields": {
+      "name": "Kontoname",
+      "nameHint": "Wird in mailnix angezeigt, z. B. „Arbeit“ oder „Privat“.",
+      "host": "IMAP-Server",
+      "hostPlaceholder": "imap.example.com",
+      "port": "Port",
+      "security": "Verschlüsselung",
+      "username": "Benutzername",
+      "usernameHint": "Meist deine vollständige E-Mail-Adresse.",
+      "password": "Passwort",
+      "passwordKeep": "Leer lassen, um das aktuelle Passwort zu behalten.",
+      "enabled": "Neue E-Mails verarbeiten",
+      "enabledHint": "Pausieren stoppt alle Regeln für dieses Konto."
+    },
+    "security": {
+      "SslOnConnect": "SSL/TLS",
+      "SslOnConnectHint": "Von Anfang an verschlüsselt (Port 993). Empfohlen.",
+      "StartTls": "STARTTLS",
+      "StartTlsHint": "Wechselt nach dem Verbinden zur Verschlüsselung (Port 143).",
+      "None": "Keine",
+      "NoneHint": "Unverschlüsselt. Nur wenn dein Server nichts anderes erlaubt."
+    },
+    "folders": {
+      "title": "Ordner",
+      "watched": "Überwachte Ordner",
+      "watchedHint": "Regeln laufen für neue E-Mails in diesen Ordnern.",
+      "messages": "{count} E-Mail | {count} E-Mails",
+      "unread": "{count} ungelesen",
+      "notSelectable": "Nur Container",
+      "loadFailed": "Ordner konnten nicht geladen werden",
+      "special": {
+        "Inbox": "Posteingang",
+        "Sent": "Gesendet",
+        "Drafts": "Entwürfe",
+        "Trash": "Papierkorb",
+        "Junk": "Spam",
+        "Archive": "Archiv",
+        "All": "Alle E-Mails",
+        "Flagged": "Markiert"
+      },
+      "specialTitle": "Spezialordner",
+      "specialHint": "Wohin „Löschen“, „Als Spam markieren“ und „Archivieren“ E-Mails verschieben. Wird automatisch erkannt.",
+      "notSet": "Nicht festgelegt"
+    },
+    "safety": {
+      "title": "Sicherheit",
+      "blastRadius": "Bestätigungsschwelle",
+      "blastRadiusHint": "Läufe, die mehr E-Mails verschieben oder löschen würden, pausieren und fragen vorher nach.",
+      "purgeTrash": "Papierkorb automatisch leeren",
+      "purgeTrashHint": "E-Mails, die schon eine Weile im Papierkorb liegen, endgültig löschen. Standardmäßig aus.",
+      "purgeDays": "Nach wie vielen Tagen"
+    },
+    "tabs": {
+      "overview": "Übersicht",
+      "folders": "Ordner",
+      "settings": "Einstellungen"
+    },
+    "overview": {
+      "connection": "Verbindung",
+      "server": "Server",
+      "capabilities": "Server-Funktionen",
+      "capabilityHints": {
+        "Idle": "Sofortige Benachrichtigung bei neuen E-Mails",
+        "Move": "Atomares Verschieben",
+        "UidPlus": "Zuverlässiges Rückgängigmachen",
+        "SpecialUse": "Erkennung von Spezialordnern",
+        "CondStore": "Effiziente Änderungsverfolgung"
+      }
+    },
+    "saveFailed": "Speichern fehlgeschlagen"
+  },
+  "connectionErrors": {
+    "HostNotFound": "Der Servername wurde nicht gefunden. Prüfe die Schreibweise.",
+    "ConnectionRefused": "Der Server hat die Verbindung abgelehnt. Prüfe Server und Port.",
+    "ConnectionFailed": "Die Verbindung zum Server ist fehlgeschlagen.",
+    "Timeout": "Der Server hat nicht rechtzeitig geantwortet.",
+    "TlsFailed": "Die verschlüsselte Verbindung konnte nicht aufgebaut werden. Prüfe Verschlüsselung und Port.",
+    "AuthenticationFailed": "Der Server hat Benutzername oder Passwort abgelehnt.",
+    "ProtocolError": "Der Server hat unerwartet geantwortet.",
+    "InsecureConnectionNotAllowed": "Unverschlüsselte Verbindungen sind auf diesem mailnix-Server deaktiviert.",
+    "AddressNotAllowed": "Diese Serveradresse ist nicht erlaubt (privates Netzwerk).",
+    "CredentialsUnreadable": "Das gespeicherte Passwort kann nicht mehr entschlüsselt werden. Gib es in den Einstellungen erneut ein.",
+    "Unknown": "Die Verbindung zum Server ist fehlgeschlagen."
   }
 }

@@ -5,7 +5,8 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "toggleSidebar": "Toggle sidebar"
+    "toggleSidebar": "Toggle sidebar",
+    "accounts": "Accounts"
   },
   "common": {
     "language": "Language",
@@ -14,7 +15,16 @@
     "themeDark": "Dark",
     "themeSystem": "System",
     "loading": "Loading…",
-    "unexpectedError": "Something went wrong. Please try again."
+    "unexpectedError": "Something went wrong. Please try again.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "retry": "Try again",
+    "refresh": "Refresh",
+    "none": "None",
+    "comingSoon": "Coming soon",
+    "saved": "Changes saved."
   },
   "auth": {
     "email": "Email",
@@ -41,13 +51,16 @@
     "email": "Enter a valid email address.",
     "passwordLength": "Use at least {min} characters.",
     "passwordMismatch": "Passwords do not match.",
-    "maxLength": "Use at most {max} characters."
+    "maxLength": "Use at most {max} characters.",
+    "portRange": "Use a port between 1 and 65535.",
+    "watchedRequired": "Select at least one folder.",
+    "numberRange": "Enter a number between {min} and {max}."
   },
   "home": {
     "welcome": "Welcome, {name}",
     "intro": "mailnix watches your mailboxes and sorts incoming mail with rules you build visually – with a preview of what each rule would do before it touches anything.",
     "nextStepsTitle": "Getting started",
-    "nextSteps": "Connecting mailboxes and building rules is coming next. You are signed in as {role}.",
+    "nextSteps": "Next: create rules for your mailboxes. You are signed in as {role}.",
     "roleAdmin": "administrator",
     "roleUser": "user"
   },
@@ -55,5 +68,135 @@
     "title": "Page not found",
     "description": "The page you are looking for does not exist.",
     "back": "Back to the dashboard"
+  },
+  "accounts": {
+    "title": "Accounts",
+    "subtitle": "Mailboxes mailnix watches and sorts.",
+    "add": "Add account",
+    "empty": "No accounts yet",
+    "emptyHint": "Connect a mailbox to start sorting mail with rules.",
+    "status": {
+      "Ok": "Connected",
+      "Error": "Error",
+      "Unknown": "Not checked"
+    },
+    "disabled": "Paused",
+    "lastChecked": "Last checked {time}",
+    "neverChecked": "Never checked",
+    "test": "Test connection",
+    "testOk": "Connection works.",
+    "testFailed": "Connection failed",
+    "delete": "Delete account",
+    "deleteTitle": "Delete \"{name}\"?",
+    "deleteText": "mailnix stops processing this mailbox. Messages on the server are not touched.",
+    "deleted": "Account deleted.",
+    "created": "Account created.",
+    "notFound": "This account does not exist.",
+    "provider": {
+      "Imap": "IMAP",
+      "ImapDescription": "Any mail server with IMAP and a password.",
+      "Google": "Google",
+      "GoogleDescription": "Gmail and Google Workspace via OAuth.",
+      "Microsoft": "Microsoft 365",
+      "MicrosoftDescription": "Outlook.com and Microsoft 365 via OAuth."
+    },
+    "wizard": {
+      "title": "Add account",
+      "stepProvider": "Provider",
+      "stepProviderDescription": "Where your mail lives",
+      "stepServer": "Server",
+      "stepServerDescription": "Address and login",
+      "stepConnection": "Connection",
+      "stepConnectionDescription": "Check access",
+      "stepFolders": "Folders & safety",
+      "stepFoldersDescription": "What mailnix may touch",
+      "connecting": "Connecting to {host}…",
+      "connectionOk": "Connected to {host}",
+      "foldersFound": "{count} folder found | {count} folders found",
+      "create": "Create account"
+    },
+    "fields": {
+      "name": "Account name",
+      "nameHint": "Shown in mailnix, e.g. \"Work\" or \"Private\".",
+      "host": "IMAP server",
+      "hostPlaceholder": "imap.example.com",
+      "port": "Port",
+      "security": "Encryption",
+      "username": "Username",
+      "usernameHint": "Usually your full email address.",
+      "password": "Password",
+      "passwordKeep": "Leave empty to keep the current password.",
+      "enabled": "Process new mail",
+      "enabledHint": "Pause to stop all rules for this account."
+    },
+    "security": {
+      "SslOnConnect": "SSL/TLS",
+      "SslOnConnectHint": "Encrypted from the start (port 993). Recommended.",
+      "StartTls": "STARTTLS",
+      "StartTlsHint": "Upgrades to encryption after connecting (port 143).",
+      "None": "None",
+      "NoneHint": "Unencrypted. Only if your server allows nothing else."
+    },
+    "folders": {
+      "title": "Folders",
+      "watched": "Watched folders",
+      "watchedHint": "Rules run on new mail in these folders.",
+      "messages": "{count} message | {count} messages",
+      "unread": "{count} unread",
+      "notSelectable": "Container only",
+      "loadFailed": "Could not load folders",
+      "special": {
+        "Inbox": "Inbox",
+        "Sent": "Sent",
+        "Drafts": "Drafts",
+        "Trash": "Trash",
+        "Junk": "Spam",
+        "Archive": "Archive",
+        "All": "All mail",
+        "Flagged": "Flagged"
+      },
+      "specialTitle": "Special folders",
+      "specialHint": "Where \"delete\", \"mark as spam\" and \"archive\" put messages. Detected automatically.",
+      "notSet": "Not set"
+    },
+    "safety": {
+      "title": "Safety",
+      "blastRadius": "Confirmation threshold",
+      "blastRadiusHint": "Runs that would move or delete more messages than this pause and ask you first.",
+      "purgeTrash": "Empty trash automatically",
+      "purgeTrashHint": "Permanently delete messages that have been in the trash for a while. Off by default.",
+      "purgeDays": "After how many days"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "folders": "Folders",
+      "settings": "Settings"
+    },
+    "overview": {
+      "connection": "Connection",
+      "server": "Server",
+      "capabilities": "Server features",
+      "capabilityHints": {
+        "Idle": "Instant notification of new mail",
+        "Move": "Atomic moves",
+        "UidPlus": "Reliable undo",
+        "SpecialUse": "Special folder detection",
+        "CondStore": "Efficient change tracking"
+      }
+    },
+    "saveFailed": "Saving failed"
+  },
+  "connectionErrors": {
+    "HostNotFound": "The server name could not be found. Check the spelling.",
+    "ConnectionRefused": "The server refused the connection. Check host and port.",
+    "ConnectionFailed": "The connection to the server failed.",
+    "Timeout": "The server did not respond in time.",
+    "TlsFailed": "The encrypted connection could not be established. Check the encryption setting and port.",
+    "AuthenticationFailed": "The server rejected the username or password.",
+    "ProtocolError": "The server sent an unexpected response.",
+    "InsecureConnectionNotAllowed": "Unencrypted connections are disabled on this mailnix server.",
+    "AddressNotAllowed": "This server address is not allowed (private network).",
+    "CredentialsUnreadable": "The stored password can no longer be decrypted. Enter it again in the settings.",
+    "Unknown": "Connecting to the server failed."
   }
 }

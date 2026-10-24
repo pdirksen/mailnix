@@ -12,6 +12,8 @@ export interface ProblemDetails {
   status?: number
   detail?: string
   errors?: Record<string, string[]>
+  /** Machine-readable reason, e.g. a connection error code. */
+  errorCode?: string
 }
 
 export class ApiError extends Error {
@@ -21,6 +23,10 @@ export class ApiError extends Error {
   ) {
     super(problem.title ?? `Request failed with status ${status}`)
     this.name = 'ApiError'
+  }
+
+  get code(): string | undefined {
+    return this.problem.errorCode
   }
 
   /** All human-readable messages: validation errors if present, otherwise the title. */

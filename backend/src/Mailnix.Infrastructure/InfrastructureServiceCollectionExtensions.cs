@@ -41,6 +41,7 @@ public static class InfrastructureServiceCollectionExtensions
         }
 
         services.AddScoped<DatabaseInitializer>();
+        services.AddSingleton<MailSecretProtector>();
         services.AddSingleton(TimeProvider.System);
 
         return services;
