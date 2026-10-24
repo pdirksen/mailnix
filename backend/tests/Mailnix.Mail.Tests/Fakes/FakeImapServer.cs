@@ -38,6 +38,14 @@ internal sealed partial class FakeImapServer : IAsyncDisposable
 
     public IReadOnlyList<Folder> Folders { get; init; } = [new("INBOX")];
 
+    /// <summary>Delay before answering LIST, to keep a request in flight.</summary>
+    public TimeSpan ListDelay { get; init; }
+
+    /// <summary>Completes when a client sends its first LIST command.</summary>
+    public Task ListStarted => _listStarted.Task;
+
+    private readonly TaskCompletionSource _listStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
     public int LoginAttempts => _loginAttempts;
 
     private int _loginAttempts;
@@ -117,6 +125,12 @@ internal sealed partial class FakeImapServer : IAsyncDisposable
                     : $"{tag} NO [AUTHENTICATIONFAILED] Authentication failed.");
                 break;
             case "LIST":
+                _listStarted.TrySetResult();
+                if (ListDelay > TimeSpan.Zero)
+                {
+                    await Task.Delay(ListDelay, _stop.Token);
+                }
+
                 await ListAsync(tag, args, writer);
                 break;
             case "STATUS":

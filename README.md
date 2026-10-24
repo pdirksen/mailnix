@@ -3,14 +3,15 @@
 Rule-based mail sorting with a web UI, in the spirit of imapfilter: connect IMAP, Google or Microsoft 365
 mailboxes, build rules visually, preview what they would do, and let mailnix move, flag or trash incoming mail.
 
-> Status: early development. Auth, hosting and IMAP accounts (setup wizard, connection test, folder
-> discovery) are in place; rules, mail processing and stats follow.
+> Status: early development. Auth, IMAP accounts (setup wizard, connection test, folder discovery), the rule
+> engine with its API, and named lists are in place; the visual rule builder, mail processing and stats follow.
 
 ## Repository layout
 
 ```
 backend/    .NET 10 solution (Mailnix.slnx)
   src/Mailnix.Api             ASP.NET Core host: REST API, auth, serves the SPA
+  src/Mailnix.Core            rule engine (pure): conditions, evaluator with explanations, action planning
   src/Mailnix.Infrastructure  EF Core (SQLite + PostgreSQL), Identity, data protection
   src/Mailnix.Mail            IMAP access via MailKit (connect, probe folders/capabilities)
   tests/                      xUnit v3: API integration tests, mail tests with an in-process fake IMAP server

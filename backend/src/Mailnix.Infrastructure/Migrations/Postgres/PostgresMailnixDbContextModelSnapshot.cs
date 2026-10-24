@@ -140,6 +140,172 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.ToTable("MailAccounts");
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.MailRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActionsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConditionsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("DryRun")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Schedule")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.PrimitiveCollection<List<string>>("SourceFolders")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<bool>("StopProcessing")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Trigger")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "Priority");
+
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("Rules");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("NamedLists");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ListId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListId", "Value")
+                        .IsUnique();
+
+                    b.ToTable("NamedListEntryEntity");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleListReference", b =>
+                {
+                    b.Property<Guid>("RuleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ListId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RuleId", "ListId");
+
+                    b.HasIndex("ListId");
+
+                    b.ToTable("RuleListReferences");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleReference", b =>
+                {
+                    b.Property<Guid>("RuleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ReferencedRuleId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RuleId", "ReferencedRuleId");
+
+                    b.HasIndex("ReferencedRuleId");
+
+                    b.ToTable("RuleReferences");
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -406,6 +572,56 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.MailRule", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntryEntity", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.NamedListEntity", null)
+                        .WithMany("Entries")
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleListReference", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.NamedListEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Mailnix.Infrastructure.Data.MailRule", null)
+                        .WithMany("ListReferences")
+                        .HasForeignKey("RuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleReference", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailRule", null)
+                        .WithMany()
+                        .HasForeignKey("ReferencedRuleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Mailnix.Infrastructure.Data.MailRule", null)
+                        .WithMany("References")
+                        .HasForeignKey("RuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Identity.AppUser", b =>
                 {
                     b.HasOne("Mailnix.Infrastructure.Data.Tenant", "Tenant")
@@ -466,6 +682,18 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.MailRule", b =>
+                {
+                    b.Navigation("ListReferences");
+
+                    b.Navigation("References");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntity", b =>
+                {
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

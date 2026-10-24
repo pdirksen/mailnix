@@ -14,4 +14,8 @@
     <InternalsVisibleTo Include="Mailnix.Mail.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Mailnix.Core\Mailnix.Core.csproj" />
+  </ItemGroup>
+
 </Project>

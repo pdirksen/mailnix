@@ -1,10 +1,12 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Mailnix.Api/Mailnix.Api.csproj" />
+    <Project Path="src/Mailnix.Core/Mailnix.Core.csproj" />
     <Project Path="src/Mailnix.Infrastructure/Mailnix.Infrastructure.csproj" />
     <Project Path="src/Mailnix.Mail/Mailnix.Mail.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Mailnix.Core.Tests/Mailnix.Core.Tests.csproj" />
     <Project Path="tests/Mailnix.Integration.Tests/Mailnix.Integration.Tests.csproj" />
     <Project Path="tests/Mailnix.Mail.Tests/Mailnix.Mail.Tests.csproj" />
   </Folder>

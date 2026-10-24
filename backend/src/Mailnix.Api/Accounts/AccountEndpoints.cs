@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Mailnix.Api.Hosting;
+using Mailnix.Api.Rules;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Mail;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -38,13 +39,29 @@ internal static class AccountEndpoints
     private static async Task<Results<Ok<AccountResponse>, NotFound>> Get(Guid id, ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct) =>
         await FindOwnedAsync(db, id, user, ct) is { } account ? TypedResults.Ok(AccountResponse.From(account)) : TypedResults.NotFound();
 
-    private static async Task<Results<NoContent, NotFound>> Delete(Guid id, ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
+    private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> Delete(
+        Guid id,
+        ClaimsPrincipal user,
+        MailnixDbContext db,
+        RuleService ruleService,
+        CancellationToken ct)
     {
         if (await FindOwnedAsync(db, id, user, ct) is not { } account)
         {
             return TypedResults.NotFound();
         }
 
+        // The account's rules go with it, unless rules of other accounts still reference them.
+        var rules = await db.Rules.Include(r => r.References).Include(r => r.ListReferences).Where(r => r.AccountId == id).ToListAsync(ct);
+        var dependents = await ruleService.DependentsAsync([.. rules.Select(r => r.Id)], ct);
+        if (dependents.Count > 0)
+        {
+            return RuleEndpoints.InUseProblem(
+                $"Rules of other accounts reference rules of \"{account.Name}\": {string.Join(", ", dependents.Select(d => d.Dependent.Name).Distinct())}.",
+                dependents.Select(d => d.Dependent));
+        }
+
+        db.Rules.RemoveRange(rules);
         db.MailAccounts.Remove(account);
         await db.SaveChangesAsync(ct);
         return TypedResults.NoContent();
@@ -228,7 +245,11 @@ internal static class AccountEndpoints
             response = new ConnectionTestResponse(false, ex.Code, ex.Message, null);
         }
 
-        await db.SaveChangesAsync(ct);
+        if (!await TrySaveStatusAsync(db, ct))
+        {
+            return TypedResults.NotFound();
+        }
+
         return TypedResults.Ok(response);
     }
 
@@ -256,14 +277,28 @@ internal static class AccountEndpoints
         {
             var result = await probe.ProbeAsync(ToSettings(account, password), counts, ct);
             ApplySuccess(account, result, time.GetUtcNow());
-            await db.SaveChangesAsync(ct);
-            return TypedResults.Ok(new FolderListResponse(result.Delimiter.ToString(), result.Folders, result.SpecialFolders));
+            return await TrySaveStatusAsync(db, ct)
+                ? TypedResults.Ok(new FolderListResponse(result.Delimiter.ToString(), result.Folders, result.SpecialFolders))
+                : TypedResults.NotFound();
         }
         catch (MailConnectionException ex)
         {
             ApplyFailure(account, ex, time.GetUtcNow());
+            return await TrySaveStatusAsync(db, ct) ? ConnectionProblem(ex) : TypedResults.NotFound();
+        }
+    }
+
+    /// <summary>Saves the connection status; false if the account was deleted while the server was being checked.</summary>
+    private static async Task<bool> TrySaveStatusAsync(MailnixDbContext db, CancellationToken ct)
+    {
+        try
+        {
             await db.SaveChangesAsync(ct);
-            return ConnectionProblem(ex);
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return false;
         }
     }
 

@@ -4,6 +4,9 @@ using System.Text.Json.Serialization;
 using Mailnix.Api.Accounts;
 using Mailnix.Api.Auth;
 using Mailnix.Api.Hosting;
+using Mailnix.Api.Lists;
+using Mailnix.Api.Rules;
+using Mailnix.Core.Rules;
 using Mailnix.Infrastructure;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Mail;
@@ -31,9 +34,10 @@ builder.Services.AddMailnixAuth(builder.Configuration);
 builder.Services.AddMailnixRateLimiting(builder.Configuration);
 builder.Services.ConfigureHttpJsonOptions(json =>
 {
-    json.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    RuleJson.Configure(json.SerializerOptions);
     json.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
 });
+builder.Services.AddScoped<RuleService>();
 builder.Services.AddProblemDetails();
 builder.Services.AddValidation();
 builder.Services.AddOpenApi();
@@ -51,6 +55,7 @@ app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseSerilogRequestLogging();
+app.UseMiddleware<ClientAbortMiddleware>();
 
 if (hostOptions.ServesApi)
 {
@@ -85,6 +90,8 @@ if (hostOptions.ServesApi)
     var api = app.MapGroup("/api");
     api.MapAuthEndpoints();
     api.MapAccountEndpoints();
+    api.MapRuleEndpoints();
+    api.MapListEndpoints();
     api.MapFallback("{**path}", () => TypedResults.NotFound()).AllowAnonymous();
 
     app.MapFallbackToFile("index.html", new StaticFileOptions

@@ -392,6 +392,528 @@
           }
         }
       }
+    },
+    "/api/rules/field-catalog": {
+      "get": {
+        "tags": [
+          "Rules"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FieldCatalogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules": {
+      "get": {
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RuleResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/rules/{id}": {
+      "get": {
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/rules/reorder": {
+      "post": {
+        "tags": [
+          "Rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderRulesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/rules/validate": {
+      "post": {
+        "tags": [
+          "Rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleValidationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/lists": {
+      "get": {
+        "tags": [
+          "Lists"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListSummaryResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Lists"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateListRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lists/{id}": {
+      "get": {
+        "tags": [
+          "Lists"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Lists"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateListRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Lists"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/lists/{id}/export": {
+      "get": {
+        "tags": [
+          "Lists"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/lists/{id}/import": {
+      "post": {
+        "tags": [
+          "Lists"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "replace",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "text/csv": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListImportResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -514,6 +1036,152 @@
           }
         }
       },
+      "ConditionField": {
+        "enum": [
+          "From",
+          "FromName",
+          "FromDomain",
+          "To",
+          "Cc",
+          "ReplyTo",
+          "Recipients",
+          "Subject",
+          "Header",
+          "Body",
+          "Size",
+          "Date",
+          "AgeDays",
+          "IsUnread",
+          "IsFlagged",
+          "IsAnswered",
+          "Keyword",
+          "IsNewsletter",
+          "ListId",
+          "IsAutoReply",
+          "IsReply",
+          "IsReplyToMyMail",
+          "SpfResult",
+          "DkimResult",
+          "DmarcResult",
+          "DisplayNameMismatch",
+          "SpamScore",
+          "IAmOnlyInCcOrBcc",
+          "DeliveredTo",
+          "PlusTag",
+          "RecipientCount",
+          "HasAttachment",
+          "AttachmentCount",
+          "AttachmentName",
+          "AttachmentExtension",
+          "AttachmentMimeType",
+          "AttachmentSize",
+          "Rule"
+        ]
+      },
+      "ConditionNode": {
+        "required": [
+          "kind"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/ConditionNodeConditionGroup"
+          },
+          {
+            "$ref": "#/components/schemas/ConditionNodeCondition"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "kind",
+          "mapping": {
+            "group": "#/components/schemas/ConditionNodeConditionGroup",
+            "condition": "#/components/schemas/ConditionNodeCondition"
+          }
+        }
+      },
+      "ConditionNodeCondition": {
+        "required": [
+          "field",
+          "operator"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "condition"
+            ],
+            "type": "string"
+          },
+          "field": {
+            "$ref": "#/components/schemas/ConditionField"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/ConditionOperator"
+          },
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "headerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "caseSensitive": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "ConditionNodeConditionGroup": {
+        "required": [
+          "operator",
+          "children"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "group"
+            ],
+            "type": "string"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/GroupOperator"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConditionNode"
+            }
+          }
+        }
+      },
+      "ConditionOperator": {
+        "enum": [
+          "Equals",
+          "NotEquals",
+          "Contains",
+          "NotContains",
+          "StartsWith",
+          "EndsWith",
+          "Regex",
+          "DomainMatches",
+          "InList",
+          "NotInList",
+          "Exists",
+          "NotExists",
+          "GreaterThan",
+          "LessThan",
+          "Before",
+          "After",
+          "IsTrue",
+          "IsFalse",
+          "Matches",
+          "NotMatches"
+        ]
+      },
       "ConnectionErrorCode": {
         "enum": [
           "HostNotFound",
@@ -630,6 +1298,201 @@
           }
         }
       },
+      "CreateListRequest": {
+        "required": [
+          "name",
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/NamedListKind"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "entries": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ListEntryDto"
+            }
+          }
+        }
+      },
+      "CreateRuleRequest": {
+        "required": [
+          "accountId",
+          "name",
+          "conditions",
+          "actions"
+        ],
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleAction"
+            }
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "stopProcessing": {
+            "type": "boolean",
+            "default": false
+          },
+          "dryRun": {
+            "type": "boolean",
+            "default": false
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/RuleTrigger"
+          },
+          "schedule": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceFolders": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "FetchRequirements": {
+        "type": "string",
+        "default": "None"
+      },
+      "FieldCatalogResponse": {
+        "required": [
+          "fields",
+          "folderPlaceholders"
+        ],
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldDefinition"
+            }
+          },
+          "folderPlaceholders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "FieldCategory": {
+        "enum": [
+          "Sender",
+          "Recipients",
+          "Content",
+          "Status",
+          "MailType",
+          "SenderTrust",
+          "Attachments",
+          "Rules"
+        ]
+      },
+      "FieldDefinition": {
+        "required": [
+          "field",
+          "category",
+          "valueType",
+          "operators"
+        ],
+        "type": "object",
+        "properties": {
+          "field": {
+            "$ref": "#/components/schemas/ConditionField"
+          },
+          "category": {
+            "$ref": "#/components/schemas/FieldCategory"
+          },
+          "valueType": {
+            "$ref": "#/components/schemas/FieldValueType"
+          },
+          "operators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConditionOperator"
+            }
+          },
+          "fetch": {
+            "$ref": "#/components/schemas/FetchRequirements"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/FieldUnit"
+          },
+          "options": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "requiresHeaderName": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "FieldUnit": {
+        "enum": [
+          "None",
+          "Bytes",
+          "Days"
+        ],
+        "default": "None"
+      },
+      "FieldValueType": {
+        "enum": [
+          "Text",
+          "Address",
+          "Domain",
+          "Number",
+          "Boolean",
+          "Date",
+          "Enum",
+          "RuleReference"
+        ]
+      },
       "FolderListResponse": {
         "required": [
           "delimiter",
@@ -651,6 +1514,13 @@
             "$ref": "#/components/schemas/SpecialFolderMap"
           }
         }
+      },
+      "GroupOperator": {
+        "enum": [
+          "All",
+          "Any",
+          "None"
+        ]
       },
       "HttpValidationProblemDetails": {
         "type": "object",
@@ -703,6 +1573,159 @@
           "StartTls",
           "None"
         ]
+      },
+      "InvalidListEntry": {
+        "required": [
+          "line",
+          "value",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "line": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ListEntryDto": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ListImportResponse": {
+        "required": [
+          "added",
+          "duplicates",
+          "invalid",
+          "list"
+        ],
+        "type": "object",
+        "properties": {
+          "added": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "duplicates": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "invalid": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvalidListEntry"
+            }
+          },
+          "list": {
+            "$ref": "#/components/schemas/ListResponse"
+          }
+        }
+      },
+      "ListResponse": {
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "description",
+          "entries",
+          "usedBy",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/NamedListKind"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListEntryDto"
+            }
+          },
+          "usedBy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleSummary"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ListSummaryResponse": {
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "description",
+          "entryCount",
+          "usedByRuleCount",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/NamedListKind"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usedByRuleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "LoginRequest": {
         "required": [
@@ -900,6 +1923,13 @@
           }
         }
       },
+      "NamedListKind": {
+        "enum": [
+          "Address",
+          "Domain",
+          "Pattern"
+        ]
+      },
       "RegisterRequest": {
         "required": [
           "email",
@@ -918,6 +1948,373 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "ReorderRulesRequest": {
+        "required": [
+          "accountId",
+          "ruleIds"
+        ],
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "RuleAction": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/RuleActionMarkReadAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionMarkUnreadAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionFlagAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionUnflagAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionAddKeywordAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionRemoveKeywordAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionCopyToAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionMoveToAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionDeleteAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionMarkAsSpamAction"
+          },
+          {
+            "$ref": "#/components/schemas/RuleActionArchiveAction"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "MarkRead": "#/components/schemas/RuleActionMarkReadAction",
+            "MarkUnread": "#/components/schemas/RuleActionMarkUnreadAction",
+            "Flag": "#/components/schemas/RuleActionFlagAction",
+            "Unflag": "#/components/schemas/RuleActionUnflagAction",
+            "AddKeyword": "#/components/schemas/RuleActionAddKeywordAction",
+            "RemoveKeyword": "#/components/schemas/RuleActionRemoveKeywordAction",
+            "CopyTo": "#/components/schemas/RuleActionCopyToAction",
+            "MoveTo": "#/components/schemas/RuleActionMoveToAction",
+            "Delete": "#/components/schemas/RuleActionDeleteAction",
+            "MarkAsSpam": "#/components/schemas/RuleActionMarkAsSpamAction",
+            "Archive": "#/components/schemas/RuleActionArchiveAction"
+          }
+        }
+      },
+      "RuleActionAddKeywordAction": {
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "AddKeyword"
+            ],
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionArchiveAction": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Archive"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionCopyToAction": {
+        "required": [
+          "folder"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "CopyTo"
+            ],
+            "type": "string"
+          },
+          "folder": {
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionDeleteAction": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Delete"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionFlagAction": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Flag"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionMarkAsSpamAction": {
+        "properties": {
+          "type": {
+            "enum": [
+              "MarkAsSpam"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionMarkReadAction": {
+        "properties": {
+          "type": {
+            "enum": [
+              "MarkRead"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionMarkUnreadAction": {
+        "properties": {
+          "type": {
+            "enum": [
+              "MarkUnread"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionMoveToAction": {
+        "required": [
+          "folder"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "MoveTo"
+            ],
+            "type": "string"
+          },
+          "folder": {
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionRemoveKeywordAction": {
+        "required": [
+          "keyword"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "RemoveKeyword"
+            ],
+            "type": "string"
+          },
+          "keyword": {
+            "type": "string"
+          }
+        }
+      },
+      "RuleActionUnflagAction": {
+        "properties": {
+          "type": {
+            "enum": [
+              "Unflag"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "RuleResponse": {
+        "required": [
+          "id",
+          "accountId",
+          "name",
+          "description",
+          "priority",
+          "enabled",
+          "stopProcessing",
+          "dryRun",
+          "trigger",
+          "schedule",
+          "sourceFolders",
+          "conditions",
+          "actions",
+          "usedBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "stopProcessing": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/RuleTrigger"
+          },
+          "schedule": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceFolders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleAction"
+            }
+          },
+          "usedBy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleSummary"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RuleSummary": {
+        "required": [
+          "id",
+          "name",
+          "accountId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "RuleTrigger": {
+        "enum": [
+          "OnNew",
+          "Scheduled",
+          "Manual"
+        ]
+      },
+      "RuleValidationError": {
+        "required": [
+          "path",
+          "code",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "RuleValidationResponse": {
+        "required": [
+          "valid",
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleValidationError"
+            }
           }
         }
       },
@@ -1065,6 +2462,129 @@
             ]
           }
         }
+      },
+      "UpdateListRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "entries": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ListEntryDto"
+            }
+          }
+        }
+      },
+      "UpdateRuleRequest": {
+        "required": [
+          "name",
+          "conditions",
+          "actions"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleAction"
+            }
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "stopProcessing": {
+            "type": "boolean",
+            "default": false
+          },
+          "dryRun": {
+            "type": "boolean",
+            "default": false
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/RuleTrigger"
+          },
+          "schedule": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceFolders": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ValidateRuleRequest": {
+        "required": [
+          "accountId",
+          "conditions",
+          "actions"
+        ],
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleAction"
+            }
+          },
+          "ruleId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/RuleTrigger"
+          },
+          "schedule": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       }
     }
   },
@@ -1074,6 +2594,12 @@
     },
     {
       "name": "Accounts"
+    },
+    {
+      "name": "Rules"
+    },
+    {
+      "name": "Lists"
     }
   ]
 }

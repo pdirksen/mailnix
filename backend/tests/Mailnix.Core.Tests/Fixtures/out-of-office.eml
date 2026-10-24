@@ -1,0 +1,14 @@
+Authentication-Results: mx.example.com; spf=pass smtp.mailfrom=partner.example; dkim=none; dmarc=none
+From: Erika Mustermann <erika@partner.example>
+To: me@example.com
+Subject: Abwesenheitsnotiz: Angebot Projekt Nord
+Date: Fri, 23 Oct 2026 14:02:11 +0200
+Message-ID: <ooo-1@partner.example>
+In-Reply-To: <offer-17@example.com>
+References: <offer-17@example.com>
+Auto-Submitted: auto-replied
+X-Auto-Response-Suppress: All
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Ich bin bis zum 2. November nicht im Büro.

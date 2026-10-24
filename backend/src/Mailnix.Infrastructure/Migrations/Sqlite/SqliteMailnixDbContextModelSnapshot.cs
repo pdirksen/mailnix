@@ -135,6 +135,172 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                     b.ToTable("MailAccounts");
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.MailRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ActionsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConditionsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("DryRun")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Schedule")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("SourceFolders")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("StopProcessing")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Trigger")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "Priority");
+
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("Rules");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("NamedLists");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntryEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ListId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListId", "Value")
+                        .IsUnique();
+
+                    b.ToTable("NamedListEntryEntity");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleListReference", b =>
+                {
+                    b.Property<Guid>("RuleId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ListId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("RuleId", "ListId");
+
+                    b.HasIndex("ListId");
+
+                    b.ToTable("RuleListReferences");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleReference", b =>
+                {
+                    b.Property<Guid>("RuleId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ReferencedRuleId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("RuleId", "ReferencedRuleId");
+
+                    b.HasIndex("ReferencedRuleId");
+
+                    b.ToTable("RuleReferences");
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -395,6 +561,56 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.MailRule", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntryEntity", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.NamedListEntity", null)
+                        .WithMany("Entries")
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleListReference", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.NamedListEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Mailnix.Infrastructure.Data.MailRule", null)
+                        .WithMany("ListReferences")
+                        .HasForeignKey("RuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleReference", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailRule", null)
+                        .WithMany()
+                        .HasForeignKey("ReferencedRuleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Mailnix.Infrastructure.Data.MailRule", null)
+                        .WithMany("References")
+                        .HasForeignKey("RuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Identity.AppUser", b =>
                 {
                     b.HasOne("Mailnix.Infrastructure.Data.Tenant", "Tenant")
@@ -455,6 +671,18 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.MailRule", b =>
+                {
+                    b.Navigation("ListReferences");
+
+                    b.Navigation("References");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntity", b =>
+                {
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

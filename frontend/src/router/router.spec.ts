@@ -9,6 +9,11 @@ describe('routes', () => {
     ['/', 'dashboard'],
     ['/login', 'login'],
     ['/register', 'register'],
+    ['/accounts', 'accounts'],
+    ['/accounts/new', 'account-new'],
+    ['/accounts/123', 'account-detail'],
+    ['/lists', 'lists'],
+    ['/lists/123', 'list-detail'],
     ['/does/not/exist', 'not-found'],
   ])('%s resolves to %s', (path, name) => {
     expect(router.resolve(path).name).toBe(name)

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Mailnix.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Header/address parsing only (Authentication-Results, .eml fixtures); no network access in this project. -->
+    <PackageReference Include="MimeKit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mailnix.Core.Tests" />
+  </ItemGroup>
+
+</Project>

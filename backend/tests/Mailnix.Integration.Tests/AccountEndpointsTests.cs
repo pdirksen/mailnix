@@ -261,6 +261,34 @@ public sealed class AccountEndpointsTests : IAsyncLifetime
     }
 }
 
+public sealed class AccountRaceTests
+{
+    [Fact]
+    public async Task Deleting_an_account_while_its_folders_load_returns_not_found_instead_of_failing()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var imap = new FakeImapServer { ListDelay = TimeSpan.FromMilliseconds(500) };
+        await using var app = new MailnixAppFactory().WithSetting("Mailnix:Mail:AllowInsecureConnections", "true");
+        var client = app.CreateApiClient();
+        (await client.RegisterAsync("owner@example.com")).EnsureSuccessStatusCode();
+        var created = await client.PostAsJsonAsync("/api/accounts", new
+        {
+            name = "Work", host = "127.0.0.1", port = imap.Port, security = "None", username = imap.Username, password = imap.Password,
+            watchedFolders = new[] { "INBOX" },
+        }, ct);
+        var id = (await created.Content.ReadFromJsonAsync<JsonElement>(ct)).GetProperty("id").GetString();
+
+        var folders = client.GetAsync($"/api/accounts/{id}/folders", ct);
+        await imap.ListStarted.WaitAsync(TimeSpan.FromSeconds(10), ct);
+        // A second session (e.g. another browser tab) deletes the account meanwhile.
+        var otherTab = app.CreateApiClient();
+        (await otherTab.LoginAsync("owner@example.com")).EnsureSuccessStatusCode();
+        (await otherTab.DeleteAsync($"/api/accounts/{id}", ct)).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+
+        (await folders).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+}
+
 public sealed class AccountRateLimitTests
 {
     [Fact]

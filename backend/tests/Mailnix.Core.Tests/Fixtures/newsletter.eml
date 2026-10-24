@@ -1,0 +1,21 @@
+Authentication-Results: mx.example.com;
+ spf=pass smtp.mailfrom=mail.shop.example;
+ dkim=pass header.d=shop.example;
+ dmarc=pass header.from=shop.example
+Received: from mail.shop.example (mail.shop.example [203.0.113.10])
+ by mx.example.com with ESMTPS id 1234; Thu, 22 Oct 2026 08:15:00 +0200
+From: Shop News <news@mail.shop.example>
+To: me@example.com
+Subject: =?UTF-8?Q?Unsere_Herbst-Angebote_=F0=9F=8D=82?=
+Date: Thu, 22 Oct 2026 08:14:55 +0200
+Message-ID: <newsletter-4711@mail.shop.example>
+List-Id: Shop News <news.shop.example>
+List-Unsubscribe: <https://shop.example/unsubscribe?u=1>, <mailto:unsubscribe@shop.example>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+Precedence: bulk
+X-Spam-Score: 1.2
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+<html><head><style>p { color: red }</style><script>track()</script></head>
+<body><h1>Herbst &amp; Winter</h1><p>Jetzt 20&nbsp;% sparen!</p></body></html>

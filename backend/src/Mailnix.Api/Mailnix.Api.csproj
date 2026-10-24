@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cronos" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -22,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Mailnix.Infrastructure\Mailnix.Infrastructure.csproj" />
     <ProjectReference Include="..\Mailnix.Mail\Mailnix.Mail.csproj" />
+    <ProjectReference Include="..\Mailnix.Core\Mailnix.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

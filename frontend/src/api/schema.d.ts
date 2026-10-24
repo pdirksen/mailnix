@@ -501,6 +501,600 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rules/field-catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FieldCatalogResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    accountId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RuleResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateRuleRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RuleResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rules/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RuleResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateRuleRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RuleResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rules/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReorderRulesRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rules/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ValidateRuleRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RuleValidationResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ListSummaryResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateListRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/lists/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ListResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateListRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/lists/{id}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/lists/{id}/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: {
+                    replace?: boolean;
+                };
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "text/csv": string;
+                    "text/plain": string;
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ListImportResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -535,6 +1129,27 @@ export interface components {
             registrationOpen: boolean;
         };
         /** @enum {unknown} */
+        ConditionField: "From" | "FromName" | "FromDomain" | "To" | "Cc" | "ReplyTo" | "Recipients" | "Subject" | "Header" | "Body" | "Size" | "Date" | "AgeDays" | "IsUnread" | "IsFlagged" | "IsAnswered" | "Keyword" | "IsNewsletter" | "ListId" | "IsAutoReply" | "IsReply" | "IsReplyToMyMail" | "SpfResult" | "DkimResult" | "DmarcResult" | "DisplayNameMismatch" | "SpamScore" | "IAmOnlyInCcOrBcc" | "DeliveredTo" | "PlusTag" | "RecipientCount" | "HasAttachment" | "AttachmentCount" | "AttachmentName" | "AttachmentExtension" | "AttachmentMimeType" | "AttachmentSize" | "Rule";
+        ConditionNode: components["schemas"]["ConditionNodeConditionGroup"] | components["schemas"]["ConditionNodeCondition"];
+        ConditionNodeCondition: {
+            /** @enum {string} */
+            kind?: "condition";
+            field: components["schemas"]["ConditionField"];
+            operator: components["schemas"]["ConditionOperator"];
+            value?: null | string;
+            headerName?: null | string;
+            /** @default false */
+            caseSensitive: boolean;
+        };
+        ConditionNodeConditionGroup: {
+            /** @enum {string} */
+            kind?: "group";
+            operator: components["schemas"]["GroupOperator"];
+            children: components["schemas"]["ConditionNode"][];
+        };
+        /** @enum {unknown} */
+        ConditionOperator: "Equals" | "NotEquals" | "Contains" | "NotContains" | "StartsWith" | "EndsWith" | "Regex" | "DomainMatches" | "InList" | "NotInList" | "Exists" | "NotExists" | "GreaterThan" | "LessThan" | "Before" | "After" | "IsTrue" | "IsFalse" | "Matches" | "NotMatches";
+        /** @enum {unknown} */
         ConnectionErrorCode: "HostNotFound" | "ConnectionRefused" | "ConnectionFailed" | "Timeout" | "TlsFailed" | "AuthenticationFailed" | "ProtocolError" | "InsecureConnectionNotAllowed" | "AddressNotAllowed" | "Unknown" | null;
         ConnectionTestResponse: {
             success: boolean;
@@ -560,11 +1175,62 @@ export interface components {
             /** Format: int32 */
             purgeTrashAfterDays?: null | number;
         };
+        CreateListRequest: {
+            name: string;
+            kind: components["schemas"]["NamedListKind"];
+            description?: null | string;
+            entries?: null | components["schemas"]["ListEntryDto"][];
+        };
+        CreateRuleRequest: {
+            /** Format: uuid */
+            accountId: string;
+            name: string;
+            conditions: components["schemas"]["ConditionNode"];
+            actions: components["schemas"]["RuleAction"][];
+            description?: null | string;
+            /** @default true */
+            enabled: boolean;
+            /** @default false */
+            stopProcessing: boolean;
+            /** @default false */
+            dryRun: boolean;
+            trigger?: components["schemas"]["RuleTrigger"];
+            schedule?: null | string;
+            sourceFolders?: null | string[];
+        };
+        /** @default None */
+        FetchRequirements: string;
+        FieldCatalogResponse: {
+            fields: components["schemas"]["FieldDefinition"][];
+            folderPlaceholders: string[];
+        };
+        /** @enum {unknown} */
+        FieldCategory: "Sender" | "Recipients" | "Content" | "Status" | "MailType" | "SenderTrust" | "Attachments" | "Rules";
+        FieldDefinition: {
+            field: components["schemas"]["ConditionField"];
+            category: components["schemas"]["FieldCategory"];
+            valueType: components["schemas"]["FieldValueType"];
+            operators: components["schemas"]["ConditionOperator"][];
+            fetch?: components["schemas"]["FetchRequirements"];
+            unit?: components["schemas"]["FieldUnit"];
+            options?: null | string[];
+            /** @default false */
+            requiresHeaderName: boolean;
+        };
+        /**
+         * @default None
+         * @enum {unknown}
+         */
+        FieldUnit: "None" | "Bytes" | "Days";
+        /** @enum {unknown} */
+        FieldValueType: "Text" | "Address" | "Domain" | "Number" | "Boolean" | "Date" | "Enum" | "RuleReference";
         FolderListResponse: {
             delimiter: string;
             folders: components["schemas"]["MailFolderInfo"][];
             specialFolders: components["schemas"]["SpecialFolderMap"];
         };
+        /** @enum {unknown} */
+        GroupOperator: "All" | "Any" | "None";
         HttpValidationProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -578,6 +1244,48 @@ export interface components {
         };
         /** @enum {unknown} */
         ImapSecurity: "SslOnConnect" | "StartTls" | "None";
+        InvalidListEntry: {
+            /** Format: int32 */
+            line: number;
+            value: string;
+            message: string;
+        };
+        ListEntryDto: {
+            value: string;
+            note?: null | string;
+        };
+        ListImportResponse: {
+            /** Format: int32 */
+            added: number;
+            /** Format: int32 */
+            duplicates: number;
+            invalid: components["schemas"]["InvalidListEntry"][];
+            list: components["schemas"]["ListResponse"];
+        };
+        ListResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            kind: components["schemas"]["NamedListKind"];
+            description: null | string;
+            entries: components["schemas"]["ListEntryDto"][];
+            usedBy: components["schemas"]["RuleSummary"][];
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ListSummaryResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            kind: components["schemas"]["NamedListKind"];
+            description: null | string;
+            /** Format: int32 */
+            entryCount: number;
+            /** Format: int32 */
+            usedByRuleCount: number;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         LoginRequest: {
             email: string;
             password: string;
@@ -624,10 +1332,107 @@ export interface components {
             timeZone: string;
             language: string;
         };
+        /** @enum {unknown} */
+        NamedListKind: "Address" | "Domain" | "Pattern";
         RegisterRequest: {
             email: string;
             password: string;
             displayName?: null | string;
+        };
+        ReorderRulesRequest: {
+            /** Format: uuid */
+            accountId: string;
+            ruleIds: string[];
+        };
+        RuleAction: components["schemas"]["RuleActionMarkReadAction"] | components["schemas"]["RuleActionMarkUnreadAction"] | components["schemas"]["RuleActionFlagAction"] | components["schemas"]["RuleActionUnflagAction"] | components["schemas"]["RuleActionAddKeywordAction"] | components["schemas"]["RuleActionRemoveKeywordAction"] | components["schemas"]["RuleActionCopyToAction"] | components["schemas"]["RuleActionMoveToAction"] | components["schemas"]["RuleActionDeleteAction"] | components["schemas"]["RuleActionMarkAsSpamAction"] | components["schemas"]["RuleActionArchiveAction"];
+        RuleActionAddKeywordAction: {
+            /** @enum {string} */
+            type?: "AddKeyword";
+            keyword: string;
+        };
+        RuleActionArchiveAction: {
+            /** @enum {string} */
+            type?: "Archive";
+        };
+        RuleActionCopyToAction: {
+            /** @enum {string} */
+            type?: "CopyTo";
+            folder: string;
+        };
+        RuleActionDeleteAction: {
+            /** @enum {string} */
+            type?: "Delete";
+        };
+        RuleActionFlagAction: {
+            /** @enum {string} */
+            type?: "Flag";
+        };
+        RuleActionMarkAsSpamAction: {
+            /** @enum {string} */
+            type?: "MarkAsSpam";
+        };
+        RuleActionMarkReadAction: {
+            /** @enum {string} */
+            type?: "MarkRead";
+        };
+        RuleActionMarkUnreadAction: {
+            /** @enum {string} */
+            type?: "MarkUnread";
+        };
+        RuleActionMoveToAction: {
+            /** @enum {string} */
+            type?: "MoveTo";
+            folder: string;
+        };
+        RuleActionRemoveKeywordAction: {
+            /** @enum {string} */
+            type?: "RemoveKeyword";
+            keyword: string;
+        };
+        RuleActionUnflagAction: {
+            /** @enum {string} */
+            type?: "Unflag";
+        };
+        RuleResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            accountId: string;
+            name: string;
+            description: null | string;
+            /** Format: int32 */
+            priority: number;
+            enabled: boolean;
+            stopProcessing: boolean;
+            dryRun: boolean;
+            trigger: components["schemas"]["RuleTrigger"];
+            schedule: null | string;
+            sourceFolders: string[];
+            conditions: components["schemas"]["ConditionNode"];
+            actions: components["schemas"]["RuleAction"][];
+            usedBy: components["schemas"]["RuleSummary"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        RuleSummary: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: uuid */
+            accountId: string;
+        };
+        /** @enum {unknown} */
+        RuleTrigger: "OnNew" | "Scheduled" | "Manual";
+        RuleValidationError: {
+            path: string;
+            code: string;
+            message: string;
+        };
+        RuleValidationResponse: {
+            valid: boolean;
+            errors: components["schemas"]["RuleValidationError"][];
         };
         /** @enum {unknown} */
         SpecialFolderKind: "Inbox" | "Sent" | "Drafts" | "Trash" | "Junk" | "Archive" | "All" | "Flagged" | null;
@@ -661,6 +1466,36 @@ export interface components {
             /** Format: int32 */
             purgeTrashAfterDays: null | number;
             password?: null | string;
+        };
+        UpdateListRequest: {
+            name: string;
+            description?: null | string;
+            entries?: null | components["schemas"]["ListEntryDto"][];
+        };
+        UpdateRuleRequest: {
+            name: string;
+            conditions: components["schemas"]["ConditionNode"];
+            actions: components["schemas"]["RuleAction"][];
+            description?: null | string;
+            /** @default true */
+            enabled: boolean;
+            /** @default false */
+            stopProcessing: boolean;
+            /** @default false */
+            dryRun: boolean;
+            trigger?: components["schemas"]["RuleTrigger"];
+            schedule?: null | string;
+            sourceFolders?: null | string[];
+        };
+        ValidateRuleRequest: {
+            /** Format: uuid */
+            accountId: string;
+            conditions: components["schemas"]["ConditionNode"];
+            actions: components["schemas"]["RuleAction"][];
+            /** Format: uuid */
+            ruleId?: null | string;
+            trigger?: components["schemas"]["RuleTrigger"];
+            schedule?: null | string;
         };
     };
     responses: never;

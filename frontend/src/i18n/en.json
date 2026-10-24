@@ -6,7 +6,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "toggleSidebar": "Toggle sidebar",
-    "accounts": "Accounts"
+    "accounts": "Accounts",
+    "lists": "Lists"
   },
   "common": {
     "language": "Language",
@@ -24,7 +25,13 @@
     "refresh": "Refresh",
     "none": "None",
     "comingSoon": "Coming soon",
-    "saved": "Changes saved."
+    "saved": "Changes saved.",
+    "delete": "Delete",
+    "search": "Search",
+    "create": "Create",
+    "name": "Name",
+    "description": "Description",
+    "optional": "optional"
   },
   "auth": {
     "email": "Email",
@@ -198,5 +205,48 @@
     "AddressNotAllowed": "This server address is not allowed (private network).",
     "CredentialsUnreadable": "The stored password can no longer be decrypted. Enter it again in the settings.",
     "Unknown": "Connecting to the server failed."
+  },
+  "lists": {
+    "title": "Named lists",
+    "subtitle": "Reusable lists of addresses, domains or patterns for your rules, e.g. VIPs or blocked senders.",
+    "add": "New list",
+    "empty": "No lists yet",
+    "emptyHint": "Create a list once and use it in many rules.",
+    "entries": "{count} entry | {count} entries",
+    "usedBy": "used by {count} rule | used by {count} rules",
+    "unused": "not used yet",
+    "kind": "Type",
+    "kinds": {
+      "Address": "Addresses",
+      "AddressHint": "Exact email addresses, e.g. boss{'@'}example.com",
+      "Domain": "Domains",
+      "DomainHint": "Domains including subdomains, e.g. example.com",
+      "Pattern": "Patterns",
+      "PatternHint": "Wildcards on addresses, e.g. noreply{'@'}* or *{'@'}*.shop.example"
+    },
+    "kindFixed": "The type cannot be changed later.",
+    "created": "List created.",
+    "deleted": "List deleted.",
+    "deleteTitle": "Delete \"{name}\"?",
+    "deleteText": "The list and its {count} entries will be removed.",
+    "inUse": "This list is used by rules and cannot be deleted:",
+    "notFound": "This list does not exist.",
+    "addEntries": "Add entries",
+    "addEntriesHint": "One per line. Add a note after a comma: boss{'@'}example.com, my boss",
+    "addButton": "Add",
+    "added": "{added} added, {skipped} already in the list.",
+    "entryValue": "Entry",
+    "entryNote": "Note",
+    "removeEntry": "Remove {value}",
+    "noEntries": "The list is empty.",
+    "noMatches": "No entries match your search.",
+    "unsaved": "Unsaved changes",
+    "import": "Import CSV",
+    "importReplace": "Replace all entries with the file",
+    "imported": "{added} imported, {duplicates} duplicates skipped.",
+    "importInvalid": "{count} line could not be imported: | {count} lines could not be imported:",
+    "importLine": "Line {line}",
+    "export": "Export CSV",
+    "saveFailed": "Saving failed"
   }
 }

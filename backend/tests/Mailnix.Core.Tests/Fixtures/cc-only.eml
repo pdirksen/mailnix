@@ -1,0 +1,11 @@
+From: Project Lead <lead@company.example>
+To: team@company.example
+Cc: "Me" <ME@Example.com>
+Subject: Weekly status
+Date: Wed, 21 Oct 2026 09:00:00 +0200
+Message-ID: <status-21@company.example>
+X-Spamd-Result: default: False [0.40 / 15.00];
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Status attached.

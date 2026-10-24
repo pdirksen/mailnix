@@ -6,7 +6,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "toggleSidebar": "Seitenleiste ein-/ausblenden",
-    "accounts": "Konten"
+    "accounts": "Konten",
+    "lists": "Listen"
   },
   "common": {
     "language": "Sprache",
@@ -24,7 +25,13 @@
     "refresh": "Aktualisieren",
     "none": "Keiner",
     "comingSoon": "Demnächst",
-    "saved": "Änderungen gespeichert."
+    "saved": "Änderungen gespeichert.",
+    "delete": "Löschen",
+    "search": "Suchen",
+    "create": "Erstellen",
+    "name": "Name",
+    "description": "Beschreibung",
+    "optional": "optional"
   },
   "auth": {
     "email": "E-Mail",
@@ -198,5 +205,48 @@
     "AddressNotAllowed": "Diese Serveradresse ist nicht erlaubt (privates Netzwerk).",
     "CredentialsUnreadable": "Das gespeicherte Passwort kann nicht mehr entschlüsselt werden. Gib es in den Einstellungen erneut ein.",
     "Unknown": "Die Verbindung zum Server ist fehlgeschlagen."
+  },
+  "lists": {
+    "title": "Listen",
+    "subtitle": "Wiederverwendbare Listen von Adressen, Domains oder Mustern für deine Regeln, z. B. VIPs oder blockierte Absender.",
+    "add": "Neue Liste",
+    "empty": "Noch keine Listen",
+    "emptyHint": "Lege eine Liste einmal an und nutze sie in vielen Regeln.",
+    "entries": "{count} Eintrag | {count} Einträge",
+    "usedBy": "in {count} Regel verwendet | in {count} Regeln verwendet",
+    "unused": "noch nicht verwendet",
+    "kind": "Typ",
+    "kinds": {
+      "Address": "Adressen",
+      "AddressHint": "Exakte E-Mail-Adressen, z. B. chef{'@'}example.com",
+      "Domain": "Domains",
+      "DomainHint": "Domains inklusive Subdomains, z. B. example.com",
+      "Pattern": "Muster",
+      "PatternHint": "Platzhalter für Adressen, z. B. noreply{'@'}* oder *{'@'}*.shop.example"
+    },
+    "kindFixed": "Der Typ kann später nicht geändert werden.",
+    "created": "Liste erstellt.",
+    "deleted": "Liste gelöscht.",
+    "deleteTitle": "„{name}“ löschen?",
+    "deleteText": "Die Liste und ihre {count} Einträge werden entfernt.",
+    "inUse": "Diese Liste wird von Regeln verwendet und kann nicht gelöscht werden:",
+    "notFound": "Diese Liste existiert nicht.",
+    "addEntries": "Einträge hinzufügen",
+    "addEntriesHint": "Einer pro Zeile. Eine Notiz nach einem Komma: chef{'@'}example.com, mein Chef",
+    "addButton": "Hinzufügen",
+    "added": "{added} hinzugefügt, {skipped} bereits in der Liste.",
+    "entryValue": "Eintrag",
+    "entryNote": "Notiz",
+    "removeEntry": "{value} entfernen",
+    "noEntries": "Die Liste ist leer.",
+    "noMatches": "Keine Einträge passen zur Suche.",
+    "unsaved": "Nicht gespeicherte Änderungen",
+    "import": "CSV importieren",
+    "importReplace": "Alle Einträge durch die Datei ersetzen",
+    "imported": "{added} importiert, {duplicates} Duplikate übersprungen.",
+    "importInvalid": "{count} Zeile konnte nicht importiert werden: | {count} Zeilen konnten nicht importiert werden:",
+    "importLine": "Zeile {line}",
+    "export": "CSV exportieren",
+    "saveFailed": "Speichern fehlgeschlagen"
   }
 }

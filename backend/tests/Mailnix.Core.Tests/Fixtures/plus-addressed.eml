@@ -1,0 +1,31 @@
+Delivered-To: me+shop@example.com
+X-Original-To: me+shop@example.com
+From: Order Service <orders@store.example>
+To: Me <me+shop@example.com>
+Cc: accounting@example.com
+Subject: Your invoice 2026-1042
+Date: Mon, 19 Oct 2026 23:30:00 +0000
+Message-ID: <invoice-1042@store.example>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="b1"
+
+--b1
+Content-Type: text/plain; charset=utf-8
+
+Thank you for your order. Your invoice is attached.
+
+--b1
+Content-Type: application/pdf; name="Invoice-2026-1042.pdf"
+Content-Disposition: attachment; filename="Invoice-2026-1042.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDMgMCBSPj4Kc3RyZWFtCg==
+
+--b1
+Content-Type: image/jpeg; name="Photo.JPG"
+Content-Disposition: attachment; filename="Photo.JPG"
+Content-Transfer-Encoding: base64
+
+/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIy
+
+--b1--

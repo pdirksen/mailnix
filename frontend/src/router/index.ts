@@ -48,6 +48,19 @@ export const routes: RouteRecordRaw[] = [
         props: true,
         meta: { titleKey: 'nav.accounts' },
       },
+      {
+        path: 'lists',
+        name: 'lists',
+        component: () => import('@/pages/lists/ListsPage.vue'),
+        meta: { titleKey: 'nav.lists' },
+      },
+      {
+        path: 'lists/:id',
+        name: 'list-detail',
+        component: () => import('@/pages/lists/ListDetailPage.vue'),
+        props: true,
+        meta: { titleKey: 'nav.lists' },
+      },
     ],
   },
   {
