@@ -40,6 +40,9 @@ public sealed class MailnixAppFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.UseSetting("Mailnix:Database:Provider", "Sqlite");
         builder.UseSetting("Mailnix:Database:ConnectionString", $"Data Source={_databasePath};Pooling=False");
+
+        // Mailbox watchers only run in tests that ask for them (WithSetting("Mailnix:Worker:Enabled", "true")).
+        builder.UseSetting("Mailnix:Worker:Enabled", "false");
         foreach (var (key, value) in _settings)
         {
             builder.UseSetting(key, value);

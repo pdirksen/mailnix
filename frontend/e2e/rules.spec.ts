@@ -1,6 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { deleteAllAccounts, pauseAccount } from './support'
 
 /** Same credentials file as accounts.spec.ts; the preview only reads from the mailbox. */
 function loadImapCredentials() {
@@ -40,7 +41,11 @@ async function setUp(page: Page) {
     timeout: 60_000,
   })
   expect(response.status()).toBe(201)
+  // It watches the real INBOX: paused, so the rules saved below never act on incoming mail. Previews still work.
+  await pauseAccount(page, (await response.json()).id)
 }
+
+test.afterEach(async ({ page }) => deleteAllAccounts(page))
 
 test('build rules with the template gallery and the editor, preview them on real mail, reorder and delete', async ({ page }) => {
   test.skip(!imap, 'No real IMAP credentials (test-email-credentials.ini)')

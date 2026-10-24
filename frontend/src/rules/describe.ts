@@ -25,6 +25,12 @@ export function splitBytes(bytes: number): { value: number; unit: 'B' | 'KB' | '
   return { value: bytes, unit: 'B' }
 }
 
+/** "Move to: Archive/2026", "Mark as read" */
+export function describeAction(action: { type: string; targetFolder?: string | null; keyword?: string | null }, t: Translate): string {
+  const target = action.targetFolder ?? action.keyword
+  return target ? `${t(`rules.actions.${action.type}`)}: ${target}` : t(`rules.actions.${action.type}`)
+}
+
 export const UNIT_SIZES: Record<'B' | 'KB' | 'MB', number> = { B: 1, KB: 1024, MB: 1024 * 1024 }
 
 /** "Sender domain is (incl. subdomains) shop.example", "Newsletter / bulk mail: yes" */

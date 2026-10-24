@@ -8,7 +8,8 @@
     "toggleSidebar": "Seitenleiste ein-/ausblenden",
     "accounts": "Konten",
     "lists": "Listen",
-    "rules": "Regeln"
+    "rules": "Regeln",
+    "activity": "Aktivität"
   },
   "common": {
     "language": "Sprache",
@@ -316,7 +317,8 @@
       "save": "Regel speichern",
       "unsaved": "Es gibt ungespeicherte Änderungen. Trotzdem verlassen?",
       "invalid": "Behebe zuerst die markierten Probleme.",
-      "saveFailed": "Speichern fehlgeschlagen"
+      "saveFailed": "Speichern fehlgeschlagen",
+      "saveFirst": "Speichere zuerst deine Änderungen."
     },
     "groups": {
       "match": "Erfülle",
@@ -534,5 +536,79 @@
         }
       }
     }
+  },
+  "activity": {
+    "title": "Aktivität",
+    "subtitle": "Was mailnix in deinen Postfächern gemacht hat. Läufe lassen sich rückgängig machen.",
+    "empty": "Noch nichts passiert",
+    "emptyHint": "Läufe erscheinen hier, wenn Regeln auf neue E-Mails reagieren oder du sie manuell startest.",
+    "account": "Konto",
+    "allAccounts": "Alle Konten",
+    "state": "Status",
+    "allStates": "Alle",
+    "triggers": {
+      "NewMail": "Neue E-Mails",
+      "Manual": "Manuell gestartet",
+      "Scheduled": "Zeitgesteuert",
+      "Undo": "Rückgängig"
+    },
+    "states": {
+      "Queued": "Wartet",
+      "Running": "Läuft",
+      "AwaitingConfirmation": "Wartet auf Bestätigung",
+      "Completed": "Fertig",
+      "CompletedWithErrors": "Fertig mit Fehlern",
+      "Failed": "Fehlgeschlagen",
+      "Cancelled": "Abgebrochen",
+      "Expired": "Abgelaufen"
+    },
+    "undone": "Rückgängig gemacht",
+    "counts": "{executed} Aktionen bei {matched} von {examined} E-Mails",
+    "countsFailed": "{failed} fehlgeschlagen",
+    "undoCounts": "{executed} Aktionen rückgängig gemacht",
+    "details": "Details",
+    "noActions": "Keine Aktionen.",
+    "dryRun": "Probelauf",
+    "failed": "Fehlgeschlagen",
+    "undo": "Rückgängig",
+    "undoTitle": "Diesen Lauf rückgängig machen?",
+    "undoText": "mailnix verschiebt die E-Mails zurück, entfernt Kopien und stellt Markierungen wieder her. E-Mails, die seitdem verändert oder verschoben wurden, lassen sich nicht immer wiederherstellen.",
+    "undoStarted": "Rückgängig machen gestartet.",
+    "review": "Prüfen",
+    "awaitingToast": "Ein Lauf wartet auf deine Bestätigung.",
+    "pendingBell": "Läufe, die auf Bestätigung warten",
+    "rule": "Regel",
+    "action": "Aktion",
+    "message": "E-Mail",
+    "result": "Ergebnis",
+    "expiresAt": "Läuft ab {time}",
+    "reviewTitle": "Lauf bestätigen",
+    "reviewText": "Dieser Lauf würde {count} E-Mails verschieben, mehr als die Bestätigungsschwelle des Kontos. Prüfe die Liste und bestätige oder brich ab.",
+    "confirm": "Ausführen",
+    "cancelRun": "Abbrechen",
+    "confirmed": "Lauf bestätigt.",
+    "cancelled": "Lauf abgebrochen.",
+    "notWaiting": "Dieser Lauf wartet nicht auf Bestätigung.",
+    "time": "Zeit",
+    "messagesAffected": "{count} E-Mails betroffen"
+  },
+  "runNow": {
+    "button": "Jetzt ausführen",
+    "title": "Regeln jetzt ausführen",
+    "text": "Wendet die aktiven Regeln auf die neuesten E-Mails eines Ordners an. Große Läufe fragen vorher nach.",
+    "ruleTitle": "Auf vorhandene E-Mails anwenden",
+    "ruleText": "Wendet diese Regel auf die neuesten E-Mails eines Ordners an, auch wenn sie ausgeschaltet ist.",
+    "folder": "Ordner",
+    "limit": "Neueste E-Mails",
+    "start": "Starten",
+    "started": "Lauf gestartet.",
+    "show": "Anzeigen"
+  },
+  "undoRule": {
+    "menu": "Letzte Aktionen rückgängig machen",
+    "title": "Letzte Aktionen von „{name}“ rückgängig machen",
+    "text": "Macht die letzten Aktionen dieser Regel rückgängig, die neuesten zuerst.",
+    "count": "Anzahl Aktionen",
+    "start": "Rückgängig machen"
   }
 }

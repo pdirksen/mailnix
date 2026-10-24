@@ -1,6 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { deleteAllAccounts } from './support'
 
 /**
  * Real mailbox credentials (read-only use: connection test, folder listing) from the git-ignored
@@ -35,6 +36,9 @@ async function registerNewUser(page: Page) {
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
 }
+
+// Normally deleted by the test itself; this covers failures half-way.
+test.afterEach(async ({ page }) => deleteAllAccounts(page))
 
 test('shows a translated error when the server cannot be reached', async ({ page }) => {
   await registerNewUser(page)

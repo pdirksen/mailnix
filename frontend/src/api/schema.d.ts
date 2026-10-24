@@ -1152,6 +1152,102 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/accounts/{id}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["StartRunRequest"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RunSummary"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rules/{id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UndoRuleRequest"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RunSummary"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rule-templates": {
         parameters: {
             query?: never;
@@ -1244,6 +1340,221 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    accountId?: string;
+                    state?: components["schemas"]["RunState"];
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RunSummary"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RunDetail"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RunSummary"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RunSummary"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RunSummary"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1273,6 +1584,26 @@ export interface components {
             purgeTrashAfterDays: null | number;
             /** Format: date-time */
             createdAt: string;
+        };
+        ActionLogItem: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            ruleId: null | string;
+            ruleName: null | string;
+            action: components["schemas"]["ActionType"];
+            keyword: null | string;
+            sourceFolder: string;
+            targetFolder: null | string;
+            from: null | string;
+            subject: null | string;
+            dryRun: boolean;
+            success: boolean;
+            error: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            undoneAt: null | string;
         };
         /** @enum {unknown} */
         ActionType: "MarkRead" | "MarkUnread" | "Flag" | "Unflag" | "AddKeyword" | "RemoveKeyword" | "CopyTo" | "MoveTo" | "Delete" | "MarkAsSpam" | "Archive";
@@ -1493,6 +1824,20 @@ export interface components {
         };
         /** @enum {unknown} */
         NamedListKind: "Address" | "Domain" | "Pattern";
+        PendingActionItem: {
+            ruleName: string;
+            type: components["schemas"]["ActionType"];
+            targetFolder: null | string;
+            keyword: null | string;
+            dryRun: boolean;
+        };
+        PendingMessageItem: {
+            /** Format: uint32 */
+            uid: number;
+            from: null | string;
+            subject: null | string;
+            actions: components["schemas"]["PendingActionItem"][];
+        };
         PreviewAction: {
             type: components["schemas"]["ActionType"];
             targetFolder: null | string;
@@ -1676,6 +2021,51 @@ export interface components {
             valid: boolean;
             errors: components["schemas"]["RuleValidationError"][];
         };
+        RunDetail: {
+            run: components["schemas"]["RunSummary"];
+            actions: components["schemas"]["ActionLogItem"][];
+            pending: components["schemas"]["PendingMessageItem"][];
+        };
+        /** @enum {unknown} */
+        RunState: "Queued" | "Running" | "AwaitingConfirmation" | "Completed" | "CompletedWithErrors" | "Failed" | "Cancelled" | "Expired";
+        RunSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            accountId: string;
+            accountName: string;
+            trigger: components["schemas"]["RunTrigger"];
+            state: components["schemas"]["RunState"];
+            folder: string;
+            /** Format: int32 */
+            messagesExamined: number;
+            /** Format: int32 */
+            messagesMatched: number;
+            /** Format: int32 */
+            plannedActions: number;
+            /** Format: int32 */
+            executedActions: number;
+            /** Format: int32 */
+            failedActions: number;
+            error: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            startedAt: null | string;
+            /** Format: date-time */
+            finishedAt: null | string;
+            /** Format: date-time */
+            expiresAt: null | string;
+            /** Format: uuid */
+            undoneByRunId: null | string;
+            /** Format: uuid */
+            undoRunId: null | string;
+            /** Format: uuid */
+            undoRuleId: null | string;
+            canUndo: boolean;
+        };
+        /** @enum {unknown} */
+        RunTrigger: "NewMail" | "Manual" | "Scheduled" | "Undo";
         /** @enum {unknown} */
         SkipReason: "TerminalActionAlreadyPlanned" | "ContradictsEarlierAction" | "Duplicate" | "AlreadyInTargetFolder" | "NoChange" | "SpecialFolderNotConfigured";
         /** @enum {unknown} */
@@ -1686,6 +2076,15 @@ export interface components {
             trash: null | string;
             junk: null | string;
             archive: null | string;
+        };
+        StartRunRequest: {
+            folder?: null | string;
+            /**
+             * Format: int32
+             * @default 100
+             */
+            limit: number;
+            ruleIds?: null | string[];
         };
         TemplateParameterInfo: {
             name: string;
@@ -1713,6 +2112,13 @@ export interface components {
         };
         /** @enum {unknown} */
         TraceNote: "NotLoaded" | "RegexTimeout" | "InvalidValue" | "ListNotFound" | "RuleNotFound" | "ReferenceDepthExceeded" | null;
+        UndoRuleRequest: {
+            /**
+             * Format: int32
+             * @default 10
+             */
+            count: number;
+        };
         UpdateAccountRequest: {
             name: string;
             host: string;

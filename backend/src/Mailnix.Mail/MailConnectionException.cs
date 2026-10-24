@@ -40,3 +40,9 @@ public sealed class MailConnectionException : Exception
 
     public ConnectionErrorCode Code { get; }
 }
+
+public static class MailConnectionErrors
+{
+    /// <summary>Turns a MailKit/socket exception into a classified <see cref="MailConnectionException"/>.</summary>
+    public static MailConnectionException Classify(Exception exception) => ImapConnector.Classify(exception, timedOut: false);
+}

@@ -968,6 +968,92 @@
         }
       }
     },
+    "/api/accounts/{id}/runs": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/rules/{id}/undo": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoRuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/api/rule-templates": {
       "get": {
         "tags": [
@@ -1038,6 +1124,186 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/runs": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/RunState"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RunSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runs/{id}": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/runs/{id}/confirm": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/runs/{id}/cancel": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/runs/{id}/undo": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -1148,6 +1414,97 @@
           },
           "createdAt": {
             "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ActionLogItem": {
+        "required": [
+          "id",
+          "ruleId",
+          "ruleName",
+          "action",
+          "keyword",
+          "sourceFolder",
+          "targetFolder",
+          "from",
+          "subject",
+          "dryRun",
+          "success",
+          "error",
+          "createdAt",
+          "undoneAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "action": {
+            "$ref": "#/components/schemas/ActionType"
+          },
+          "keyword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceFolder": {
+            "type": "string"
+          },
+          "targetFolder": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subject": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "undoneAt": {
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "date-time"
           }
         }
@@ -2103,6 +2460,72 @@
           "Pattern"
         ]
       },
+      "PendingActionItem": {
+        "required": [
+          "ruleName",
+          "type",
+          "targetFolder",
+          "keyword",
+          "dryRun"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleName": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ActionType"
+          },
+          "targetFolder": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "keyword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dryRun": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PendingMessageItem": {
+        "required": [
+          "uid",
+          "from",
+          "subject",
+          "actions"
+        ],
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subject": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingActionItem"
+            }
+          }
+        }
+      },
       "PreviewAction": {
         "required": [
           "type",
@@ -2817,6 +3240,173 @@
           }
         }
       },
+      "RunDetail": {
+        "required": [
+          "run",
+          "actions",
+          "pending"
+        ],
+        "type": "object",
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/RunSummary"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionLogItem"
+            }
+          },
+          "pending": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PendingMessageItem"
+            }
+          }
+        }
+      },
+      "RunState": {
+        "enum": [
+          "Queued",
+          "Running",
+          "AwaitingConfirmation",
+          "Completed",
+          "CompletedWithErrors",
+          "Failed",
+          "Cancelled",
+          "Expired"
+        ]
+      },
+      "RunSummary": {
+        "required": [
+          "id",
+          "accountId",
+          "accountName",
+          "trigger",
+          "state",
+          "folder",
+          "messagesExamined",
+          "messagesMatched",
+          "plannedActions",
+          "executedActions",
+          "failedActions",
+          "error",
+          "createdAt",
+          "startedAt",
+          "finishedAt",
+          "expiresAt",
+          "undoneByRunId",
+          "undoRunId",
+          "undoRuleId",
+          "canUndo"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/RunTrigger"
+          },
+          "state": {
+            "$ref": "#/components/schemas/RunState"
+          },
+          "folder": {
+            "type": "string"
+          },
+          "messagesExamined": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "messagesMatched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "plannedActions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "executedActions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedActions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "undoneByRunId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "undoRunId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "undoRuleId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "canUndo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RunTrigger": {
+        "enum": [
+          "NewMail",
+          "Manual",
+          "Scheduled",
+          "Undo"
+        ]
+      },
       "SkipReason": {
         "enum": [
           "TerminalActionAlreadyPlanned",
@@ -2879,6 +3469,32 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "StartRunRequest": {
+        "type": "object",
+        "properties": {
+          "folder": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 100
+          },
+          "ruleIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },
@@ -3009,6 +3625,16 @@
           "ReferenceDepthExceeded",
           null
         ]
+      },
+      "UndoRuleRequest": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32",
+            "default": 10
+          }
+        }
       },
       "UpdateAccountRequest": {
         "required": [
@@ -3209,6 +3835,9 @@
     },
     {
       "name": "Lists"
+    },
+    {
+      "name": "Runs"
     }
   ]
 }

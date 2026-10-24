@@ -24,6 +24,7 @@
     <ProjectReference Include="..\Mailnix.Infrastructure\Mailnix.Infrastructure.csproj" />
     <ProjectReference Include="..\Mailnix.Mail\Mailnix.Mail.csproj" />
     <ProjectReference Include="..\Mailnix.Core\Mailnix.Core.csproj" />
+    <ProjectReference Include="..\Mailnix.Worker\Mailnix.Worker.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,408 @@
+using System.Text.Json;
+using Mailnix.Core.Messages;
+using Mailnix.Core.Rules;
+using Mailnix.Infrastructure.Data;
+using Mailnix.Mail;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+namespace Mailnix.Worker;
+
+public sealed record PendingAction(Guid RuleId, string RuleName, ActionType Type, string? TargetFolder, string? Keyword, bool DryRun)
+{
+    public PlannedAction ToPlanned() => new(RuleId, Type, TargetFolder, Keyword);
+}
+
+public sealed record PendingMessage(uint Uid, string? MessageId, string? From, string? Subject, List<string> PreviousFlags, List<PendingAction> Actions)
+{
+    public static PendingMessage Create(MessageSnapshot message, MessagePlan plan, IReadOnlyDictionary<Guid, RuleDefinition> rules)
+    {
+        string Name(Guid id) => rules.TryGetValue(id, out var rule) ? rule.Name : string.Empty;
+        List<string> flags = [.. message.Keywords];
+        if (message.IsSeen)
+        {
+            flags.Add(Flags.Seen);
+        }
+
+        if (message.IsFlagged)
+        {
+            flags.Add(Flags.Flagged);
+        }
+
+        return new PendingMessage(
+            message.Uid,
+            message.MessageId,
+            message.From?.Address,
+            message.Subject is { Length: > 300 } subject ? subject[..300] : message.Subject,
+            flags,
+            [
+                .. plan.Actions.Select(a => new PendingAction(a.RuleId, Name(a.RuleId), a.Type, a.TargetFolder, a.Keyword, DryRun: false)),
+                .. plan.DryRunActions.Select(a => new PendingAction(a.RuleId, Name(a.RuleId), a.Type, a.TargetFolder, a.Keyword, DryRun: true)),
+            ]);
+    }
+}
+
+/// <summary>Stored on runs awaiting confirmation; executed as planned once the user confirms.</summary>
+public sealed record PendingPlan(uint UidValidity, List<PendingMessage> Messages);
+
+internal static class Flags
+{
+    public const string Seen = "\\Seen";
+    public const string Flagged = "\\Flagged";
+}
+
+/// <summary>Plans, gates, executes and logs rule runs on one mailbox session.</summary>
+internal sealed partial class RunProcessor(
+    MailnixDbContext db,
+    RuleSetLoader loader,
+    ILiveNotifier notifier,
+    IOptions<WorkerOptions> options,
+    TimeProvider time,
+    ILogger<RunProcessor> logger)
+{
+    private WorkerOptions Options => options.Value;
+
+    /// <summary>
+    /// Applies OnNew rules to messages that arrived in a watched folder since the last pass. On the first pass
+    /// (or after the folder was recreated) existing mail is left alone: only mail arriving from now on is processed.
+    /// </summary>
+    public async Task ProcessNewMailAsync(IMailboxSession session, MailAccount account, string folder, CancellationToken ct)
+    {
+        // Read-only until a rule actually changes something (ExecuteAsync reopens the folder for writing).
+        var status = await session.OpenAsync(folder, writable: false, ct);
+        var state = await db.FolderStates.SingleOrDefaultAsync(f => f.AccountId == account.Id && f.Folder == folder, ct);
+        var now = time.GetUtcNow();
+        if (state is null || state.UidValidity != status.UidValidity)
+        {
+            if (state is null)
+            {
+                state = new FolderState { AccountId = account.Id, Folder = folder };
+                db.FolderStates.Add(state);
+            }
+
+            state.UidValidity = status.UidValidity;
+            state.LastProcessedUid = status.UidNext > 0 ? status.UidNext - 1 : await HighestUidAsync(session, folder, ct);
+            state.UpdatedAt = now;
+            await db.SaveChangesAsync(ct);
+            return;
+        }
+
+        if (status.UidNext > 0 && status.UidNext - 1 <= state.LastProcessedUid)
+        {
+            return;
+        }
+
+        var loaded = await loader.LoadAsync(account, ct);
+        var rules = loaded.AccountRules
+            .Where(r => r.Enabled && loaded.Stored[r.Id].Trigger == RuleTrigger.OnNew && loaded.AppliesTo(r.Id, folder, account.WatchedFolders))
+            .ToList();
+        var requirements = rules.Count == 0 ? FetchRequirements.None : FieldCatalog.RequiredFetch(rules, loaded.Context.Rules);
+        var messages = await session.FetchNewAsync(folder, state.LastProcessedUid, Options.MaxNewMessagesPerPass, requirements, ct);
+        if (messages.Count == 0)
+        {
+            return;
+        }
+
+        if (rules.Count > 0)
+        {
+            var since = now - Options.LoopGuardWindow;
+            var uids = messages.Select(m => m.Uid).ToList();
+            var placedByUs = await db.ActionLog
+                .Where(a => a.AccountId == account.Id && a.TargetFolder == folder && a.TargetUidValidity == status.UidValidity
+                    && a.TargetUid != null && uids.Contains(a.TargetUid.Value) && a.CreatedAt > since && a.Success && !a.DryRun)
+                .Select(a => a.TargetUid!.Value)
+                .ToListAsync(ct);
+
+            var candidates = messages.Where(m => !placedByUs.Contains(m.Uid)).ToList();
+            var context = await ContextAsync(session, account, loaded, rules, ct);
+            var planned = Plan(candidates, rules, context);
+            if (planned.Any(p => p.Pending.Actions.Count > 0))
+            {
+                var run = NewRun(account, RunTrigger.NewMail, folder, RunState.Running);
+                run.StartedAt = now;
+                db.Runs.Add(run);
+                await ApplyAsync(session, account, run, folder, status.UidValidity, planned, candidates.Count, gate: true, ct);
+            }
+        }
+
+        state.LastProcessedUid = messages.Max(m => m.Uid);
+        state.UpdatedAt = now;
+        await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>Runs queued jobs of the account: manual runs, confirmed runs and undo.</summary>
+    public async Task ProcessQueuedAsync(IMailboxSession session, MailAccount account, UndoProcessor undo, CancellationToken ct)
+    {
+        await ExpirePendingAsync(account, ct);
+        var queued = await db.Runs.Where(r => r.AccountId == account.Id && r.State == RunState.Queued).OrderBy(r => r.CreatedAt).ToListAsync(ct);
+        foreach (var run in queued)
+        {
+            run.State = RunState.Running;
+            run.StartedAt = time.GetUtcNow();
+            await db.SaveChangesAsync(ct);
+            await NotifyAsync(account, run);
+            try
+            {
+                if (run.Trigger == RunTrigger.Undo)
+                {
+                    await undo.UndoAsync(session, account, run, ct);
+                }
+                else if (run.PendingPlanJson is not null)
+                {
+                    await ExecuteConfirmedAsync(session, account, run, ct);
+                }
+                else
+                {
+                    await ExecuteManualAsync(session, account, run, ct);
+                }
+            }
+            catch (Mail.FolderNotFoundException ex)
+            {
+                Fail(run, ex.Message);
+            }
+
+            run.FinishedAt ??= time.GetUtcNow();
+            await db.SaveChangesAsync(ct);
+            await NotifyAsync(account, run);
+        }
+    }
+
+    private async Task ExecuteManualAsync(IMailboxSession session, MailAccount account, RuleRun run, CancellationToken ct)
+    {
+        var status = await session.OpenAsync(run.Folder, writable: false, ct);
+        var loaded = await loader.LoadAsync(account, ct);
+
+        // Explicitly chosen rules run even when switched off (e.g. "apply this rule to existing mail").
+        var rules = run.RuleIds is { Count: > 0 } chosen
+            ? loaded.AccountRules.Where(r => chosen.Contains(r.Id)).Select(r => r with { Enabled = true }).ToList()
+            : loaded.AccountRules.Where(r => r.Enabled && loaded.AppliesTo(r.Id, run.Folder, account.WatchedFolders)).ToList();
+        if (rules.Count == 0)
+        {
+            Complete(run);
+            return;
+        }
+
+        var limit = Math.Clamp(run.Limit ?? 100, 1, Options.MaxManualRunMessages);
+        var messages = await session.FetchLatestAsync(run.Folder, limit, FieldCatalog.RequiredFetch(rules, loaded.Context.Rules), ct);
+        var context = await ContextAsync(session, account, loaded, rules, ct);
+        await ApplyAsync(session, account, run, run.Folder, status.UidValidity, Plan(messages, rules, context), messages.Count, gate: true, ct);
+    }
+
+    private async Task ExecuteConfirmedAsync(IMailboxSession session, MailAccount account, RuleRun run, CancellationToken ct)
+    {
+        var plan = JsonSerializer.Deserialize<PendingPlan>(run.PendingPlanJson!, RuleJson.Options)!;
+        var status = await session.OpenAsync(run.Folder, writable: false, ct);
+        if (status.UidValidity != plan.UidValidity)
+        {
+            Fail(run, "The folder was recreated on the server since the run was planned; nothing was changed.");
+            return;
+        }
+
+        // Re-check that each message is still there (and still the same message) before acting on it.
+        var present = (await session.FetchAsync(run.Folder, [.. plan.Messages.Select(m => m.Uid)], FetchRequirements.None, ct))
+            .Where(s => plan.Messages.First(m => m.Uid == s.Uid).MessageId is not { } id || s.MessageId == id)
+            .ToDictionary(s => s.Uid);
+        var gone = plan.Messages.Where(m => !present.ContainsKey(m.Uid)).ToList();
+        foreach (var message in gone)
+        {
+            foreach (var action in message.Actions.Where(a => !a.DryRun))
+            {
+                db.ActionLog.Add(Entry(run, account, run.Folder, plan.UidValidity, message, action, success: false, "The message is no longer in the folder."));
+                run.FailedActions++;
+            }
+        }
+
+        var remaining = plan.Messages.Where(m => present.ContainsKey(m.Uid)).Select(m => (present[m.Uid], m)).ToList();
+        await ExecuteAndLogAsync(session, account, run, run.Folder, plan.UidValidity, remaining, ct);
+        run.PendingPlanJson = null;
+        Complete(run);
+    }
+
+    /// <summary>Executes a plan, or parks it for confirmation when it would move more messages than the account allows.</summary>
+    private async Task ApplyAsync(
+        IMailboxSession session,
+        MailAccount account,
+        RuleRun run,
+        string folder,
+        uint uidValidity,
+        List<(MessageSnapshot Message, PendingMessage Pending)> planned,
+        int examined,
+        bool gate,
+        CancellationToken ct)
+    {
+        var withActions = planned.Where(p => p.Pending.Actions.Count > 0).ToList();
+        run.MessagesExamined = examined;
+        run.MessagesMatched = withActions.Count;
+        run.PlannedActions = withActions.Sum(p => p.Pending.Actions.Count(a => !a.DryRun));
+
+        var moving = withActions.Count(p => p.Pending.Actions.Any(a => !a.DryRun && IsTerminal(a.Type)));
+        if (gate && moving > account.BlastRadiusLimit)
+        {
+            run.State = RunState.AwaitingConfirmation;
+            run.PendingPlanJson = JsonSerializer.Serialize(new PendingPlan(uidValidity, [.. withActions.Select(p => p.Pending)]), RuleJson.Options);
+            run.ExpiresAt = time.GetUtcNow() + Options.ConfirmationExpiry;
+            LogAwaitingConfirmation(account.Id, moving, account.BlastRadiusLimit);
+            await db.SaveChangesAsync(ct);
+            await NotifyAsync(account, run);
+            return;
+        }
+
+        await ExecuteAndLogAsync(session, account, run, folder, uidValidity, withActions, ct);
+        Complete(run);
+        await NotifyAsync(account, run);
+    }
+
+    private async Task ExecuteAndLogAsync(
+        IMailboxSession session,
+        MailAccount account,
+        RuleRun run,
+        string folder,
+        uint uidValidity,
+        List<(MessageSnapshot Message, PendingMessage Pending)> work,
+        CancellationToken ct)
+    {
+        foreach (var (_, pending) in work)
+        {
+            foreach (var action in pending.Actions.Where(a => a.DryRun))
+            {
+                db.ActionLog.Add(Entry(run, account, folder, uidValidity, pending, action, success: true, null, dryRun: true));
+            }
+        }
+
+        var live = work
+            .Select(w => new MessageActions(w.Message, [.. w.Pending.Actions.Where(a => !a.DryRun).Select(a => a.ToPlanned())]))
+            .Where(w => w.Actions.Count > 0)
+            .ToList();
+        if (live.Count == 0)
+        {
+            return;
+        }
+
+        var outcomes = await session.ExecuteAsync(folder, live, ct);
+        var byUid = work.ToDictionary(w => w.Message.Uid, w => w.Pending);
+        foreach (var outcome in outcomes)
+        {
+            var pending = byUid[outcome.Uid];
+            var action = pending.Actions.First(a => !a.DryRun && a.ToPlanned() == outcome.Action);
+            db.ActionLog.Add(Entry(run, account, folder, uidValidity, pending, action, outcome.Success, outcome.Error, false, outcome.TargetUid, outcome.TargetUidValidity));
+            if (outcome.Success)
+            {
+                run.ExecutedActions++;
+            }
+            else
+            {
+                run.FailedActions++;
+            }
+        }
+    }
+
+    private static List<(MessageSnapshot Message, PendingMessage Pending)> Plan(IReadOnlyList<MessageSnapshot> messages, IReadOnlyList<RuleDefinition> rules, EvaluationContext context) =>
+        [.. messages.Select(m => (m, PendingMessage.Create(m, ActionPlanner.Plan(rules, m, context), context.Rules)))];
+
+    private static async Task<EvaluationContext> ContextAsync(IMailboxSession session, MailAccount account, LoadedRuleSet loaded, IReadOnlyList<RuleDefinition> rules, CancellationToken ct)
+    {
+        var context = loaded.Context with { FolderDelimiter = session.Delimiter };
+        if (FieldCatalog.UsedFields(rules, loaded.Context.Rules).Contains(ConditionField.IsReplyToMyMail) && account.SpecialFolders.Sent is { } sent)
+        {
+            context = context with { SentMessageIds = await session.MessageIdsAsync(sent, 500, ct) };
+        }
+
+        return context;
+    }
+
+    private async Task ExpirePendingAsync(MailAccount account, CancellationToken ct)
+    {
+        var now = time.GetUtcNow();
+        var expired = await db.Runs.Where(r => r.AccountId == account.Id && r.State == RunState.AwaitingConfirmation && r.ExpiresAt < now).ToListAsync(ct);
+        foreach (var run in expired)
+        {
+            run.State = RunState.Expired;
+            run.PendingPlanJson = null;
+            run.FinishedAt = now;
+        }
+
+        if (expired.Count > 0)
+        {
+            await db.SaveChangesAsync(ct);
+            foreach (var run in expired)
+            {
+                await NotifyAsync(account, run);
+            }
+        }
+    }
+
+    private static async Task<uint> HighestUidAsync(IMailboxSession session, string folder, CancellationToken ct) =>
+        (await session.FetchLatestAsync(folder, 1, FetchRequirements.None, ct)) is [var latest, ..] ? latest.Uid : 0;
+
+    internal static bool IsTerminal(ActionType type) => type is ActionType.MoveTo or ActionType.Delete or ActionType.MarkAsSpam or ActionType.Archive;
+
+    private RuleRun NewRun(MailAccount account, RunTrigger trigger, string folder, RunState state) => new()
+    {
+        Id = Guid.CreateVersion7(),
+        TenantId = account.TenantId,
+        UserId = account.UserId,
+        AccountId = account.Id,
+        Trigger = trigger,
+        State = state,
+        Folder = folder,
+        CreatedAt = time.GetUtcNow(),
+    };
+
+    private ActionLogEntry Entry(
+        RuleRun run,
+        MailAccount account,
+        string folder,
+        uint uidValidity,
+        PendingMessage message,
+        PendingAction action,
+        bool success,
+        string? error,
+        bool dryRun = false,
+        uint? targetUid = null,
+        uint? targetUidValidity = null) => new()
+        {
+            Id = Guid.CreateVersion7(),
+            RunId = run.Id,
+            AccountId = account.Id,
+            UserId = account.UserId,
+            RuleId = action.RuleId == Guid.Empty ? null : action.RuleId,
+            RuleName = action.RuleName,
+            Action = action.Type,
+            Keyword = action.Keyword,
+            SourceFolder = folder,
+            SourceUid = message.Uid,
+            SourceUidValidity = uidValidity,
+            TargetFolder = action.TargetFolder,
+            TargetUid = targetUid,
+            TargetUidValidity = targetUidValidity,
+            MessageId = message.MessageId,
+            From = message.From,
+            Subject = message.Subject,
+            PreviousFlags = message.PreviousFlags,
+            DryRun = dryRun,
+            Success = success,
+            Error = error is { Length: > 1000 } ? error[..1000] : error,
+            CreatedAt = time.GetUtcNow(),
+        };
+
+    private void Complete(RuleRun run)
+    {
+        run.State = run.FailedActions > 0 ? RunState.CompletedWithErrors : RunState.Completed;
+        run.FinishedAt = time.GetUtcNow();
+    }
+
+    private void Fail(RuleRun run, string error)
+    {
+        run.State = RunState.Failed;
+        run.Error = error;
+        run.PendingPlanJson = null;
+        run.FinishedAt = time.GetUtcNow();
+    }
+
+    private Task NotifyAsync(MailAccount account, RuleRun run) =>
+        notifier.NotifyAsync(account.UserId, LiveEvents.RunUpdated, new RunEvent(run.Id, account.Id, run.State, run.Trigger));
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Run for account {AccountId} would move {Count} messages (threshold {Threshold}); waiting for confirmation")]
+    private partial void LogAwaitingConfirmation(Guid accountId, int count, int threshold);
+}

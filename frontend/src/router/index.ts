@@ -80,6 +80,19 @@ export const routes: RouteRecordRaw[] = [
         props: true,
         meta: { titleKey: 'nav.lists' },
       },
+      {
+        path: 'activity',
+        name: 'activity',
+        component: () => import('@/pages/activity/ActivityPage.vue'),
+        meta: { titleKey: 'nav.activity' },
+      },
+      {
+        path: 'activity/pending/:id',
+        name: 'run-review',
+        component: () => import('@/pages/activity/RunReviewPage.vue'),
+        props: true,
+        meta: { titleKey: 'activity.reviewTitle' },
+      },
     ],
   },
   {

@@ -8,7 +8,8 @@
     "toggleSidebar": "Toggle sidebar",
     "accounts": "Accounts",
     "lists": "Lists",
-    "rules": "Rules"
+    "rules": "Rules",
+    "activity": "Activity"
   },
   "common": {
     "language": "Language",
@@ -316,7 +317,8 @@
       "save": "Save rule",
       "unsaved": "You have unsaved changes. Leave anyway?",
       "invalid": "Fix the marked problems first.",
-      "saveFailed": "Saving failed"
+      "saveFailed": "Saving failed",
+      "saveFirst": "Save your changes first."
     },
     "groups": {
       "match": "Match",
@@ -534,5 +536,79 @@
         }
       }
     }
+  },
+  "activity": {
+    "title": "Activity",
+    "subtitle": "What mailnix did in your mailboxes. Runs can be undone.",
+    "empty": "Nothing happened yet",
+    "emptyHint": "Runs appear here when rules act on new mail or when you run them manually.",
+    "account": "Account",
+    "allAccounts": "All accounts",
+    "state": "Status",
+    "allStates": "All",
+    "triggers": {
+      "NewMail": "New mail",
+      "Manual": "Run manually",
+      "Scheduled": "Scheduled",
+      "Undo": "Undo"
+    },
+    "states": {
+      "Queued": "Queued",
+      "Running": "Running",
+      "AwaitingConfirmation": "Waiting for confirmation",
+      "Completed": "Done",
+      "CompletedWithErrors": "Done with errors",
+      "Failed": "Failed",
+      "Cancelled": "Cancelled",
+      "Expired": "Expired"
+    },
+    "undone": "Undone",
+    "counts": "{executed} actions on {matched} of {examined} messages",
+    "countsFailed": "{failed} failed",
+    "undoCounts": "{executed} actions undone",
+    "details": "Details",
+    "noActions": "No actions.",
+    "dryRun": "Dry run",
+    "failed": "Failed",
+    "undo": "Undo",
+    "undoTitle": "Undo this run?",
+    "undoText": "mailnix moves the messages back, removes copies and restores flags. Messages that were changed or moved since cannot always be restored.",
+    "undoStarted": "Undo started.",
+    "review": "Review",
+    "awaitingToast": "A run is waiting for your confirmation.",
+    "pendingBell": "Runs waiting for confirmation",
+    "rule": "Rule",
+    "action": "Action",
+    "message": "Message",
+    "result": "Result",
+    "expiresAt": "Expires {time}",
+    "reviewTitle": "Confirm run",
+    "reviewText": "This run would move {count} messages, more than the confirmation threshold of the account. Check the list and confirm or cancel.",
+    "confirm": "Run it",
+    "cancelRun": "Cancel",
+    "confirmed": "Run confirmed.",
+    "cancelled": "Run cancelled.",
+    "notWaiting": "This run is not waiting for confirmation.",
+    "time": "Time",
+    "messagesAffected": "{count} messages affected"
+  },
+  "runNow": {
+    "button": "Run now",
+    "title": "Run rules now",
+    "text": "Applies the active rules to the newest messages of a folder. Large runs ask for confirmation first.",
+    "ruleTitle": "Apply to existing mail",
+    "ruleText": "Applies this rule to the newest messages of a folder, even if it is switched off.",
+    "folder": "Folder",
+    "limit": "Newest messages",
+    "start": "Start",
+    "started": "Run started.",
+    "show": "Show"
+  },
+  "undoRule": {
+    "menu": "Undo recent actions",
+    "title": "Undo recent actions of \"{name}\"",
+    "text": "Reverts the most recent actions of this rule, newest first.",
+    "count": "Number of actions",
+    "start": "Undo"
   }
 }

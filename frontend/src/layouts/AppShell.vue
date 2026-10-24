@@ -3,6 +3,7 @@ import AppLogo from '@/components/common/AppLogo.vue'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import ThemeToggle from '@/components/common/ThemeToggle.vue'
 import UserMenu from '@/components/common/UserMenu.vue'
+import PendingBell from '@/components/runs/PendingBell.vue'
 import { Separator } from '@/components/ui/separator'
 import {
   Sidebar,
@@ -19,14 +20,23 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
+import { connectLive, disconnectLive } from '@/realtime/live'
 import { useAuthStore } from '@/stores/auth'
-import { computed } from 'vue'
+import { useRunsStore } from '@/stores/runs'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { type NavigationItem, navigation } from './navigation'
 
 const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+
+// Live updates and the pending-confirmations bell are only needed while signed in, i.e. inside the shell.
+onMounted(() => {
+  void useRunsStore().fetchRecent().catch(() => {})
+  void connectLive()
+})
+onUnmounted(() => void disconnectLive())
 
 const items = computed(() => navigation.filter((item) => !item.adminOnly || auth.isAdmin))
 
@@ -80,6 +90,7 @@ function isActive(item: NavigationItem) {
         <Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
         <h1 class="truncate text-sm font-medium">{{ route.meta.titleKey ? $t(route.meta.titleKey) : '' }}</h1>
         <div class="ml-auto flex items-center gap-1">
+          <PendingBell />
           <LanguageSwitcher />
           <ThemeToggle />
         </div>

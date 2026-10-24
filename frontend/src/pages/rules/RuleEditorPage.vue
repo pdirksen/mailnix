@@ -6,6 +6,7 @@ import ConditionGroupEditor from '@/components/rules/ConditionGroupEditor.vue'
 import CronInput from '@/components/rules/CronInput.vue'
 import PreviewPanel from '@/components/rules/PreviewPanel.vue'
 import SourceFoldersPicker from '@/components/rules/SourceFoldersPicker.vue'
+import RunNowDialog from '@/components/runs/RunNowDialog.vue'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,7 +22,7 @@ import { type ConditionField, type FieldDefinition, newCondition, newGroup, type
 import { type Account, useAccountsStore } from '@/stores/accounts'
 import { useListsStore } from '@/stores/lists'
 import { type RuleDraft, useRulesStore } from '@/stores/rules'
-import { ArrowLeftIcon, CircleAlertIcon, Loader2Icon } from '@lucide/vue'
+import { ArrowLeftIcon, CircleAlertIcon, Loader2Icon, PlayIcon } from '@lucide/vue'
 import { useDebounceFn } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -137,6 +138,8 @@ watch(draft, () => void validate(), { deep: true })
 watch(account, () => void validate())
 
 const saving = ref(false)
+// Runs use the saved rule, so applying it needs the changes saved first.
+const runDialogOpen = ref(false)
 const saveError = ref<string[]>([])
 
 async function save() {
@@ -194,10 +197,23 @@ onBeforeRouteLeave((to) => {
           <Badge variant="secondary">{{ account.name }}</Badge>
           <Badge v-if="dirty" variant="outline" class="border-warning text-warning">{{ $t('lists.unsaved') }}</Badge>
         </div>
-        <Button :disabled="saving" data-testid="save-rule" @click="save">
-          <Loader2Icon v-if="saving" class="animate-spin" />
-          {{ $t('rules.editor.save') }}
-        </Button>
+        <div class="flex flex-wrap gap-2">
+          <Button
+            v-if="ruleId && draft.actions.length"
+            variant="outline"
+            :disabled="dirty"
+            :title="dirty ? $t('rules.editor.saveFirst') : undefined"
+            data-testid="apply-rule"
+            @click="runDialogOpen = true"
+          >
+            <PlayIcon />
+            {{ $t('runNow.ruleTitle') }}
+          </Button>
+          <Button :disabled="saving" data-testid="save-rule" @click="save">
+            <Loader2Icon v-if="saving" class="animate-spin" />
+            {{ $t('rules.editor.save') }}
+          </Button>
+        </div>
       </div>
 
       <Alert v-if="saveError.length" variant="destructive">
@@ -289,6 +305,7 @@ onBeforeRouteLeave((to) => {
           />
         </div>
       </div>
+      <RunNowDialog v-if="ruleId" v-model:open="runDialogOpen" :account-id="account.id" :rule-id="ruleId" />
     </template>
   </div>
 </template>

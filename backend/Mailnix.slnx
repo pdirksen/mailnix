@@ -4,6 +4,7 @@
     <Project Path="src/Mailnix.Core/Mailnix.Core.csproj" />
     <Project Path="src/Mailnix.Infrastructure/Mailnix.Infrastructure.csproj" />
     <Project Path="src/Mailnix.Mail/Mailnix.Mail.csproj" />
+    <Project Path="src/Mailnix.Worker/Mailnix.Worker.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Mailnix.Core.Tests/Mailnix.Core.Tests.csproj" />

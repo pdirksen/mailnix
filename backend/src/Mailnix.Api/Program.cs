@@ -6,10 +6,12 @@ using Mailnix.Api.Auth;
 using Mailnix.Api.Hosting;
 using Mailnix.Api.Lists;
 using Mailnix.Api.Rules;
+using Mailnix.Api.Runs;
 using Mailnix.Core.Rules;
 using Mailnix.Infrastructure;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Mail;
+using Mailnix.Worker;
 using Microsoft.Net.Http.Headers;
 using Scalar.AspNetCore;
 using Serilog;
@@ -38,6 +40,13 @@ builder.Services.ConfigureHttpJsonOptions(json =>
     json.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
 });
 builder.Services.AddScoped<RuleService>();
+if (hostOptions.ServesApi)
+{
+    builder.Services.AddSignalR().AddJsonProtocol(json => RuleJson.Configure(json.PayloadSerializerOptions));
+    builder.Services.AddSingleton<ILiveNotifier, HubLiveNotifier>();
+}
+
+builder.Services.AddMailnixWorker(builder.Configuration, runWatchers: hostOptions.Mode is MailnixMode.AllInOne or MailnixMode.Worker && !isOpenApiGeneration);
 builder.Services.AddMemoryCache();
 builder.Services.AddProblemDetails();
 builder.Services.AddValidation();
@@ -94,6 +103,8 @@ if (hostOptions.ServesApi)
     api.MapRuleEndpoints();
     api.MapListEndpoints();
     api.MapPreviewEndpoints();
+    api.MapRunEndpoints();
+    app.MapHub<LiveHub>("/hubs/live");
     api.MapFallback("{**path}", () => TypedResults.NotFound()).AllowAnonymous();
 
     app.MapFallbackToFile("index.html", new StaticFileOptions

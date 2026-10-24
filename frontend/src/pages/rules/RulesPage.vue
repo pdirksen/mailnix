@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ApiError } from '@/api/client'
 import RuleTemplatesDialog from '@/components/rules/RuleTemplatesDialog.vue'
+import RunNowDialog from '@/components/runs/RunNowDialog.vue'
+import UndoRuleDialog from '@/components/runs/UndoRuleDialog.vue'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +31,19 @@ import { useConnectionErrors } from '@/lib/connectionErrors'
 import { countConditions, fromApi, toDraft } from '@/rules/model'
 import { useAccountsStore } from '@/stores/accounts'
 import { type Rule, useRulesStore } from '@/stores/rules'
-import { CopyIcon, GripVerticalIcon, MoreHorizontalIcon, PencilIcon, PlusIcon, SparklesIcon, Trash2Icon, WandSparklesIcon } from '@lucide/vue'
+import {
+  CopyIcon,
+  GripVerticalIcon,
+  HistoryIcon,
+  MoreHorizontalIcon,
+  PencilIcon,
+  PlayIcon,
+  PlusIcon,
+  SparklesIcon,
+  Trash2Icon,
+  Undo2Icon,
+  WandSparklesIcon,
+} from '@lucide/vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { useI18n } from 'vue-i18n'
@@ -120,6 +134,23 @@ async function confirmDelete() {
   }
 }
 
+// "Run now" for all active rules, or "Apply to existing mail" for a single rule.
+const runDialogOpen = ref(false)
+const runRuleId = ref<string>()
+
+function openRun(rule?: Rule) {
+  runRuleId.value = rule?.id
+  runDialogOpen.value = true
+}
+
+const undoRule = ref<Rule | null>(null)
+const undoDialogOpen = ref(false)
+
+function openUndo(rule: Rule) {
+  undoRule.value = rule
+  undoDialogOpen.value = true
+}
+
 function summary(rule: Rule) {
   const conditions = countConditions(fromApi(rule.conditions))
   const actions = rule.actions.length ? rule.actions.map((a) => t(`rules.actions.${a.type}`)).join(', ') : t('rules.noActions')
@@ -135,6 +166,10 @@ function summary(rule: Rule) {
         <p class="text-muted-foreground mt-1">{{ $t('rules.subtitle') }}</p>
       </div>
       <div v-if="accountId" class="flex flex-wrap gap-2">
+        <Button variant="outline" data-testid="run-now" @click="openRun()">
+          <PlayIcon />
+          {{ $t('runNow.button') }}
+        </Button>
         <Button variant="outline" data-testid="open-templates" @click="templatesOpen = true">
           <SparklesIcon />
           {{ $t('rules.fromTemplate') }}
@@ -223,6 +258,12 @@ function summary(rule: Rule) {
               </DropdownMenuItem>
               <DropdownMenuItem @select="duplicate(rule)"><CopyIcon /> {{ $t('rules.duplicate') }}</DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem v-if="rule.actions.length" @select="openRun(rule)"><PlayIcon /> {{ $t('runNow.ruleTitle') }}</DropdownMenuItem>
+              <DropdownMenuItem @select="router.push({ name: 'activity', query: { account: rule.accountId } })">
+                <HistoryIcon /> {{ $t('nav.activity') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem @select="openUndo(rule)"><Undo2Icon /> {{ $t('undoRule.menu') }}</DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem class="text-destructive" @select="askDelete(rule)"><Trash2Icon /> {{ $t('rules.delete') }}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -231,6 +272,8 @@ function summary(rule: Rule) {
     </template>
 
     <RuleTemplatesDialog v-if="accountId" v-model:open="templatesOpen" :account-id="accountId" />
+    <RunNowDialog v-if="accountId" v-model:open="runDialogOpen" :account-id="accountId" :rule-id="runRuleId" />
+    <UndoRuleDialog v-if="undoRule" v-model:open="undoDialogOpen" :rule-id="undoRule.id" :rule-name="undoRule.name" />
 
     <AlertDialog v-model:open="deleteDialogOpen">
       <AlertDialogContent>

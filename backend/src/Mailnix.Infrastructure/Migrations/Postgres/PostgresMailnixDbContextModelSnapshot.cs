@@ -23,6 +23,124 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.ActionLogEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("DryRun")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("From")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<string>("Keyword")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("MessageId")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.PrimitiveCollection<List<string>>("PreviousFlags")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<Guid?>("RuleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RuleName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SourceFolder")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long>("SourceUid")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SourceUidValidity")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("TargetFolder")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long?>("TargetUid")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("TargetUidValidity")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset?>("UndoneAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RunId");
+
+                    b.HasIndex("RuleId", "CreatedAt");
+
+                    b.HasIndex("AccountId", "TargetFolder", "TargetUid");
+
+                    b.ToTable("ActionLog");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.FolderState", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Folder")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long>("LastProcessedUid")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UidValidity")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("AccountId", "Folder");
+
+                    b.ToTable("FolderStates");
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.MailAccount", b =>
                 {
                     b.Property<Guid>("Id")
@@ -306,6 +424,97 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.ToTable("RuleReferences");
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("ExecutedActions")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FailedActions")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Folder")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int?>("Limit")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MessagesExamined")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MessagesMatched")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PendingPlanJson")
+                        .HasColumnType("text");
+
+                    b.Property<int>("PlannedActions")
+                        .HasColumnType("integer");
+
+                    b.PrimitiveCollection<List<Guid>>("RuleIds")
+                        .HasColumnType("uuid[]");
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Trigger")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int?>("UndoCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("UndoRuleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UndoRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UndoneByRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "State");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("Runs");
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -561,6 +770,24 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.ActionLogEntry", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.RuleRun", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.FolderState", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.MailAccount", b =>
                 {
                     b.HasOne("Mailnix.Infrastructure.Identity.AppUser", "User")
@@ -618,6 +845,15 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.HasOne("Mailnix.Infrastructure.Data.MailRule", null)
                         .WithMany("References")
                         .HasForeignKey("RuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleRun", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

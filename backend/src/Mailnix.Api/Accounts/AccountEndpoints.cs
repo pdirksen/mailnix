@@ -4,6 +4,7 @@ using Mailnix.Api.Hosting;
 using Mailnix.Api.Rules;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Mail;
+using Mailnix.Worker;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,6 +45,7 @@ internal static class AccountEndpoints
         ClaimsPrincipal user,
         MailnixDbContext db,
         RuleService ruleService,
+        IWorkerSignals signals,
         CancellationToken ct)
     {
         if (await FindOwnedAsync(db, id, user, ct) is not { } account)
@@ -64,6 +66,7 @@ internal static class AccountEndpoints
         db.Rules.RemoveRange(rules);
         db.MailAccounts.Remove(account);
         await db.SaveChangesAsync(ct);
+        signals.AccountsChanged();
         return TypedResults.NoContent();
     }
 
@@ -88,6 +91,7 @@ internal static class AccountEndpoints
         IMailboxProbe probe,
         MailSecretProtector secrets,
         TimeProvider time,
+        IWorkerSignals signals,
         CancellationToken ct)
     {
         var settings = new ImapConnectionSettings(request.Host.Trim(), request.Port, request.Security, request.Username.Trim(), request.Password);
@@ -132,6 +136,7 @@ internal static class AccountEndpoints
 
         db.MailAccounts.Add(account);
         await db.SaveChangesAsync(ct);
+        signals.AccountsChanged();
         return TypedResults.Created($"/api/accounts/{account.Id}", AccountResponse.From(account));
     }
 
@@ -143,6 +148,7 @@ internal static class AccountEndpoints
         IMailboxProbe probe,
         MailSecretProtector secrets,
         TimeProvider time,
+        IWorkerSignals signals,
         CancellationToken ct)
     {
         if (await FindOwnedAsync(db, id, user, ct) is not { } account)
@@ -210,6 +216,7 @@ internal static class AccountEndpoints
         account.UpdatedAt = now;
 
         await db.SaveChangesAsync(ct);
+        signals.AccountsChanged();
         return TypedResults.Ok(AccountResponse.From(account));
     }
 

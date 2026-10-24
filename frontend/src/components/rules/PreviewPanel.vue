@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { type DescribedError, useConnectionErrors } from '@/lib/connectionErrors'
 import { formatDateTime, formatRelative } from '@/lib/format'
+import { describeAction } from '@/rules/describe'
 import { type Preview, type PreviewMessage, type RuleDraft, useRulesStore } from '@/stores/rules'
 import { CheckIcon, ChevronDownIcon, ChevronRightIcon, Loader2Icon, PlayIcon, RefreshCwIcon, TriangleAlertIcon } from '@lucide/vue'
 import { useDebounceFn } from '@vueuse/core'
@@ -81,8 +82,7 @@ function toggle(uid: number) {
 }
 
 function actionLabel(action: { type: string; targetFolder?: string | null; keyword?: string | null }) {
-  const target = action.targetFolder ?? action.keyword
-  return target ? `${t(`rules.actions.${action.type}`)}: ${target}` : t(`rules.actions.${action.type}`)
+  return describeAction(action, t)
 }
 
 function skipLabel(skip: PreviewMessage['skipped'][number]) {

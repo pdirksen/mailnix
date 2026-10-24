@@ -18,6 +18,124 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.ActionLogEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("DryRun")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("From")
+                        .HasMaxLength(320)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Keyword")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MessageId")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.PrimitiveCollection<string>("PreviousFlags")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("RuleId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RuleName")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceFolder")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<uint>("SourceUid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("SourceUidValidity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TargetFolder")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<uint?>("TargetUid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint?>("TargetUidValidity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("UndoneAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RunId");
+
+                    b.HasIndex("RuleId", "CreatedAt");
+
+                    b.HasIndex("AccountId", "TargetFolder", "TargetUid");
+
+                    b.ToTable("ActionLog");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.FolderState", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Folder")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<uint>("LastProcessedUid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("UidValidity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AccountId", "Folder");
+
+                    b.ToTable("FolderStates");
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.MailAccount", b =>
                 {
                     b.Property<Guid>("Id")
@@ -301,6 +419,97 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                     b.ToTable("RuleReferences");
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ExecutedActions")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("ExpiresAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FailedActions")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("FinishedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Folder")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Limit")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MessagesExamined")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MessagesMatched")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PendingPlanJson")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PlannedActions")
+                        .HasColumnType("INTEGER");
+
+                    b.PrimitiveCollection<string>("RuleIds")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("StartedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Trigger")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("UndoCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("UndoRuleId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UndoRunId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UndoneByRunId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "State");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.ToTable("Runs");
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -550,6 +759,24 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.ActionLogEntry", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.RuleRun", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.FolderState", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.MailAccount", b =>
                 {
                     b.HasOne("Mailnix.Infrastructure.Identity.AppUser", "User")
@@ -607,6 +834,15 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                     b.HasOne("Mailnix.Infrastructure.Data.MailRule", null)
                         .WithMany("References")
                         .HasForeignKey("RuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleRun", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
