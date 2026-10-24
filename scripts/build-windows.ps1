@@ -109,7 +109,10 @@ Data (SQLite database, encryption keys for stored mailbox passwords) is kept in 
 'data' folder next to mailnix.exe. Back it up, and keep it when updating: replace
 everything else with the new version. The keys are encrypted for the Windows account
 that runs mailnix: a backup restored on another computer or account needs the mailbox
-passwords entered again.
+passwords entered again. To move installations, use a master key instead: run
+    mailnix.exe --generate-master-key
+keep the output safe (outside the data folder) and start mailnix with it, e.g.
+    set Mailnix__DataProtection__MasterKey=<key>
 
 Other address or port:
     mailnix.exe --urls http://localhost:8080

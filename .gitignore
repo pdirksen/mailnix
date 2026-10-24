@@ -14,6 +14,9 @@ backend/src/Mailnix.Api/data/
 .DS_Store
 Thumbs.db
 
+# Docker secrets (master key)
+docker/secrets/
+
 # Local test credentials (never commit)
 test-email-credentials.ini
 *.credentials.ini

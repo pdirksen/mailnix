@@ -88,15 +88,21 @@ executable, whatever the working directory is. Rebuilding keeps an existing `dat
 includes it. The encryption keys in it are protected with Windows DPAPI for the account that runs mailnix, so a copied
 `data\` folder is useless elsewhere; to run mailnix as a Windows service under another account, set
 `Mailnix__DataProtection__KeyProtection=WindowsMachine` before its first start there (or enter the mailbox passwords again).
-In Docker (Linux) the keys are stored unencrypted in the database: protect the `mailnix-data` volume and its backups.
+On Linux, macOS and in Docker, configure a master key (see below); without one, the keys are stored unencrypted in
+the database and mailnix logs a warning at startup.
 
 ## Running with Docker
 
 ```bash
+mkdir -p docker/secrets
+openssl rand -base64 32 > docker/secrets/mailnix_master_key   # once; or: mailnix --generate-master-key
 docker compose -f docker/compose.selfhosted.yml up -d --build
 ```
 
-Open http://localhost:8080. Data (SQLite database, encryption keys) lives in the `mailnix-data` volume.
+Open http://localhost:8080. Data (SQLite database, encrypted keys) lives in the `mailnix-data` volume. The master key
+is mounted as a Docker secret from `docker/secrets/` (git-ignored; the file must be readable by the container) and is
+not part of the volume, so a copy of the volume alone cannot decrypt the stored mailbox passwords. Back up the master
+key separately; without it, the mailbox passwords have to be entered again.
 
 ## Configuration
 
@@ -109,7 +115,9 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Database__ConnectionString` | `Data Source=data/mailnix.db` | |
 | `Mailnix__Database__AutoMigrate` | `true` | Apply database migrations on startup |
 | `Mailnix__Auth__AllowRegistration` | `true` | Self-service signup (the first user can always register) |
-| `Mailnix__DataProtection__KeyProtection` | `Auto` | How the keys that encrypt stored mailbox passwords are themselves stored: `Auto` (= `WindowsUser` on Windows, `None` elsewhere), `None`, `WindowsUser` (DPAPI, only the Windows account mailnix runs as can read them) or `WindowsMachine` (DPAPI, any account on this machine, e.g. for a Windows service). Existing unencrypted keys are replaced on the next start; users then sign in again |
+| `Mailnix__DataProtection__MasterKey` | – | Master key (base64, from `mailnix --generate-master-key`) that encrypts the keys protecting stored mailbox passwords. Keep it outside the database and back it up separately: without it the stored passwords cannot be decrypted |
+| `Mailnix__DataProtection__MasterKeyFile` | – | Alternatively, a file containing the master key, e.g. a Docker secret (`/run/secrets/mailnix_master_key`) |
+| `Mailnix__DataProtection__KeyProtection` | `Auto` | `Auto` (= `MasterKey` when one is configured, otherwise `WindowsUser` on Windows and `None` elsewhere), `None`, `MasterKey`, `WindowsUser` (DPAPI, only the Windows account mailnix runs as can read the keys) or `WindowsMachine` (DPAPI, any account on this machine, e.g. for a Windows service). Keys stored the old way are replaced on the next start (users then sign in again); a wrong or missing master key stops the start instead |
 | `Mailnix__Bootstrap__AdminEmail` / `AdminPassword` | – | Create this admin account on first start |
 | `Mailnix__Mail__AllowInsecureConnections` | `false` | Allow unencrypted IMAP (passwords in clear text) |
 | `Mailnix__Mail__BlockPrivateNetworks` | `false` | Refuse mail servers on private/local addresses (recommended for SaaS) |

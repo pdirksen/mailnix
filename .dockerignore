@@ -12,6 +12,7 @@ frontend/dist
 frontend/test-results
 frontend/playwright-report
 artifacts
+docker/secrets
 # Local test credentials: never part of a build context
 test-email-credentials.ini
 *.credentials.ini

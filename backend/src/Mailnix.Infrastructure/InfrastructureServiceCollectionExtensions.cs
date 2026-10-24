@@ -1,6 +1,8 @@
 using Mailnix.Infrastructure.Data;
 using Mailnix.Infrastructure.Options;
+using Mailnix.Infrastructure.Security;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,8 +42,21 @@ public static class InfrastructureServiceCollectionExtensions
         {
             dataProtection.PersistKeysToDbContext<MailnixDbContext>();
 
-            // ...and are themselves encrypted where the platform allows it (see KeyProtectionUpgrade for existing keys).
-            var keyProtection = (configuration.GetSection(KeyProtectionOptions.Section).Get<KeyProtectionOptions>() ?? new KeyProtectionOptions()).Resolve();
+            // ...and are themselves encrypted: with a master key kept outside the database, or with Windows DPAPI
+            // (see KeyProtectionUpgrade for keys stored before).
+            var keyOptions = configuration.GetSection(KeyProtectionOptions.Section).Get<KeyProtectionOptions>() ?? new KeyProtectionOptions();
+            var keyProtection = keyOptions.Resolve();
+
+            // Also available when not used for new keys, so keys written with it can still be read.
+            if (keyOptions.LoadMasterKey() is { } masterKey)
+            {
+                services.AddSingleton(masterKey);
+                if (keyProtection == KeyProtectionMode.MasterKey)
+                {
+                    services.Configure<KeyManagementOptions>(o => o.XmlEncryptor = new MasterKeyXmlEncryptor(masterKey));
+                }
+            }
+
             if (OperatingSystem.IsWindows() && keyProtection is KeyProtectionMode.WindowsUser or KeyProtectionMode.WindowsMachine)
             {
                 dataProtection.ProtectKeysWithDpapi(protectToLocalMachine: keyProtection == KeyProtectionMode.WindowsMachine);

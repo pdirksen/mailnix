@@ -1,5 +1,6 @@
 # Self-hosted mailnix: one container (API + web UI + mailbox workers) with SQLite on a volume.
 #
+#   mkdir -p docker/secrets && openssl rand -base64 32 > docker/secrets/mailnix_master_key   # once; back it up
 #   docker compose -f docker/compose.selfhosted.yml up -d --build
 #
 # Then open http://localhost:8080. Without a bootstrap admin, the first account you register becomes admin.
@@ -16,7 +17,11 @@ services:
       - "8080:8080"
     volumes:
       - mailnix-data:/data
+    # Encrypts the keys that protect stored mailbox passwords; kept outside the data volume (see README).
+    secrets:
+      - mailnix_master_key
     environment:
+      Mailnix__DataProtection__MasterKeyFile: /run/secrets/mailnix_master_key
       Mailnix__Mode: AllInOne
       Mailnix__Auth__AllowRegistration: ${MAILNIX_ALLOW_REGISTRATION:-true}
       Mailnix__Bootstrap__AdminEmail: ${MAILNIX_ADMIN_EMAIL:-}
@@ -31,3 +36,8 @@ services:
 
 volumes:
   mailnix-data:
+
+secrets:
+  mailnix_master_key:
+    # Create it once: openssl rand -base64 32 > docker/secrets/mailnix_master_key
+    file: ./secrets/mailnix_master_key

@@ -16,6 +16,13 @@ using Microsoft.Net.Http.Headers;
 using Scalar.AspNetCore;
 using Serilog;
 
+if (args.Contains("--generate-master-key"))
+{
+    // For Mailnix__DataProtection__MasterKey (or a key file): keep it outside the database and back it up separately.
+    Console.WriteLine(Mailnix.Infrastructure.Security.MasterKey.Generate());
+    return;
+}
+
 // A published build (e.g. the standalone Windows app) keeps wwwroot and data/ next to the executable. Start there
 // whatever the working directory is (shortcuts, services), so the UI and relative database paths are found.
 if (File.Exists(Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html")))
