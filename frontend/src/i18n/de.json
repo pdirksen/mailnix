@@ -1,0 +1,59 @@
+{
+  "app": {
+    "name": "mailnix",
+    "tagline": "Regelbasierte E-Mail-Sortierung für IMAP, Google und Microsoft 365"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "toggleSidebar": "Seitenleiste ein-/ausblenden"
+  },
+  "common": {
+    "language": "Sprache",
+    "theme": "Darstellung",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "themeSystem": "System",
+    "loading": "Wird geladen…",
+    "unexpectedError": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+  },
+  "auth": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "displayName": "Anzeigename",
+    "displayNameHint": "Optional – wird statt deiner E-Mail-Adresse angezeigt.",
+    "rememberMe": "Angemeldet bleiben",
+    "login": "Anmelden",
+    "loginTitle": "Bei mailnix anmelden",
+    "loginSubtitle": "Gib deine E-Mail-Adresse und dein Passwort ein.",
+    "register": "Konto erstellen",
+    "registerTitle": "Konto erstellen",
+    "registerSubtitle": "Das erste Konto wird Administrator.",
+    "noAccount": "Noch kein Konto?",
+    "haveAccount": "Bereits ein Konto?",
+    "logout": "Abmelden",
+    "sessionExpired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+    "loginFailed": "Anmeldung fehlgeschlagen",
+    "registerFailed": "Registrierung fehlgeschlagen"
+  },
+  "validation": {
+    "required": "Dieses Feld ist erforderlich.",
+    "email": "Gib eine gültige E-Mail-Adresse ein.",
+    "passwordLength": "Verwende mindestens {min} Zeichen.",
+    "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+    "maxLength": "Verwende höchstens {max} Zeichen."
+  },
+  "home": {
+    "welcome": "Willkommen, {name}",
+    "intro": "mailnix überwacht deine Postfächer und sortiert eingehende E-Mails mit Regeln, die du grafisch erstellst – inklusive Vorschau, was eine Regel tun würde, bevor sie etwas verändert.",
+    "nextStepsTitle": "Erste Schritte",
+    "nextSteps": "Postfächer verbinden und Regeln erstellen folgt als Nächstes. Du bist angemeldet als {role}.",
+    "roleAdmin": "Administrator",
+    "roleUser": "Benutzer"
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Die gesuchte Seite existiert nicht.",
+    "back": "Zurück zum Dashboard"
+  }
+}

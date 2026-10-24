@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: backend/global.json
+      - run: dotnet tool restore
+      - run: dotnet restore --locked-mode
+      - run: dotnet build --no-restore
+      - name: OpenAPI document is up to date
+        run: git diff --exit-code -- openapi/
+      - run: dotnet test --no-build
+      - name: License check
+        run: dotnet nuget-license -i Mailnix.slnx -t -a licenses-allowed.json
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: API client is in sync with the backend
+        run: npm run gen:api && git diff --exit-code -- src/api/schema.d.ts
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm run license:check
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: backend/global.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build SPA into the API's wwwroot
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+          mkdir -p ../backend/src/Mailnix.Api/wwwroot
+          cp -r dist/. ../backend/src/Mailnix.Api/wwwroot/
+      - name: Start mailnix
+        working-directory: backend
+        run: |
+          dotnet build src/Mailnix.Api
+          ASPNETCORE_URLS=http://localhost:5080 dotnet run --project src/Mailnix.Api --no-build --no-launch-profile &
+          for i in $(seq 1 60); do curl -sf http://localhost:5080/healthz && exit 0; sleep 1; done
+          exit 1
+      - name: Playwright
+        working-directory: frontend
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e

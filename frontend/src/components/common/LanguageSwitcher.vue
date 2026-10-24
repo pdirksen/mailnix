@@ -1,0 +1,40 @@
+<script setup lang="ts">
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { isLocale, LOCALE_NAMES, SUPPORTED_LOCALES } from '@/i18n'
+import { useUiStore } from '@/stores/ui'
+import { LanguagesIcon } from '@lucide/vue'
+
+const ui = useUiStore()
+
+function onSelect(value: unknown) {
+  if (isLocale(value)) ui.setLocale(value)
+}
+</script>
+
+<template>
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <Button variant="ghost" size="icon" :aria-label="$t('common.language')">
+        <LanguagesIcon class="size-4" />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end">
+      <DropdownMenuLabel>{{ $t('common.language') }}</DropdownMenuLabel>
+      <DropdownMenuSeparator />
+      <DropdownMenuRadioGroup :model-value="ui.locale" @update:model-value="onSelect">
+        <DropdownMenuRadioItem v-for="locale in SUPPORTED_LOCALES" :key="locale" :value="locale">
+          {{ LOCALE_NAMES[locale] }}
+        </DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </DropdownMenuContent>
+  </DropdownMenu>
+</template>

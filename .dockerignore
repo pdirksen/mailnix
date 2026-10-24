@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/bin
+**/obj
+**/data
+**/*.db
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+backend/src/Mailnix.Api/wwwroot

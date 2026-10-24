@@ -1,0 +1,19 @@
+# .NET
+backend/**/bin/
+backend/**/obj/
+backend/src/Mailnix.Api/wwwroot/
+backend/**/data/
+*.db
+*.db-shm
+*.db-wal
+*.user
+
+# Editors / OS
+.vs/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local test credentials (never commit)
+test-email-credentials.ini
+*.credentials.ini

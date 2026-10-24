@@ -1,0 +1,59 @@
+{
+  "app": {
+    "name": "mailnix",
+    "tagline": "Rule-based mail sorting for IMAP, Google and Microsoft 365"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "toggleSidebar": "Toggle sidebar"
+  },
+  "common": {
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "loading": "Loading…",
+    "unexpectedError": "Something went wrong. Please try again."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "displayName": "Display name",
+    "displayNameHint": "Optional – shown instead of your email address.",
+    "rememberMe": "Keep me signed in",
+    "login": "Sign in",
+    "loginTitle": "Sign in to mailnix",
+    "loginSubtitle": "Enter your email and password.",
+    "register": "Create account",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "The first account becomes the administrator.",
+    "noAccount": "No account yet?",
+    "haveAccount": "Already have an account?",
+    "logout": "Sign out",
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "loginFailed": "Sign-in failed",
+    "registerFailed": "Registration failed"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email address.",
+    "passwordLength": "Use at least {min} characters.",
+    "passwordMismatch": "Passwords do not match.",
+    "maxLength": "Use at most {max} characters."
+  },
+  "home": {
+    "welcome": "Welcome, {name}",
+    "intro": "mailnix watches your mailboxes and sorts incoming mail with rules you build visually – with a preview of what each rule would do before it touches anything.",
+    "nextStepsTitle": "Getting started",
+    "nextSteps": "Connecting mailboxes and building rules is coming next. You are signed in as {role}.",
+    "roleAdmin": "administrator",
+    "roleUser": "user"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist.",
+    "back": "Back to the dashboard"
+  }
+}

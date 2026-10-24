@@ -1,0 +1,31 @@
+# Self-hosted mailnix: one container (API + web UI + mailbox workers) with SQLite on a volume.
+#
+#   docker compose -f docker/compose.selfhosted.yml up -d --build
+#
+# Then open http://localhost:8080. Without a bootstrap admin, the first account you register becomes admin.
+# Put a TLS-terminating reverse proxy in front for anything beyond localhost (see FORWARDEDHEADERS below).
+
+services:
+  mailnix:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: mailnix:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - mailnix-data:/data
+    environment:
+      Mailnix__Mode: AllInOne
+      Mailnix__Auth__AllowRegistration: ${MAILNIX_ALLOW_REGISTRATION:-true}
+      Mailnix__Bootstrap__AdminEmail: ${MAILNIX_ADMIN_EMAIL:-}
+      Mailnix__Bootstrap__AdminPassword: ${MAILNIX_ADMIN_PASSWORD:-}
+      # Behind a reverse proxy: trust X-Forwarded-* so cookies are marked Secure on HTTPS.
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: ${MAILNIX_BEHIND_PROXY:-false}
+      # PostgreSQL instead of SQLite:
+      # Mailnix__Database__Provider: Postgres
+      # Mailnix__Database__ConnectionString: Host=postgres;Database=mailnix;Username=mailnix;Password=change-me
+
+volumes:
+  mailnix-data:
