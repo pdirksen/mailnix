@@ -73,6 +73,19 @@ user=me@example.com
 password=...
 ```
 
+## Standalone Windows app
+
+```powershell
+.\scripts\build-windows.ps1            # -Runtime win-arm64, -Zip, -Output <dir>
+.\scripts\run-windows.ps1              # builds if needed, starts it, opens the browser; -Build, -Urls, -NoBrowser
+```
+
+Builds `artifacts\windows\win-x64\mailnix.exe`: a self-contained single executable (no .NET installation needed)
+with the web UI in `wwwroot\` next to it. Start it and open http://localhost:5000 (other address:
+`mailnix.exe --urls http://localhost:8080`). The database and encryption keys live in `data\` next to the
+executable, whatever the working directory is. Rebuilding keeps an existing `data\` folder, and `-Zip` never
+includes it.
+
 ## Running with Docker
 
 ```bash

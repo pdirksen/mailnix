@@ -16,6 +16,13 @@ using Microsoft.Net.Http.Headers;
 using Scalar.AspNetCore;
 using Serilog;
 
+// A published build (e.g. the standalone Windows app) keeps wwwroot and data/ next to the executable. Start there
+// whatever the working directory is (shortcuts, services), so the UI and relative database paths are found.
+if (File.Exists(Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html")))
+{
+    Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // The build-time OpenAPI generator boots the app without a database.

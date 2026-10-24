@@ -17,3 +17,6 @@ Thumbs.db
 # Local test credentials (never commit)
 test-email-credentials.ini
 *.credentials.ini
+
+# Build output (scripts/build-windows.ps1)
+artifacts/

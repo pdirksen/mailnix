@@ -9,6 +9,9 @@
     <!-- XML doc comments are optional; don't warn on missing ones -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <!-- Runtime-specific publishes (scripts/build-windows.ps1) keep their lock files in obj/, so the committed ones
+         stay platform-neutral. -->
+    <NuGetLockFilePath Condition="'$(MailnixRuntimeLockFiles)' == 'true'">$(MSBuildProjectDirectory)/obj/packages.runtime.lock.json</NuGetLockFilePath>
     <Company>mailnix</Company>
     <Product>mailnix</Product>
   </PropertyGroup>
