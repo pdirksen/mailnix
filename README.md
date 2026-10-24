@@ -85,7 +85,10 @@ Builds `artifacts\windows\win-x64\mailnix.exe`: a self-contained single executab
 with the web UI in `wwwroot\` next to it. Start it and open http://localhost:5000 (other address:
 `mailnix.exe --urls http://localhost:8080`). The database and encryption keys live in `data\` next to the
 executable, whatever the working directory is. Rebuilding keeps an existing `data\` folder, and `-Zip` never
-includes it.
+includes it. The encryption keys in it are protected with Windows DPAPI for the account that runs mailnix, so a copied
+`data\` folder is useless elsewhere; to run mailnix as a Windows service under another account, set
+`Mailnix__DataProtection__KeyProtection=WindowsMachine` before its first start there (or enter the mailbox passwords again).
+In Docker (Linux) the keys are stored unencrypted in the database: protect the `mailnix-data` volume and its backups.
 
 ## Running with Docker
 
@@ -106,6 +109,7 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Database__ConnectionString` | `Data Source=data/mailnix.db` | |
 | `Mailnix__Database__AutoMigrate` | `true` | Apply database migrations on startup |
 | `Mailnix__Auth__AllowRegistration` | `true` | Self-service signup (the first user can always register) |
+| `Mailnix__DataProtection__KeyProtection` | `Auto` | How the keys that encrypt stored mailbox passwords are themselves stored: `Auto` (= `WindowsUser` on Windows, `None` elsewhere), `None`, `WindowsUser` (DPAPI, only the Windows account mailnix runs as can read them) or `WindowsMachine` (DPAPI, any account on this machine, e.g. for a Windows service). Existing unencrypted keys are replaced on the next start; users then sign in again |
 | `Mailnix__Bootstrap__AdminEmail` / `AdminPassword` | – | Create this admin account on first start |
 | `Mailnix__Mail__AllowInsecureConnections` | `false` | Allow unencrypted IMAP (passwords in clear text) |
 | `Mailnix__Mail__BlockPrivateNetworks` | `false` | Refuse mail servers on private/local addresses (recommended for SaaS) |

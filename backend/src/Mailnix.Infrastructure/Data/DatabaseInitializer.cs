@@ -14,6 +14,7 @@ public sealed partial class DatabaseInitializer(
     UserManager<AppUser> userManager,
     IOptions<DatabaseOptions> databaseOptions,
     IOptions<BootstrapOptions> bootstrapOptions,
+    KeyProtectionUpgrade keyProtection,
     TimeProvider timeProvider,
     ILogger<DatabaseInitializer> logger)
 {
@@ -40,6 +41,7 @@ public sealed partial class DatabaseInitializer(
         }
 
         await SeedBootstrapAdminAsync();
+        await keyProtection.UpgradeAsync(cancellationToken);
     }
 
     private async Task SeedBootstrapAdminAsync()

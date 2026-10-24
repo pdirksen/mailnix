@@ -19,6 +19,7 @@ public static class InfrastructureServiceCollectionExtensions
     {
         services.AddOptions<DatabaseOptions>().Bind(configuration.GetSection(DatabaseOptions.Section));
         services.AddOptions<BootstrapOptions>().Bind(configuration.GetSection(BootstrapOptions.Section));
+        services.AddOptions<KeyProtectionOptions>().Bind(configuration.GetSection(KeyProtectionOptions.Section));
 
         var database = configuration.GetSection(DatabaseOptions.Section).Get<DatabaseOptions>() ?? new DatabaseOptions();
         switch (database.Provider)
@@ -38,9 +39,17 @@ public static class InfrastructureServiceCollectionExtensions
         if (persistDataProtectionKeys)
         {
             dataProtection.PersistKeysToDbContext<MailnixDbContext>();
+
+            // ...and are themselves encrypted where the platform allows it (see KeyProtectionUpgrade for existing keys).
+            var keyProtection = (configuration.GetSection(KeyProtectionOptions.Section).Get<KeyProtectionOptions>() ?? new KeyProtectionOptions()).Resolve();
+            if (OperatingSystem.IsWindows() && keyProtection is KeyProtectionMode.WindowsUser or KeyProtectionMode.WindowsMachine)
+            {
+                dataProtection.ProtectKeysWithDpapi(protectToLocalMachine: keyProtection == KeyProtectionMode.WindowsMachine);
+            }
         }
 
         services.AddScoped<DatabaseInitializer>();
+        services.AddScoped<KeyProtectionUpgrade>();
         services.AddSingleton<MailSecretProtector>();
         services.AddScoped<RuleSetLoader>();
         services.AddSingleton(TimeProvider.System);

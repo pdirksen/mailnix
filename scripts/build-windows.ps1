@@ -107,7 +107,9 @@ The first account you register becomes the administrator.
 
 Data (SQLite database, encryption keys for stored mailbox passwords) is kept in the
 'data' folder next to mailnix.exe. Back it up, and keep it when updating: replace
-everything else with the new version.
+everything else with the new version. The keys are encrypted for the Windows account
+that runs mailnix: a backup restored on another computer or account needs the mailbox
+passwords entered again.
 
 Other address or port:
     mailnix.exe --urls http://localhost:8080

@@ -14,9 +14,15 @@ RUN npm run build \
 # --- Backend: restore (locked), publish with the SPA in wwwroot -----------------------------------
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend
 WORKDIR /src/backend
+# Analyzer settings (warnings are errors; generated migrations are exempt).
+COPY .editorconfig /src/
 COPY backend/global.json backend/Directory.Build.props backend/Directory.Packages.props ./
+# Every project the API references, so restore can be cached independently of source changes.
 COPY backend/src/Mailnix.Api/Mailnix.Api.csproj backend/src/Mailnix.Api/packages.lock.json src/Mailnix.Api/
+COPY backend/src/Mailnix.Core/Mailnix.Core.csproj backend/src/Mailnix.Core/packages.lock.json src/Mailnix.Core/
 COPY backend/src/Mailnix.Infrastructure/Mailnix.Infrastructure.csproj backend/src/Mailnix.Infrastructure/packages.lock.json src/Mailnix.Infrastructure/
+COPY backend/src/Mailnix.Mail/Mailnix.Mail.csproj backend/src/Mailnix.Mail/packages.lock.json src/Mailnix.Mail/
+COPY backend/src/Mailnix.Worker/Mailnix.Worker.csproj backend/src/Mailnix.Worker/packages.lock.json src/Mailnix.Worker/
 RUN dotnet restore src/Mailnix.Api/Mailnix.Api.csproj --locked-mode
 COPY backend/ ./
 COPY --from=frontend /src/frontend/dist/ src/Mailnix.Api/wwwroot/

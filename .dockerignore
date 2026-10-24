@@ -2,9 +2,16 @@
 **/node_modules
 **/bin
 **/obj
-**/data
 **/*.db
+**/*.db-shm
+**/*.db-wal
+# Only the API's local database folder (a bare "data" pattern would also hit source folders named Data)
+backend/src/Mailnix.Api/data
+backend/src/Mailnix.Api/wwwroot
 frontend/dist
 frontend/test-results
 frontend/playwright-report
-backend/src/Mailnix.Api/wwwroot
+artifacts
+# Local test credentials: never part of a build context
+test-email-credentials.ini
+*.credentials.ini
