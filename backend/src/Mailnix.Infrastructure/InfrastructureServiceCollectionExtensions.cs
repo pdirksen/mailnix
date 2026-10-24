@@ -1,4 +1,5 @@
 using Mailnix.Infrastructure.Data;
+using Mailnix.Infrastructure.OAuth;
 using Mailnix.Infrastructure.Options;
 using Mailnix.Infrastructure.Security;
 using Microsoft.AspNetCore.DataProtection;
@@ -62,6 +63,16 @@ public static class InfrastructureServiceCollectionExtensions
                 dataProtection.ProtectKeysWithDpapi(protectToLocalMachine: keyProtection == KeyProtectionMode.WindowsMachine);
             }
         }
+
+        // OAuth for Google and Microsoft mailboxes; one long-lived HttpClient (pooled connections, DNS refresh).
+        services.AddOptions<OAuthOptions>().Bind(configuration.GetSection(OAuthOptions.Section));
+        services.AddMemoryCache();
+        services.AddSingleton(sp => new OAuthClient(
+            new HttpClient(new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(10) }) { Timeout = TimeSpan.FromSeconds(30) },
+            sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<OAuthOptions>>(),
+            sp.GetRequiredService<TimeProvider>()));
+        services.AddSingleton<OAuthStateProtector>();
+        services.AddSingleton<AccountCredentials>();
 
         services.AddScoped<DatabaseInitializer>();
         services.AddScoped<KeyProtectionUpgrade>();

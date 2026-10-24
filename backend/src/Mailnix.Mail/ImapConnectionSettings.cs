@@ -12,7 +12,23 @@ public enum ImapSecurity
     None,
 }
 
-public sealed record ImapConnectionSettings(string Host, int Port, ImapSecurity Security, string Username, string Password)
+public enum ImapAuthentication
+{
+    /// <summary>LOGIN / AUTHENTICATE PLAIN with the account password.</summary>
+    Password,
+
+    /// <summary>AUTHENTICATE XOAUTH2 with an OAuth access token (Google, Microsoft 365).</summary>
+    OAuth2,
+}
+
+/// <param name="Password">The password, or the OAuth access token with <see cref="ImapAuthentication.OAuth2"/>.</param>
+public sealed record ImapConnectionSettings(
+    string Host,
+    int Port,
+    ImapSecurity Security,
+    string Username,
+    string Password,
+    ImapAuthentication Authentication = ImapAuthentication.Password)
 {
     public static int DefaultPort(ImapSecurity security) => security == ImapSecurity.SslOnConnect ? 993 : 143;
 

@@ -12,6 +12,9 @@ export type ConnectionErrorCode = NonNullable<Schemas['ConnectionErrorCode']>
 export type TestConnectionInput = Schemas['TestConnectionRequest']
 export type CreateAccountInput = Schemas['CreateAccountRequest']
 export type UpdateAccountInput = Schemas['UpdateAccountRequest']
+export type MailProvider = Schemas['MailProvider']
+export type OAuthProvider = Exclude<MailProvider, 'Imap'>
+export type OAuthProviderInfo = Schemas['OAuthProviderInfo']
 
 export const DEFAULT_PORTS: Record<ImapSecurity, number> = { SslOnConnect: 993, StartTls: 143, None: 143 }
 
@@ -70,5 +73,44 @@ export const useAccountsStore = defineStore('accounts', () => {
     return unwrap(await api.GET('/api/accounts/{id}/folders', { params: { path: { id }, query: { counts } } }))
   }
 
-  return { accounts, loaded, fetchAll, fetchOne, create, update, remove, testSettings, testStored, folders }
+  /** Google / Microsoft sign-in that the server is set up for. */
+  async function oauthProviders() {
+    return unwrap(await api.GET('/api/oauth/providers'))
+  }
+
+  /**
+   * Sends the browser to the provider's sign-in page. It comes back to /oauth/callback, which completes it.
+   * With an account id, the existing account is reconnected instead of a new one added.
+   */
+  async function startOAuth(provider: OAuthProvider, options: { name?: string; accountId?: string } = {}) {
+    const { authorizationUrl } = unwrap(
+      await api.POST('/api/oauth/{provider}/start', {
+        params: { path: { provider: provider.toLowerCase() } },
+        body: { name: options.name || null, accountId: options.accountId ?? null },
+      }),
+    )
+    window.location.assign(authorizationUrl)
+  }
+
+  async function completeOAuth(state: string, code: string) {
+    const result = unwrap(await api.POST('/api/oauth/complete', { body: { state, code } }))
+    upsert(result.account)
+    return result
+  }
+
+  return {
+    accounts,
+    loaded,
+    fetchAll,
+    fetchOne,
+    create,
+    update,
+    remove,
+    testSettings,
+    testStored,
+    folders,
+    oauthProviders,
+    startOAuth,
+    completeOAuth,
+  }
 })

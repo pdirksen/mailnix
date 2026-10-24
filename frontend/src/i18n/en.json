@@ -136,7 +136,8 @@
       "password": "Password",
       "passwordKeep": "Leave empty to keep the current password.",
       "enabled": "Process new mail",
-      "enabledHint": "Pause to stop all rules for this account."
+      "enabledHint": "Pause to stop all rules for this account.",
+      "provider": "Provider"
     },
     "security": {
       "SslOnConnect": "SSL/TLS",
@@ -207,7 +208,14 @@
     "InsecureConnectionNotAllowed": "Unencrypted connections are disabled on this mailnix server.",
     "AddressNotAllowed": "This server address is not allowed (private network).",
     "CredentialsUnreadable": "The stored password can no longer be decrypted. Enter it again in the settings.",
-    "Unknown": "Connecting to the server failed."
+    "Unknown": "Connecting to the server failed.",
+    "ReconnectRequired": "The access to this mailbox was revoked or has expired. Reconnect the account.",
+    "OAuthStateInvalid": "The sign-in took too long or was started elsewhere. Please start it again.",
+    "OAuthFailed": "The provider did not complete the sign-in.",
+    "OAuthNoRefreshToken": "The provider did not grant lasting access. Remove mailnix from the apps with access to your account and try again.",
+    "OAuthNoEmail": "The provider did not tell which mailbox you signed in to.",
+    "OAuthDifferentMailbox": "You signed in to a different mailbox than this account's.",
+    "OAuthNotConfigured": "Signing in with this provider is not set up on this server."
   },
   "lists": {
     "title": "Named lists",
@@ -538,7 +546,12 @@
         }
       }
     },
-    "nextRun": "next {time}"
+    "nextRun": "next {time}",
+    "gmailActions": {
+      "MoveTo": "Move to label",
+      "CopyTo": "Add label",
+      "Archive": "Archive (remove from Inbox)"
+    }
   },
   "activity": {
     "title": "Activity",
@@ -616,5 +629,25 @@
     "text": "Reverts the most recent actions of this rule, newest first.",
     "count": "Number of actions",
     "start": "Undo"
+  },
+  "oauth": {
+    "title": "Signing in",
+    "signIn": "Sign in with {provider}",
+    "reconnect": "Reconnect with {provider}",
+    "stepSignIn": "Sign in",
+    "stepSignInDescription": "Allow mailbox access",
+    "explanation": "You will be taken to {provider} to allow mailnix to read and organize your mail. mailnix never sees your {provider} password; it keeps a revocable permission, encrypted.",
+    "namePlaceholder": "Defaults to the mailbox address",
+    "notConfigured": "Not set up",
+    "notConfiguredHint": "Needs an OAuth app registered by whoever runs this server (see docs/oauth-setup.md).",
+    "completing": "Completing the sign-in…",
+    "failed": "Signing in did not work",
+    "tryAgain": "Try again",
+    "cancelled": "The sign-in was cancelled.",
+    "providerError": "The provider reported an error.",
+    "invalidCallback": "This page was opened without sign-in data.",
+    "added": "Account added. Check its folders and settings.",
+    "reconnected": "Account reconnected.",
+    "signedInAs": "Signed in with {provider} as {email}."
   }
 }

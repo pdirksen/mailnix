@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using MailKit;
 using MailKit.Net.Imap;
 using Mailnix.Infrastructure.Data;
+using Mailnix.Infrastructure.OAuth;
 using Mailnix.Mail;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +22,7 @@ internal sealed partial class MailboxWatcher(
     IMailboxSessionFactory sessions,
     IWorkerSignals signals,
     ILiveNotifier notifier,
-    MailSecretProtector secrets,
+    AccountCredentials credentials,
     IOptions<WorkerOptions> options,
     TimeProvider time,
     ILogger<MailboxWatcher> logger)
@@ -45,7 +46,8 @@ internal sealed partial class MailboxWatcher(
                 ImapConnectionSettings settings;
                 try
                 {
-                    settings = new ImapConnectionSettings(account.Host, account.Port, account.Security, account.Username, secrets.Unprotect(account.EncryptedSecret));
+                    // The password, or a current OAuth access token (refreshed when needed).
+                    settings = await credentials.SettingsAsync(account, ct);
                 }
                 catch (CryptographicException)
                 {
@@ -76,14 +78,16 @@ internal sealed partial class MailboxWatcher(
 
                 return;
             }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            catch (Exception) when (ct.IsCancellationRequested)
             {
+                // Stopping (account changed or removed): MailKit may surface that as another error, e.g. an
+                // interrupted TLS handshake. Nothing to report.
                 return;
             }
             catch (MailConnectionException ex)
             {
                 await SetStatusSafelyAsync(MailAccountStatus.Error, ex.Code, ex.Message, ct);
-                delay = ex.Code == ConnectionErrorCode.AuthenticationFailed ? Options.AuthenticationFailureBackoff : backoff;
+                delay = ex.Code is ConnectionErrorCode.AuthenticationFailed or ConnectionErrorCode.ReconnectRequired ? Options.AuthenticationFailureBackoff : backoff;
                 LogConnectionFailed(accountId, ex.Code, delay);
             }
             catch (Exception ex) when (ex is IOException or SocketException or ImapProtocolException or ImapCommandException or ServiceNotConnectedException or ProtocolException)

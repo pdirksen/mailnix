@@ -39,7 +39,14 @@ internal sealed partial class ImapConnector(IOptions<MailOptions> options, ILogg
             var connected = socket;
             socket = null;
             await client.ConnectAsync(connected, settings.Host, settings.Port, ToSocketOptions(settings.Security), timeout.Token);
-            await client.AuthenticateAsync(settings.Username, settings.Password, timeout.Token);
+            if (settings.Authentication == ImapAuthentication.OAuth2)
+            {
+                await client.AuthenticateAsync(new SaslMechanismOAuth2(settings.Username, settings.Password), timeout.Token);
+            }
+            else
+            {
+                await client.AuthenticateAsync(settings.Username, settings.Password, timeout.Token);
+            }
             return client;
         }
         catch (Exception ex) when (ex is not MailConnectionException && !cancellationToken.IsCancellationRequested)

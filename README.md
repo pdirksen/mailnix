@@ -5,8 +5,8 @@ mailboxes, build rules visually, preview what they would do, and let mailnix mov
 
 > Status: early development. Auth, IMAP accounts, the rule engine, named lists, the visual rule builder with a
 > preview against real mail, rule execution (new mail via IDLE, "run now", confirmation of large runs, undo,
-> live status), scheduled rules with server-side preselection, and the optional Trash purge are in place;
-> OAuth (Google, Microsoft 365) and stats follow.
+> live status), scheduled rules with server-side preselection, the optional Trash purge, and
+> OAuth sign-in for Gmail and Microsoft 365 are in place; stats and the SaaS mode follow.
 
 ## Repository layout
 
@@ -91,6 +91,11 @@ includes it. The encryption keys in it are protected with Windows DPAPI for the 
 On Linux, macOS and in Docker, configure a master key (see below); without one, the keys are stored unencrypted in
 the database and mailnix logs a warning at startup.
 
+## Gmail and Microsoft 365
+
+Each installation registers its own OAuth app with Google and/or Microsoft; see [docs/oauth-setup.md](docs/oauth-setup.md)
+for the steps and the settings. Until then, those providers show as "Not set up" when adding an account.
+
 ## Running with Docker
 
 ```bash
@@ -115,6 +120,10 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Database__ConnectionString` | `Data Source=data/mailnix.db` | |
 | `Mailnix__Database__AutoMigrate` | `true` | Apply database migrations on startup |
 | `Mailnix__Auth__AllowRegistration` | `true` | Self-service signup (the first user can always register) |
+| `Mailnix__OAuth__Google__ClientId` / `ClientSecret` | – | OAuth app for Gmail and Google Workspace mailboxes (see [docs/oauth-setup.md](docs/oauth-setup.md)) |
+| `Mailnix__OAuth__Microsoft__ClientId` / `ClientSecret` | – | OAuth app for Microsoft 365 and Outlook.com mailboxes |
+| `Mailnix__OAuth__Microsoft__Tenant` | `common` | `common`, `organizations`, `consumers` or a tenant ID |
+| `Mailnix__OAuth__RedirectBaseUrl` | the browser's address | Public address of mailnix for the redirect URI `…/oauth/callback`, when a proxy changes the host name |
 | `Mailnix__DataProtection__MasterKey` | – | Master key (base64, from `mailnix --generate-master-key`) that encrypts the keys protecting stored mailbox passwords. Keep it outside the database and back it up separately: without it the stored passwords cannot be decrypted |
 | `Mailnix__DataProtection__MasterKeyFile` | – | Alternatively, a file containing the master key, e.g. a Docker secret (`/run/secrets/mailnix_master_key`) |
 | `Mailnix__DataProtection__KeyProtection` | `Auto` | `Auto` (= `MasterKey` when one is configured, otherwise `WindowsUser` on Windows and `None` elsewhere), `None`, `MasterKey`, `WindowsUser` (DPAPI, only the Windows account mailnix runs as can read the keys) or `WindowsMachine` (DPAPI, any account on this machine, e.g. for a Windows service). Keys stored the old way are replaced on the next start (users then sign in again); a wrong or missing master key stops the start instead |

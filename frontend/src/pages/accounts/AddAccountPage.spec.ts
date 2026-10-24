@@ -55,11 +55,36 @@ describe('AddAccountPage', () => {
     i18n.global.locale.value = 'en'
   })
 
-  it('does not offer the OAuth providers yet', async () => {
+  it('offers Google and Microsoft only when the server is set up for them', async () => {
+    apiMock.GET.mockResolvedValue(apiResult(200, [{ provider: 'Google', configured: true }, { provider: 'Microsoft', configured: false }]))
     const { wrapper } = await mountWizard()
+    await flushPromises()
 
-    expect(wrapper.find('[data-testid="provider-Google"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('[data-testid="provider-Google"]').attributes('disabled')).toBeUndefined()
     expect(wrapper.find('[data-testid="provider-Microsoft"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('[data-testid="provider-Microsoft"]').text()).toContain('Not set up')
+  })
+
+  it('sends the browser to the provider to sign in', async () => {
+    apiMock.GET.mockResolvedValue(apiResult(200, [{ provider: 'Google', configured: true }]))
+    apiMock.POST.mockResolvedValue(apiResult(200, { authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth?state=s' }))
+    const assign = vi.fn()
+    vi.stubGlobal('location', { ...window.location, assign })
+    const { wrapper } = await mountWizard()
+    await flushPromises()
+
+    await wrapper.find('[data-testid="provider-Google"]').trigger('click')
+    expect(wrapper.text()).toContain('Sign in with Google')
+    await wrapper.find('#oauth-name').setValue('Private Gmail')
+    await wrapper.find('[data-testid="oauth-Google"]').trigger('click')
+    await flushPromises()
+
+    expect(apiMock.POST).toHaveBeenCalledWith('/api/oauth/{provider}/start', {
+      params: { path: { provider: 'google' } },
+      body: { name: 'Private Gmail', accountId: null },
+    })
+    expect(assign).toHaveBeenCalledWith('https://accounts.google.com/o/oauth2/v2/auth?state=s')
+    vi.unstubAllGlobals()
   })
 
   it('validates the server step before connecting', async () => {

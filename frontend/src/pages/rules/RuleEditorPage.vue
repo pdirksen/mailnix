@@ -61,7 +61,8 @@ const visibleErrors = computed(() => (showErrors.value ? serverErrors.value : {}
 const referencableRules = computed(() => rulesStore.rules.filter((r) => r.id !== ruleId.value))
 const listsRef = computed(() => listsStore.lists)
 
-provideRuleEditor({ catalog, lists: listsRef, rules: referencableRules, errors: visibleErrors, folders, delimiter })
+const labels = computed(() => account.value?.provider === 'Google')
+provideRuleEditor({ catalog, lists: listsRef, rules: referencableRules, errors: visibleErrors, folders, delimiter, labels })
 
 const dirty = computed(() => draft.value !== null && JSON.stringify(draft.value) !== savedSnapshot.value)
 

@@ -114,6 +114,7 @@ if (hostOptions.ServesApi)
     var api = app.MapGroup("/api");
     api.MapAuthEndpoints();
     api.MapAccountEndpoints();
+    api.MapOAuthEndpoints();
     api.MapRuleEndpoints();
     api.MapListEndpoints();
     api.MapPreviewEndpoints();

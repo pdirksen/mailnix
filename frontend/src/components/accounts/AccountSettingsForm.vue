@@ -11,7 +11,10 @@ import { Loader2Icon } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
+import { Input } from '@/components/ui/input'
+import type { OAuthProvider } from '@/stores/accounts'
 import ConnectionErrorAlert from './ConnectionErrorAlert.vue'
+import OAuthConnectButton from './OAuthConnectButton.vue'
 import FolderTree from './FolderTree.vue'
 import SafetyFields from './SafetyFields.vue'
 import { safetySchema, type SafetySettings } from './safety'
@@ -41,6 +44,10 @@ const safety = ref<SafetySettings>({
   purgeTrashAfterDays: props.account.purgeTrashAfterDays,
 })
 
+// Google / Microsoft accounts: server and user come from the provider; only the name is edited here.
+const oauthProvider = computed(() => (props.account.provider === 'Imap' ? null : (props.account.provider as OAuthProvider)))
+const nameError = ref<string>()
+
 const serverValidation = useSchemaValidation(computed(() => serverSettingsSchema(t, { passwordRequired: false })))
 const safetyValidation = useSchemaValidation(computed(() => safetySchema(t)))
 const watchedError = ref<string>()
@@ -61,7 +68,8 @@ const saving = ref(false)
 const saveError = ref<DescribedError | null>(null)
 
 async function save() {
-  const validServer = serverValidation.validate(server.value)
+  nameError.value = oauthProvider.value && !server.value.name.trim() ? t('validation.required') : undefined
+  const validServer = oauthProvider.value ? (nameError.value ? false : { ...server.value, name: server.value.name.trim() }) : serverValidation.validate(server.value)
   const validSafety = safetyValidation.validate(safety.value)
   watchedError.value = watched.value.length === 0 ? t('validation.watchedRequired') : undefined
   if (!validServer || !validSafety || watchedError.value) return
@@ -108,7 +116,18 @@ async function save() {
       <CardHeader>
         <CardTitle>{{ $t('accounts.overview.server') }}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent v-if="oauthProvider" class="grid gap-4">
+        <div class="grid gap-2">
+          <Label for="account-name">{{ $t('accounts.fields.name') }}</Label>
+          <Input id="account-name" v-model="server.name" class="max-w-sm" :aria-invalid="!!nameError" autocomplete="off" />
+          <p v-if="nameError" class="text-destructive text-sm" role="alert">{{ nameError }}</p>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 text-sm">
+          <span>{{ $t('oauth.signedInAs', { provider: $t(`accounts.provider.${oauthProvider}`), email: account.username }) }}</span>
+          <OAuthConnectButton :provider="oauthProvider" :account-id="account.id" variant="outline" />
+        </div>
+      </CardContent>
+      <CardContent v-else>
         <ServerSettingsFields v-model="server" :errors="serverValidation.errors.value" password-optional />
       </CardContent>
     </Card>

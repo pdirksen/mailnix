@@ -501,6 +501,135 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/oauth/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OAuthProviderInfo"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/oauth/{provider}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    provider: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["StartOAuthRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StartOAuthResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/oauth/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CompleteOAuthRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CompleteOAuthResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rules/field-catalog": {
         parameters: {
             query?: never;
@@ -1612,6 +1741,14 @@ export interface components {
         AuthConfigResponse: {
             registrationOpen: boolean;
         };
+        CompleteOAuthRequest: {
+            state: string;
+            code: string;
+        };
+        CompleteOAuthResponse: {
+            account: components["schemas"]["AccountResponse"];
+            created: boolean;
+        };
         Condition: {
             field: components["schemas"]["ConditionField"];
             operator: components["schemas"]["ConditionOperator"];
@@ -1642,7 +1779,7 @@ export interface components {
         /** @enum {unknown} */
         ConditionOperator: "Equals" | "NotEquals" | "Contains" | "NotContains" | "StartsWith" | "EndsWith" | "Regex" | "DomainMatches" | "InList" | "NotInList" | "Exists" | "NotExists" | "GreaterThan" | "LessThan" | "Before" | "After" | "IsTrue" | "IsFalse" | "Matches" | "NotMatches";
         /** @enum {unknown} */
-        ConnectionErrorCode: "HostNotFound" | "ConnectionRefused" | "ConnectionFailed" | "Timeout" | "TlsFailed" | "AuthenticationFailed" | "ProtocolError" | "InsecureConnectionNotAllowed" | "AddressNotAllowed" | "Unknown" | null;
+        ConnectionErrorCode: "HostNotFound" | "ConnectionRefused" | "ConnectionFailed" | "Timeout" | "TlsFailed" | "AuthenticationFailed" | "ProtocolError" | "InsecureConnectionNotAllowed" | "AddressNotAllowed" | "ReconnectRequired" | "Unknown" | null;
         ConnectionTestResponse: {
             success: boolean;
             errorCode: null | components["schemas"]["ConnectionErrorCode"];
@@ -1826,6 +1963,10 @@ export interface components {
         };
         /** @enum {unknown} */
         NamedListKind: "Address" | "Domain" | "Pattern";
+        OAuthProviderInfo: {
+            provider: components["schemas"]["MailProvider"];
+            configured: boolean;
+        };
         PendingActionItem: {
             ruleName: string;
             type: components["schemas"]["ActionType"];
@@ -2083,6 +2224,14 @@ export interface components {
             trash: null | string;
             junk: null | string;
             archive: null | string;
+        };
+        StartOAuthRequest: {
+            name?: null | string;
+            /** Format: uuid */
+            accountId?: null | string;
+        };
+        StartOAuthResponse: {
+            authorizationUrl: string;
         };
         StartRunRequest: {
             folder?: null | string;

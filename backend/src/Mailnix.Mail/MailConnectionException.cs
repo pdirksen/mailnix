@@ -12,6 +12,9 @@ public enum ConnectionErrorCode
     ProtocolError,
     InsecureConnectionNotAllowed,
     AddressNotAllowed,
+
+    /// <summary>The OAuth authorization was revoked or has expired; the user has to sign in with the provider again.</summary>
+    ReconnectRequired,
     Unknown,
 }
 

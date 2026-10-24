@@ -19,6 +19,9 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
 
     public int Connections { get; private set; }
 
+    /// <summary>The settings of the latest connection (password or OAuth access token).</summary>
+    public ImapConnectionSettings? LastSettings { get; private set; }
+
     /// <summary>Servers without UIDPLUS cannot expunge single messages.</summary>
     public bool UidPlus { get; set; } = true;
 
@@ -35,6 +38,7 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
             }
 
             Connections++;
+            LastSettings = settings;
         }
 
         return Task.FromResult<IMailboxSession>(new Session(this));

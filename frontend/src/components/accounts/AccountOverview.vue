@@ -5,6 +5,7 @@ import type { Account, SpecialFolders } from '@/stores/accounts'
 import { useI18n } from 'vue-i18n'
 import AccountStatusBadge from './AccountStatusBadge.vue'
 import CapabilityList from './CapabilityList.vue'
+import OAuthConnectButton from './OAuthConnectButton.vue'
 import { SPECIAL_FOLDER_ICONS } from './folderIcons'
 
 defineProps<{ account: Account }>()
@@ -34,6 +35,12 @@ const SPECIAL = [
         <template v-if="account.status === 'Error'">
           <p class="text-destructive">{{ $t(`connectionErrors.${account.lastErrorCode ?? 'Unknown'}`) }}</p>
           <p v-if="account.lastError" class="text-muted-foreground font-mono text-xs break-all">{{ account.lastError }}</p>
+          <OAuthConnectButton
+            v-if="account.provider !== 'Imap' && (account.lastErrorCode === 'ReconnectRequired' || account.lastErrorCode === 'AuthenticationFailed')"
+            :provider="account.provider"
+            :account-id="account.id"
+            class="w-fit"
+          />
         </template>
       </CardContent>
     </Card>
@@ -44,6 +51,8 @@ const SPECIAL = [
       </CardHeader>
       <CardContent>
         <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+          <dt class="text-muted-foreground">{{ $t('accounts.fields.provider') }}</dt>
+          <dd>{{ $t(`accounts.provider.${account.provider}`) }}</dd>
           <dt class="text-muted-foreground">{{ $t('accounts.fields.host') }}</dt>
           <dd class="truncate">{{ account.host }}:{{ account.port }}</dd>
           <dt class="text-muted-foreground">{{ $t('accounts.fields.security') }}</dt>

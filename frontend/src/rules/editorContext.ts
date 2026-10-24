@@ -14,6 +14,8 @@ export interface RuleEditorContext {
   /** The account's folders (server paths) and hierarchy delimiter, for folder pickers. */
   folders: Ref<string[]>
   delimiter: Ref<string>
+  /** Gmail: folders are labels (moving relabels, copying adds a label); the editor says "label". */
+  labels?: Ref<boolean>
 }
 
 const KEY: InjectionKey<RuleEditorContext> = Symbol('rule-editor')

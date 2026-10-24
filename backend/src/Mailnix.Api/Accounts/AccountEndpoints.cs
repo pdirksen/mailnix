@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using Mailnix.Api.Hosting;
 using Mailnix.Api.Rules;
 using Mailnix.Infrastructure.Data;
+using Mailnix.Infrastructure.OAuth;
 using Mailnix.Mail;
 using Mailnix.Worker;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -54,7 +55,7 @@ internal static class AccountEndpoints
         }
 
         // The account's rules go with it, unless rules of other accounts still reference them.
-        var rules = await db.Rules.Include(r => r.References).Include(r => r.ListReferences).Where(r => r.AccountId == id).ToListAsync(ct);
+        var rules = await db.Rules.Include(r => r.References).Include(r => r.ListReferences).AsSplitQuery().Where(r => r.AccountId == id).ToListAsync(ct);
         var dependents = await ruleService.DependentsAsync([.. rules.Select(r => r.Id)], ct);
         if (dependents.Count > 0)
         {
@@ -152,6 +153,7 @@ internal static class AccountEndpoints
         MailnixDbContext db,
         IMailboxProbe probe,
         MailSecretProtector secrets,
+        AccountCredentials credentials,
         TimeProvider time,
         IWorkerSignals signals,
         CancellationToken ct)
@@ -161,8 +163,12 @@ internal static class AccountEndpoints
             return TypedResults.NotFound();
         }
 
-        var settings = new ImapConnectionSettings(request.Host.Trim(), request.Port, request.Security, request.Username.Trim(), request.Password ?? string.Empty);
-        var newPassword = !string.IsNullOrEmpty(request.Password);
+        // Server and user of OAuth accounts come from the provider; only reconnecting changes their credentials.
+        var oauth = account.Provider != MailProvider.Imap;
+        var settings = oauth
+            ? new ImapConnectionSettings(account.Host, account.Port, account.Security, account.Username, string.Empty)
+            : new ImapConnectionSettings(request.Host.Trim(), request.Port, request.Security, request.Username.Trim(), request.Password ?? string.Empty);
+        var newPassword = !oauth && !string.IsNullOrEmpty(request.Password);
         var connectionChanged = newPassword
             || settings.Host != account.Host
             || settings.Port != account.Port
@@ -181,12 +187,19 @@ internal static class AccountEndpoints
         {
             if (!newPassword)
             {
-                if (TryUnprotect(secrets, account) is not { } storedPassword)
+                try
+                {
+                    var stored = await credentials.SettingsAsync(account, ct);
+                    settings = oauth ? stored : settings with { Password = stored.Password };
+                }
+                catch (CryptographicException)
                 {
                     return CredentialsUnreadableProblem();
                 }
-
-                settings = settings with { Password = storedPassword };
+                catch (MailConnectionException ex)
+                {
+                    return ConnectionProblem(ex);
+                }
             }
 
             MailboxProbeResult result;
@@ -234,7 +247,7 @@ internal static class AccountEndpoints
         ClaimsPrincipal user,
         MailnixDbContext db,
         IMailboxProbe probe,
-        MailSecretProtector secrets,
+        AccountCredentials credentials,
         TimeProvider time,
         CancellationToken ct)
     {
@@ -243,17 +256,16 @@ internal static class AccountEndpoints
             return TypedResults.NotFound();
         }
 
-        if (TryUnprotect(secrets, account) is not { } password)
-        {
-            return CredentialsUnreadableProblem();
-        }
-
         ConnectionTestResponse response;
         try
         {
-            var result = await probe.ProbeAsync(ToSettings(account, password), includeCounts: false, ct);
+            var result = await probe.ProbeAsync(await credentials.SettingsAsync(account, ct), includeCounts: false, ct);
             ApplySuccess(account, result, time.GetUtcNow());
             response = new ConnectionTestResponse(true, null, null, ToOverview(result));
+        }
+        catch (CryptographicException)
+        {
+            return CredentialsUnreadableProblem();
         }
         catch (MailConnectionException ex)
         {
@@ -274,7 +286,7 @@ internal static class AccountEndpoints
         ClaimsPrincipal user,
         MailnixDbContext db,
         IMailboxProbe probe,
-        MailSecretProtector secrets,
+        AccountCredentials credentials,
         TimeProvider time,
         CancellationToken ct,
         bool counts = true)
@@ -284,18 +296,17 @@ internal static class AccountEndpoints
             return TypedResults.NotFound();
         }
 
-        if (TryUnprotect(secrets, account) is not { } password)
-        {
-            return CredentialsUnreadableProblem();
-        }
-
         try
         {
-            var result = await probe.ProbeAsync(ToSettings(account, password), counts, ct);
+            var result = await probe.ProbeAsync(await credentials.SettingsAsync(account, ct), counts, ct);
             ApplySuccess(account, result, time.GetUtcNow());
             return await TrySaveStatusAsync(db, ct)
                 ? TypedResults.Ok(new FolderListResponse(result.Delimiter.ToString(), result.Folders, result.SpecialFolders))
                 : TypedResults.NotFound();
+        }
+        catch (CryptographicException)
+        {
+            return CredentialsUnreadableProblem();
         }
         catch (MailConnectionException ex)
         {
@@ -368,7 +379,7 @@ internal static class AccountEndpoints
         return [];
     }
 
-    private static void ApplySuccess(MailAccount account, MailboxProbeResult result, DateTimeOffset now)
+    internal static void ApplySuccess(MailAccount account, MailboxProbeResult result, DateTimeOffset now)
     {
         account.Status = MailAccountStatus.Ok;
         account.LastErrorCode = null;
@@ -387,22 +398,7 @@ internal static class AccountEndpoints
         account.LastCheckedAt = now;
     }
 
-    internal static ImapConnectionSettings ToSettings(MailAccount account, string password) =>
-        new(account.Host, account.Port, account.Security, account.Username, password);
-
-    internal static string? TryUnprotect(MailSecretProtector secrets, MailAccount account)
-    {
-        try
-        {
-            return secrets.Unprotect(account.EncryptedSecret);
-        }
-        catch (CryptographicException)
-        {
-            return null;
-        }
-    }
-
-    private static MailAccountSpecialFolders ToEntity(SpecialFolderMap map) => new()
+    internal static MailAccountSpecialFolders ToEntity(SpecialFolderMap map) => new()
     {
         Sent = map.Sent,
         Drafts = map.Drafts,

@@ -1,8 +1,10 @@
+using System.Security.Cryptography;
 using System.Security.Claims;
 using Mailnix.Api.Accounts;
 using Mailnix.Api.Hosting;
 using Mailnix.Core.Rules;
 using Mailnix.Infrastructure.Data;
+using Mailnix.Infrastructure.OAuth;
 using Mailnix.Mail;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +39,7 @@ internal static class PreviewEndpoints
         RuleService rules,
         RuleSetLoader loader,
         IMessageReader reader,
-        MailSecretProtector secrets,
+        AccountCredentials credentials,
         IMemoryCache cache,
         TimeProvider time,
         CancellationToken ct)
@@ -72,12 +74,19 @@ internal static class PreviewEndpoints
         var ruleSet = loaded.AccountRules.Where(r => r.Id != draftId).Append(draft).ToList();
         var allRules = new Dictionary<Guid, RuleDefinition>(loaded.Context.Rules) { [draftId] = draft };
 
-        if (AccountEndpoints.TryUnprotect(secrets, account) is not { } password)
+        ImapConnectionSettings settings;
+        try
+        {
+            settings = await credentials.SettingsAsync(account, ct);
+        }
+        catch (CryptographicException)
         {
             return AccountEndpoints.CredentialsUnreadableProblem();
         }
-
-        var settings = AccountEndpoints.ToSettings(account, password);
+        catch (MailConnectionException ex)
+        {
+            return AccountEndpoints.ConnectionProblem(ex);
+        }
         var folder = request.Folder?.Trim() is { Length: > 0 } requested ? requested : account.WatchedFolders.FirstOrDefault() ?? "INBOX";
         var requirements = FieldCatalog.RequiredFetch(ruleSet, allRules);
         var limit = requirements.HasFlag(FetchRequirements.Body) ? Math.Min(request.Limit, MaxMessagesWithBody) : request.Limit;

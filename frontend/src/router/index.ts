@@ -81,6 +81,13 @@ export const routes: RouteRecordRaw[] = [
         meta: { titleKey: 'nav.lists' },
       },
       {
+        // Google / Microsoft return here after signing in (the redirect URI registered with them).
+        path: 'oauth/callback',
+        name: 'oauth-callback',
+        component: () => import('@/pages/oauth/OAuthCallbackPage.vue'),
+        meta: { titleKey: 'oauth.title' },
+      },
+      {
         path: 'activity',
         name: 'activity',
         component: () => import('@/pages/activity/ActivityPage.vue'),

@@ -243,7 +243,7 @@ internal static class RuleEndpoints
         IQueryable<MailRule> query = db.Rules;
         if (includeReferences)
         {
-            query = query.Include(r => r.References).Include(r => r.ListReferences);
+            query = query.Include(r => r.References).Include(r => r.ListReferences).AsSplitQuery();
         }
 
         return query.SingleOrDefaultAsync(r => r.Id == id && r.UserId == userId, ct);

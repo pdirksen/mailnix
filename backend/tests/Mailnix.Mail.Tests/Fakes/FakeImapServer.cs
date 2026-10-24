@@ -25,9 +25,12 @@ internal sealed partial class FakeImapServer : IAsyncDisposable
 
     public int Port => ((IPEndPoint)_listener.LocalEndpoint).Port;
 
-    public string Username { get; init; } = "user@example.com";
+    public string Username { get; set; } = "user@example.com";
 
     public string Password { get; init; } = "secret";
+
+    /// <summary>Accepted for AUTHENTICATE XOAUTH2 (add "AUTH=XOAUTH2 SASL-IR" to <see cref="Capabilities"/>).</summary>
+    public string AccessToken { get; set; } = "access-token";
 
     public char Delimiter { get; init; } = '/';
 
@@ -53,6 +56,9 @@ internal sealed partial class FakeImapServer : IAsyncDisposable
 
     public ImapConnectionSettings Settings(string? password = null) =>
         new("127.0.0.1", Port, ImapSecurity.None, Username, password ?? Password);
+
+    public ImapConnectionSettings OAuthSettings(string? accessToken = null) =>
+        new("127.0.0.1", Port, ImapSecurity.None, Username, accessToken ?? AccessToken, ImapAuthentication.OAuth2);
 
     private async Task AcceptLoopAsync()
     {
@@ -123,6 +129,14 @@ internal sealed partial class FakeImapServer : IAsyncDisposable
                 await writer.WriteLineAsync(args.Count == 2 && args[0] == Username && args[1] == Password
                     ? $"{tag} OK [CAPABILITY {Capabilities}] Logged in"
                     : $"{tag} NO [AUTHENTICATIONFAILED] Authentication failed.");
+                break;
+            case "AUTHENTICATE" when args.Count == 2 && args[0].Equals("XOAUTH2", StringComparison.OrdinalIgnoreCase):
+                Interlocked.Increment(ref _loginAttempts);
+                // SASL-IR: base64("user=" + user + "auth=Bearer " + token + "")
+                var expected = $"user={Username}auth=Bearer {AccessToken}";
+                await writer.WriteLineAsync(Encoding.UTF8.GetString(Convert.FromBase64String(args[1])) == expected
+                    ? $"{tag} OK [CAPABILITY {Capabilities}] Authenticated"
+                    : $"{tag} NO [AUTHENTICATIONFAILED] Invalid credentials (Failure)");
                 break;
             case "LIST":
                 _listStarted.TrySetResult();

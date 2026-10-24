@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import CapabilityList from '@/components/accounts/CapabilityList.vue'
+import OAuthConnectButton from '@/components/accounts/OAuthConnectButton.vue'
 import ConnectionErrorAlert from '@/components/accounts/ConnectionErrorAlert.vue'
 import FolderTree from '@/components/accounts/FolderTree.vue'
 import SafetyFields from '@/components/accounts/SafetyFields.vue'
@@ -21,9 +22,11 @@ import {
 } from '@/components/ui/stepper'
 import { type DescribedError, useConnectionErrors } from '@/lib/connectionErrors'
 import { useSchemaValidation } from '@/lib/zodForm'
-import { type ConnectionTest, type SpecialFolders, useAccountsStore } from '@/stores/accounts'
+import { type ConnectionTest, type MailProvider, type OAuthProvider, type SpecialFolders, useAccountsStore } from '@/stores/accounts'
 import { CircleCheckIcon, Loader2Icon, MailIcon } from '@lucide/vue'
-import { computed, ref } from 'vue'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -36,18 +39,33 @@ const router = useRouter()
 const { describe, describeRequestError } = useConnectionErrors()
 
 const step = ref<Step>(1)
-const steps = computed(() => [
-  { step: 1, title: t('accounts.wizard.stepProvider'), description: t('accounts.wizard.stepProviderDescription') },
-  { step: 2, title: t('accounts.wizard.stepServer'), description: t('accounts.wizard.stepServerDescription') },
-  { step: 3, title: t('accounts.wizard.stepConnection'), description: t('accounts.wizard.stepConnectionDescription') },
-  { step: 4, title: t('accounts.wizard.stepFolders'), description: t('accounts.wizard.stepFoldersDescription') },
-])
+const provider = ref<MailProvider>('Imap')
+const oauthProvider = computed(() => (provider.value === 'Imap' ? null : (provider.value as OAuthProvider)))
+const steps = computed(() =>
+  oauthProvider.value
+    ? [
+        { step: 1, title: t('accounts.wizard.stepProvider'), description: t('accounts.wizard.stepProviderDescription') },
+        { step: 2, title: t('oauth.stepSignIn'), description: t('oauth.stepSignInDescription') },
+      ]
+    : [
+        { step: 1, title: t('accounts.wizard.stepProvider'), description: t('accounts.wizard.stepProviderDescription') },
+        { step: 2, title: t('accounts.wizard.stepServer'), description: t('accounts.wizard.stepServerDescription') },
+        { step: 3, title: t('accounts.wizard.stepConnection'), description: t('accounts.wizard.stepConnectionDescription') },
+        { step: 4, title: t('accounts.wizard.stepFolders'), description: t('accounts.wizard.stepFoldersDescription') },
+      ],
+)
 
-const PROVIDERS = [
-  { id: 'Imap', available: true },
-  { id: 'Google', available: false },
-  { id: 'Microsoft', available: false },
-] as const
+// Google and Microsoft need an OAuth app registered by whoever runs this server (docs/oauth-setup.md).
+const configured = ref<Partial<Record<MailProvider, boolean>>>({ Imap: true })
+onMounted(async () => {
+  try {
+    for (const info of await store.oauthProviders()) configured.value[info.provider] = info.configured
+  } catch {
+    // Without the list, only IMAP is offered.
+  }
+})
+const PROVIDERS: MailProvider[] = ['Imap', 'Google', 'Microsoft']
+const oauthName = ref('')
 
 // Step 2
 const server = ref<ServerSettings>(emptyServerSettings())
@@ -69,7 +87,8 @@ const watchedError = ref<string>()
 const creating = ref(false)
 const createError = ref<DescribedError | null>(null)
 
-function goToServer() {
+function choose(id: MailProvider) {
+  provider.value = id
   step.value = 2
 }
 
@@ -162,24 +181,42 @@ async function create() {
     <!-- Step 1: provider -->
     <div v-if="step === 1" class="grid gap-3 sm:grid-cols-3">
       <button
-        v-for="provider in PROVIDERS"
-        :key="provider.id"
+        v-for="id in PROVIDERS"
+        :key="id"
         type="button"
-        :disabled="!provider.available"
+        :disabled="!configured[id]"
         class="bg-card hover:bg-accent/50 focus-visible:ring-ring/50 grid gap-2 rounded-xl border p-4 text-left outline-none transition-colors focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-60"
-        :data-testid="`provider-${provider.id}`"
-        @click="goToServer"
+        :data-testid="`provider-${id}`"
+        @click="choose(id)"
       >
         <span class="flex items-center justify-between gap-2">
           <span class="flex items-center gap-2 font-medium">
             <MailIcon class="size-4" />
-            {{ $t(`accounts.provider.${provider.id}`) }}
+            {{ $t(`accounts.provider.${id}`) }}
           </span>
-          <Badge v-if="!provider.available" variant="secondary">{{ $t('common.comingSoon') }}</Badge>
+          <Badge v-if="!configured[id]" variant="secondary">{{ $t('oauth.notConfigured') }}</Badge>
         </span>
-        <span class="text-muted-foreground text-sm">{{ $t(`accounts.provider.${provider.id}Description`) }}</span>
+        <span class="text-muted-foreground text-sm">
+          {{ configured[id] ? $t(`accounts.provider.${id}Description`) : $t('oauth.notConfiguredHint') }}
+        </span>
       </button>
     </div>
+
+    <!-- Step 2 (Google / Microsoft): sign in with the provider -->
+    <Card v-else-if="step === 2 && oauthProvider">
+      <CardHeader>
+        <CardTitle>{{ $t('oauth.signIn', { provider: $t(`accounts.provider.${oauthProvider}`) }) }}</CardTitle>
+        <CardDescription>{{ $t('oauth.explanation', { provider: $t(`accounts.provider.${oauthProvider}`) }) }}</CardDescription>
+      </CardHeader>
+      <CardContent class="grid gap-2">
+        <Label for="oauth-name">{{ $t('accounts.fields.name') }} ({{ $t('common.optional') }})</Label>
+        <Input id="oauth-name" v-model="oauthName" :placeholder="$t('oauth.namePlaceholder')" autocomplete="off" class="max-w-sm" />
+      </CardContent>
+      <CardFooter class="mt-6 flex justify-between">
+        <Button type="button" variant="outline" @click="step = 1">{{ $t('common.back') }}</Button>
+        <OAuthConnectButton :provider="oauthProvider" :name="oauthName.trim() || undefined" />
+      </CardFooter>
+    </Card>
 
     <!-- Step 2: server settings -->
     <Card v-else-if="step === 2">

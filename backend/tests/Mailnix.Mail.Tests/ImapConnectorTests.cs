@@ -32,6 +32,28 @@ public sealed class ImapConnectorTests
     }
 
     [Fact]
+    public async Task Authenticates_with_an_oauth_access_token()
+    {
+        await using var server = new FakeImapServer { Capabilities = "IMAP4rev1 SPECIAL-USE IDLE MOVE UIDPLUS AUTH=XOAUTH2 SASL-IR" };
+
+        using var client = await MailServices.Connector().ConnectAsync(server.OAuthSettings(), Ct);
+
+        client.IsAuthenticated.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Rejected_access_token_is_reported_as_authentication_failure()
+    {
+        await using var server = new FakeImapServer { Capabilities = "IMAP4rev1 AUTH=XOAUTH2 SASL-IR" };
+
+        var error = await Should.ThrowAsync<MailConnectionException>(
+            () => MailServices.Connector().ConnectAsync(server.OAuthSettings("expired-token"), Ct));
+
+        error.Code.ShouldBe(ConnectionErrorCode.AuthenticationFailed);
+        error.Message.ShouldNotContain("expired-token");
+    }
+
+    [Fact]
     public async Task Silent_server_times_out()
     {
         await using var server = new FakeImapServer { Silent = true };

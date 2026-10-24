@@ -14,10 +14,17 @@ import { useRuleEditor } from '@/rules/editorContext'
 import { type ActionType, isTerminal, newAction, NON_TERMINAL_ACTIONS, type RuleAction, TERMINAL_ACTIONS } from '@/rules/model'
 import { ArrowRightIcon, PlusIcon, XIcon } from '@lucide/vue'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import FolderTemplateInput from './FolderTemplateInput.vue'
 
 const actions = defineModel<RuleAction[]>({ required: true })
-const { errors } = useRuleEditor()
+const { errors, labels } = useRuleEditor()
+const { t, te } = useI18n()
+
+/** Gmail calls folders labels: "Move to label", "Add label". */
+function actionLabel(type: ActionType) {
+  return labels?.value && te(`rules.gmailActions.${type}`) ? t(`rules.gmailActions.${type}`) : t(`rules.actions.${type}`)
+}
 
 const hasTerminal = computed(() => actions.value.some(isTerminal))
 
@@ -46,7 +53,7 @@ function remove(index: number) {
     >
       <div class="flex items-center gap-2">
         <ArrowRightIcon v-if="isTerminal(action)" class="text-primary size-4" aria-hidden="true" />
-        <span class="font-medium">{{ $t(`rules.actions.${action.type}`) }}</span>
+        <span class="font-medium">{{ actionLabel(action.type) }}</span>
         <Button variant="ghost" size="icon" class="ml-auto" :aria-label="$t('rules.actions.remove')" @click="remove(index)">
           <XIcon />
         </Button>
@@ -83,7 +90,7 @@ function remove(index: number) {
       <DropdownMenuContent align="start" class="w-64">
         <DropdownMenuLabel>{{ $t('rules.actions.otherGroup') }}</DropdownMenuLabel>
         <DropdownMenuGroup>
-          <DropdownMenuItem v-for="type in NON_TERMINAL_ACTIONS" :key="type" @select="add(type)">{{ $t(`rules.actions.${type}`) }}</DropdownMenuItem>
+          <DropdownMenuItem v-for="type in NON_TERMINAL_ACTIONS" :key="type" @select="add(type)">{{ actionLabel(type) }}</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuLabel>{{ $t('rules.actions.terminalGroup') }}</DropdownMenuLabel>
@@ -95,7 +102,7 @@ function remove(index: number) {
             :title="hasTerminal ? $t('rules.actions.oneTerminal') : undefined"
             @select="add(type)"
           >
-            {{ $t(`rules.actions.${type}`) }}
+            {{ actionLabel(type) }}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

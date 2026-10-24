@@ -393,6 +393,102 @@
         }
       }
     },
+    "/api/oauth/providers": {
+      "get": {
+        "tags": [
+          "OAuth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OAuthProviderInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/oauth/{provider}/start": {
+      "post": {
+        "tags": [
+          "OAuth"
+        ],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartOAuthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartOAuthResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/oauth/complete": {
+      "post": {
+        "tags": [
+          "OAuth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteOAuthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompleteOAuthResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/api/rules/field-catalog": {
       "get": {
         "tags": [
@@ -1544,6 +1640,36 @@
           }
         }
       },
+      "CompleteOAuthRequest": {
+        "required": [
+          "state",
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "CompleteOAuthResponse": {
+        "required": [
+          "account",
+          "created"
+        ],
+        "type": "object",
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/AccountResponse"
+          },
+          "created": {
+            "type": "boolean"
+          }
+        }
+      },
       "Condition": {
         "required": [
           "field",
@@ -1732,6 +1858,7 @@
           "ProtocolError",
           "InsecureConnectionNotAllowed",
           "AddressNotAllowed",
+          "ReconnectRequired",
           "Unknown",
           null
         ]
@@ -2468,6 +2595,21 @@
           "Domain",
           "Pattern"
         ]
+      },
+      "OAuthProviderInfo": {
+        "required": [
+          "provider",
+          "configured"
+        ],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/MailProvider"
+          },
+          "configured": {
+            "type": "boolean"
+          }
+        }
       },
       "PendingActionItem": {
         "required": [
@@ -3505,6 +3647,35 @@
           }
         }
       },
+      "StartOAuthRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "accountId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "StartOAuthResponse": {
+        "required": [
+          "authorizationUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "authorizationUrl": {
+            "type": "string"
+          }
+        }
+      },
       "StartRunRequest": {
         "type": "object",
         "properties": {
@@ -3862,6 +4033,9 @@
     },
     {
       "name": "Accounts"
+    },
+    {
+      "name": "OAuth"
     },
     {
       "name": "Rules"

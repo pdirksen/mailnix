@@ -136,7 +136,8 @@
       "password": "Passwort",
       "passwordKeep": "Leer lassen, um das aktuelle Passwort zu behalten.",
       "enabled": "Neue E-Mails verarbeiten",
-      "enabledHint": "Pausieren stoppt alle Regeln für dieses Konto."
+      "enabledHint": "Pausieren stoppt alle Regeln für dieses Konto.",
+      "provider": "Anbieter"
     },
     "security": {
       "SslOnConnect": "SSL/TLS",
@@ -207,7 +208,14 @@
     "InsecureConnectionNotAllowed": "Unverschlüsselte Verbindungen sind auf diesem mailnix-Server deaktiviert.",
     "AddressNotAllowed": "Diese Serveradresse ist nicht erlaubt (privates Netzwerk).",
     "CredentialsUnreadable": "Das gespeicherte Passwort kann nicht mehr entschlüsselt werden. Gib es in den Einstellungen erneut ein.",
-    "Unknown": "Die Verbindung zum Server ist fehlgeschlagen."
+    "Unknown": "Die Verbindung zum Server ist fehlgeschlagen.",
+    "ReconnectRequired": "Der Zugriff auf dieses Postfach wurde widerrufen oder ist abgelaufen. Verbinde das Konto neu.",
+    "OAuthStateInvalid": "Die Anmeldung hat zu lange gedauert oder wurde woanders gestartet. Bitte starte sie erneut.",
+    "OAuthFailed": "Der Anbieter hat die Anmeldung nicht abgeschlossen.",
+    "OAuthNoRefreshToken": "Der Anbieter hat keinen dauerhaften Zugriff erlaubt. Entferne mailnix aus den Apps mit Zugriff auf dein Konto und versuche es erneut.",
+    "OAuthNoEmail": "Der Anbieter hat nicht mitgeteilt, bei welchem Postfach du dich angemeldet hast.",
+    "OAuthDifferentMailbox": "Du hast dich bei einem anderen Postfach angemeldet als dem dieses Kontos.",
+    "OAuthNotConfigured": "Die Anmeldung mit diesem Anbieter ist auf diesem Server nicht eingerichtet."
   },
   "lists": {
     "title": "Listen",
@@ -538,7 +546,12 @@
         }
       }
     },
-    "nextRun": "nächster Lauf {time}"
+    "nextRun": "nächster Lauf {time}",
+    "gmailActions": {
+      "MoveTo": "In Label verschieben",
+      "CopyTo": "Label hinzufügen",
+      "Archive": "Archivieren (aus dem Posteingang entfernen)"
+    }
   },
   "activity": {
     "title": "Aktivität",
@@ -616,5 +629,25 @@
     "text": "Macht die letzten Aktionen dieser Regel rückgängig, die neuesten zuerst.",
     "count": "Anzahl Aktionen",
     "start": "Rückgängig machen"
+  },
+  "oauth": {
+    "title": "Anmeldung",
+    "signIn": "Mit {provider} anmelden",
+    "reconnect": "Mit {provider} neu verbinden",
+    "stepSignIn": "Anmelden",
+    "stepSignInDescription": "Zugriff auf das Postfach erlauben",
+    "explanation": "Du wirst zu {provider} weitergeleitet, um mailnix das Lesen und Sortieren deiner E-Mails zu erlauben. mailnix sieht dein {provider}-Passwort nie; es speichert eine widerrufbare Berechtigung, verschlüsselt.",
+    "namePlaceholder": "Standard: die Postfachadresse",
+    "notConfigured": "Nicht eingerichtet",
+    "notConfiguredHint": "Erfordert eine OAuth-App, die der Betreiber dieses Servers registriert (siehe docs/oauth-setup.md).",
+    "completing": "Anmeldung wird abgeschlossen…",
+    "failed": "Die Anmeldung hat nicht geklappt",
+    "tryAgain": "Erneut versuchen",
+    "cancelled": "Die Anmeldung wurde abgebrochen.",
+    "providerError": "Der Anbieter hat einen Fehler gemeldet.",
+    "invalidCallback": "Diese Seite wurde ohne Anmeldedaten geöffnet.",
+    "added": "Konto hinzugefügt. Prüfe die Ordner und Einstellungen.",
+    "reconnected": "Konto neu verbunden.",
+    "signedInAs": "Angemeldet mit {provider} als {email}."
   }
 }
