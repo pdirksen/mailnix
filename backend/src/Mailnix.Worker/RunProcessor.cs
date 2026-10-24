@@ -56,6 +56,7 @@ internal static class Flags
 internal sealed partial class RunProcessor(
     MailnixDbContext db,
     RuleSetLoader loader,
+    TrashPurger purger,
     ILiveNotifier notifier,
     IOptions<WorkerOptions> options,
     TimeProvider time,
@@ -131,7 +132,7 @@ internal sealed partial class RunProcessor(
         await db.SaveChangesAsync(ct);
     }
 
-    /// <summary>Runs queued jobs of the account: manual runs, confirmed runs and undo.</summary>
+    /// <summary>Runs queued jobs of the account: manual and scheduled runs, confirmed runs, undo and Trash purges.</summary>
     public async Task ProcessQueuedAsync(IMailboxSession session, MailAccount account, UndoProcessor undo, CancellationToken ct)
     {
         await ExpirePendingAsync(account, ct);
@@ -148,13 +149,17 @@ internal sealed partial class RunProcessor(
                 {
                     await undo.UndoAsync(session, account, run, ct);
                 }
+                else if (run.Trigger == RunTrigger.Purge)
+                {
+                    await purger.PurgeAsync(session, account, run, ct);
+                }
                 else if (run.PendingPlanJson is not null)
                 {
                     await ExecuteConfirmedAsync(session, account, run, ct);
                 }
                 else
                 {
-                    await ExecuteManualAsync(session, account, run, ct);
+                    await ExecuteRulesAsync(session, account, run, ct);
                 }
             }
             catch (Mail.FolderNotFoundException ex)
@@ -168,24 +173,45 @@ internal sealed partial class RunProcessor(
         }
     }
 
-    private async Task ExecuteManualAsync(IMailboxSession session, MailAccount account, RuleRun run, CancellationToken ct)
+    /// <summary>
+    /// Manual and scheduled runs over existing mail. The server preselects candidates (see <see cref="SearchPlanner"/>);
+    /// the newest of them, up to the run's limit, are fetched and evaluated like new mail.
+    /// </summary>
+    private async Task ExecuteRulesAsync(IMailboxSession session, MailAccount account, RuleRun run, CancellationToken ct)
     {
         var status = await session.OpenAsync(run.Folder, writable: false, ct);
         var loaded = await loader.LoadAsync(account, ct);
 
-        // Explicitly chosen rules run even when switched off (e.g. "apply this rule to existing mail").
+        // Rules chosen by the user run even when switched off ("apply this rule to existing mail"); a scheduled
+        // rule that was switched off since its run was queued does not.
         var rules = run.RuleIds is { Count: > 0 } chosen
-            ? loaded.AccountRules.Where(r => chosen.Contains(r.Id)).Select(r => r with { Enabled = true }).ToList()
+            ? loaded.AccountRules.Where(r => chosen.Contains(r.Id) && (run.Trigger != RunTrigger.Scheduled || r.Enabled)).Select(r => r with { Enabled = true }).ToList()
             : loaded.AccountRules.Where(r => r.Enabled && loaded.AppliesTo(r.Id, run.Folder, account.WatchedFolders)).ToList();
-        if (rules.Count == 0)
+        if (rules.All(r => r.Actions.Count == 0))
         {
             Complete(run);
             return;
         }
 
-        var limit = Math.Clamp(run.Limit ?? 100, 1, Options.MaxManualRunMessages);
-        var messages = await session.FetchLatestAsync(run.Folder, limit, FieldCatalog.RequiredFetch(rules, loaded.Context.Rules), ct);
         var context = await ContextAsync(session, account, loaded, rules, ct);
+        var filter = Options.SearchPushdown ? SearchPlanner.Plan(rules, context) : null;
+        var search = await session.SearchAsync(run.Folder, filter, ct);
+        if (filter is not null && search.Filtered)
+        {
+            var described = filter.Describe();
+            run.SearchFilter = described.Length > 2000 ? described[..1999] + "…" : described;
+        }
+
+        var limit = run.Trigger == RunTrigger.Scheduled
+            ? Options.MaxScheduledRunMessages
+            : Math.Clamp(run.Limit ?? 100, 1, Options.MaxManualRunMessages);
+        var requirements = FieldCatalog.RequiredFetch(rules, loaded.Context.Rules);
+        var messages = new List<MessageSnapshot>();
+        foreach (var batch in search.Uids.OrderDescending().Take(limit).Chunk(Options.FetchBatchSize))
+        {
+            messages.AddRange(await session.FetchAsync(run.Folder, batch, requirements, ct));
+        }
+
         await ApplyAsync(session, account, run, run.Folder, status.UidValidity, Plan(messages, rules, context), messages.Count, gate: true, ct);
     }
 

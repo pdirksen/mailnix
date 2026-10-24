@@ -20,6 +20,7 @@
   <ItemGroup>
     <Compile Include="..\Mailnix.Mail.Tests\Fakes\FakeImapServer.cs" Link="Fakes\FakeImapServer.cs" />
     <Compile Include="..\Mailnix.Mail.Tests\RealServer\RealServerCredentials.cs" Link="RealServer\RealServerCredentials.cs" />
+    <Compile Include="..\Mailnix.Core.Tests\Search\ImapSearchModel.cs" Link="Fakes\ImapSearchModel.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -67,6 +67,7 @@ public sealed record AccountResponse(
     IReadOnlyList<string> Capabilities,
     int BlastRadiusLimit,
     int? PurgeTrashAfterDays,
+    DateTimeOffset? LastPurgeAt,
     DateTimeOffset CreatedAt)
 {
     public static AccountResponse From(MailAccount a) => new(
@@ -87,6 +88,7 @@ public sealed record AccountResponse(
         a.Capabilities,
         a.BlastRadiusLimit,
         a.PurgeTrashAfterDays,
+        a.LastPurgeAt,
         a.CreatedAt);
 }
 

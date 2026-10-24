@@ -60,10 +60,13 @@ public sealed record RuleResponse(
     ConditionNode Conditions,
     IReadOnlyList<RuleAction> Actions,
     IReadOnlyList<RuleSummary> UsedBy,
+    DateTimeOffset? LastScheduledAt,
+    DateTimeOffset? NextRunAt,
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt)
 {
-    public static RuleResponse From(MailRule rule, IReadOnlyList<RuleSummary> usedBy) => new(
+    /// <param name="zone">The user's time zone, in which schedules run.</param>
+    public static RuleResponse From(MailRule rule, IReadOnlyList<RuleSummary> usedBy, TimeZoneInfo zone) => new(
         rule.Id,
         rule.AccountId,
         rule.Name,
@@ -78,6 +81,8 @@ public sealed record RuleResponse(
         JsonSerializer.Deserialize<ConditionNode>(rule.ConditionsJson, RuleJson.Options)!,
         JsonSerializer.Deserialize<IReadOnlyList<RuleAction>>(rule.ActionsJson, RuleJson.Options)!,
         usedBy,
+        rule.LastScheduledAt,
+        RuleSchedule.NextRun(rule, zone),
         rule.CreatedAt,
         rule.UpdatedAt);
 }

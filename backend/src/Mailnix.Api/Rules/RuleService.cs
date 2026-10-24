@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Cronos;
 using Mailnix.Core.Rules;
 using Mailnix.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -78,18 +77,7 @@ internal sealed class RuleService(MailnixDbContext db)
     public static Dictionary<string, string[]> ToProblemErrors(IEnumerable<RuleValidationError> errors) =>
         errors.GroupBy(e => e.Path).ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray());
 
-    private static bool TryParseCron(string expression)
-    {
-        try
-        {
-            CronExpression.Parse(expression.Trim());
-            return true;
-        }
-        catch (CronFormatException)
-        {
-            return false;
-        }
-    }
+    private static bool TryParseCron(string expression) => RuleSchedule.TryParse(expression, out _);
 
     private async Task<RuleValidationContext> LoadValidationContextAsync(Guid userId, Guid ruleId, CancellationToken ct)
     {

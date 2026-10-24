@@ -2,7 +2,7 @@
 backend/**/bin/
 backend/**/obj/
 backend/src/Mailnix.Api/wwwroot/
-backend/**/data/
+backend/src/Mailnix.Api/data/
 *.db
 *.db-shm
 *.db-wal

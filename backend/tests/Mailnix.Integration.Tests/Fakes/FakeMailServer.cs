@@ -1,5 +1,6 @@
 using Mailnix.Core.Messages;
 using Mailnix.Core.Rules;
+using Mailnix.Core.Tests.Search;
 using Mailnix.Mail;
 using MimeKit;
 
@@ -17,6 +18,12 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
     public MailConnectionException? ConnectError { get; set; }
 
     public int Connections { get; private set; }
+
+    /// <summary>Servers without UIDPLUS cannot expunge single messages.</summary>
+    public bool UidPlus { get; set; } = true;
+
+    /// <summary>Every search a session ran (null = all messages), in order.</summary>
+    public List<SearchFilter?> Searches { get; } = [];
 
     public Task<IMailboxSession> OpenAsync(ImapConnectionSettings settings, CancellationToken ct)
     {
@@ -90,7 +97,7 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
 
     private sealed class Session(FakeMailServer server) : IMailboxSession
     {
-        public MailboxCapabilities Capabilities { get; } = new(true, true, true, false, true, true, false, false, ["Idle", "Move", "UidPlus"]);
+        public MailboxCapabilities Capabilities { get; } = new(true, server.UidPlus, true, false, true, true, false, false, ["Idle", "Move", .. server.UidPlus ? new[] { "UidPlus" } : []]);
 
         public char Delimiter => server.Delimiter;
 
@@ -108,6 +115,16 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
 
         public Task<IReadOnlyList<MessageSnapshot>> FetchLatestAsync(string folder, int limit, FetchRequirements requirements, CancellationToken ct) =>
             Read(folder, f => f.Messages.OrderByDescending(m => m.Uid).Take(limit));
+
+        public Task<SearchResult> SearchAsync(string folder, SearchFilter? filter, CancellationToken ct)
+        {
+            lock (server._lock)
+            {
+                server.Searches.Add(filter);
+                var uids = server.Get(folder).Messages.Where(m => ImapSearchModel.Matches(filter, m.Snapshot)).Select(m => m.Uid).Order().ToList();
+                return Task.FromResult(new SearchResult(uids, filter is not null));
+            }
+        }
 
         public Task<IReadOnlyList<MessageSnapshot>> FetchAsync(string folder, IReadOnlyList<uint> uids, FetchRequirements requirements, CancellationToken ct) =>
             Read(folder, f => f.Messages.Where(m => uids.Contains(m.Uid)));
@@ -228,6 +245,20 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
             lock (server._lock)
             {
                 server.Get(folder).Messages.RemoveAll(m => m.Uid == uid);
+                return Task.FromResult(true);
+            }
+        }
+
+        public Task<bool> PurgeAsync(string folder, IReadOnlyList<uint> uids, CancellationToken ct)
+        {
+            lock (server._lock)
+            {
+                if (!server.UidPlus)
+                {
+                    return Task.FromResult(false);
+                }
+
+                server.Get(folder).Messages.RemoveAll(m => uids.Contains(m.Uid));
                 return Task.FromResult(true);
             }
         }

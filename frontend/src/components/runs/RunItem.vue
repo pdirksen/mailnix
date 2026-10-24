@@ -65,6 +65,7 @@ const isUndo = computed(() => props.run.trigger === 'Undo')
           <span :title="formatDateTime(run.createdAt, locale)">{{ formatRelative(run.createdAt, locale) }}</span>
           ·
           <template v-if="isUndo">{{ $t('activity.undoCounts', { executed: run.executedActions }) }}</template>
+          <template v-else-if="run.trigger === 'Purge'">{{ $t('activity.purgeCounts', { executed: run.executedActions, examined: run.messagesExamined }) }}</template>
           <template v-else>
             {{ $t('activity.counts', { executed: run.executedActions, matched: run.messagesMatched, examined: run.messagesExamined }) }}
           </template>
@@ -83,7 +84,10 @@ const isUndo = computed(() => props.run.trigger === 'Undo')
         {{ $t('activity.undo') }}
       </Button>
     </div>
-    <CollapsibleContent class="border-t px-3 py-3">
+    <CollapsibleContent class="grid gap-2 border-t px-3 py-3">
+      <p v-if="run.searchFilter" class="text-muted-foreground text-xs" data-testid="search-filter">
+        {{ $t('activity.searchFilter') }} <code class="bg-muted rounded px-1 py-0.5 break-all">{{ run.searchFilter }}</code>
+      </p>
       <Skeleton v-if="loading && !detail" class="h-20" />
       <RunActionsTable v-else-if="detail" :actions="detail.actions" />
     </CollapsibleContent>

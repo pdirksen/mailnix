@@ -112,6 +112,11 @@ internal static class AccountEndpoints
             return TypedResults.ValidationProblem(errors);
         }
 
+        if (ValidatePurge(request.PurgeTrashAfterDays, watched, special.Trash) is { Count: > 0 } purgeErrors)
+        {
+            return TypedResults.ValidationProblem(purgeErrors);
+        }
+
         var userId = user.GetUserId();
         var tenantId = await db.Users.Where(u => u.Id == userId).Select(u => u.TenantId).SingleAsync(ct);
         var now = time.GetUtcNow();
@@ -166,6 +171,10 @@ internal static class AccountEndpoints
         var watched = request.WatchedFolders.Distinct(StringComparer.Ordinal).ToList();
         var foldersChanged = !watched.SequenceEqual(account.WatchedFolders) || request.SpecialFolders != AccountResponse.From(account).SpecialFolders;
         var now = time.GetUtcNow();
+        if (ValidatePurge(request.PurgeTrashAfterDays, watched, request.SpecialFolders.Trash) is { Count: > 0 } purgeErrors)
+        {
+            return TypedResults.ValidationProblem(purgeErrors);
+        }
 
         // Only changes that could break mail processing are verified against the server.
         if (connectionChanged || foldersChanged)
@@ -336,6 +345,27 @@ internal static class AccountEndpoints
         }
 
         return errors;
+    }
+
+    /// <summary>Purging deletes for good, so it needs a Trash folder that is not one rules work on.</summary>
+    private static Dictionary<string, string[]> ValidatePurge(int? days, IReadOnlyList<string> watched, string? trash)
+    {
+        if (days is null)
+        {
+            return [];
+        }
+
+        if (trash is null)
+        {
+            return new() { ["purgeTrashAfterDays"] = ["Choose a Trash folder first."] };
+        }
+
+        if (trash.Equals("INBOX", StringComparison.OrdinalIgnoreCase) || watched.Contains(trash, StringComparer.Ordinal))
+        {
+            return new() { ["purgeTrashAfterDays"] = [$"'{trash}' is watched by rules and cannot be purged. Choose the real Trash folder."] };
+        }
+
+        return [];
     }
 
     private static void ApplySuccess(MailAccount account, MailboxProbeResult result, DateTimeOffset now)

@@ -4,8 +4,9 @@ Rule-based mail sorting with a web UI, in the spirit of imapfilter: connect IMAP
 mailboxes, build rules visually, preview what they would do, and let mailnix move, flag or trash incoming mail.
 
 > Status: early development. Auth, IMAP accounts, the rule engine, named lists, the visual rule builder with a
-> preview against real mail, and rule execution (new mail via IDLE, "run now", confirmation of large runs, undo,
-> live status) are in place; search pushdown, scheduled rules, OAuth and stats follow.
+> preview against real mail, rule execution (new mail via IDLE, "run now", confirmation of large runs, undo,
+> live status), scheduled rules with server-side preselection, and the optional Trash purge are in place;
+> OAuth (Google, Microsoft 365) and stats follow.
 
 ## Repository layout
 
@@ -114,6 +115,10 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Worker__IdleTimeout` | `00:09:00` | Re-issue IMAP IDLE after this time |
 | `Mailnix__Worker__PollInterval` | `00:02:00` | Check interval for servers without IDLE |
 | `Mailnix__Worker__ConfirmationExpiry` | `1.00:00:00` | Runs waiting for confirmation expire after this time |
+| `Mailnix__Worker__SearchPushdown` | `true` | Let the mail server preselect messages for manual and scheduled runs (IMAP SEARCH; results are always re-checked by mailnix) |
+| `Mailnix__Worker__ScheduleCheckInterval` | `00:00:30` | How often due scheduled rules and Trash purges are looked for |
+| `Mailnix__Worker__MaxScheduledRunMessages` | `5000` | Candidates a scheduled run checks at most (newest first) |
+| `Mailnix__Worker__PurgeInterval` | `1.00:00:00` | How often Trash is checked when purging is switched on for an account |
 | `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | `false` | Set to `true` behind a TLS-terminating reverse proxy |
 
 ## Licensing

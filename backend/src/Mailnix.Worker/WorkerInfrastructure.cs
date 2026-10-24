@@ -37,6 +37,24 @@ public sealed class WorkerOptions
 
     /// <summary>Messages mailnix moved into a folder are not processed again by that folder's rules within this window.</summary>
     public TimeSpan LoopGuardWindow { get; set; } = TimeSpan.FromHours(24);
+
+    /// <summary>Let the mail server preselect candidates for manual and scheduled runs (IMAP SEARCH).</summary>
+    public bool SearchPushdown { get; set; } = true;
+
+    /// <summary>Messages are fetched in batches of this size.</summary>
+    public int FetchBatchSize { get; set; } = 500;
+
+    /// <summary>How often the scheduler looks for due scheduled rules and Trash purges.</summary>
+    public TimeSpan ScheduleCheckInterval { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>A scheduled run checks at most this many candidates (newest first); the rest follows next time.</summary>
+    public int MaxScheduledRunMessages { get; set; } = 5000;
+
+    /// <summary>Trash is checked for messages to purge this often.</summary>
+    public TimeSpan PurgeInterval { get; set; } = TimeSpan.FromHours(24);
+
+    /// <summary>At most this many messages are purged per run.</summary>
+    public int MaxPurgePerRun { get; set; } = 5000;
 }
 
 /// <summary>Lets the API nudge the worker: new jobs for an account, or changed accounts.</summary>

@@ -107,9 +107,11 @@ public static class WorkerServiceCollectionExtensions
         services.TryAddSingleton<ILiveNotifier, NullLiveNotifier>();
         services.AddScoped<RunProcessor>();
         services.AddScoped<UndoProcessor>();
+        services.AddScoped<TrashPurger>();
         if (runWatchers)
         {
             services.AddHostedService<MailboxSupervisor>();
+            services.AddHostedService<RuleScheduler>();
         }
 
         return services;

@@ -8,6 +8,7 @@ export function testRun(overrides: Partial<RunSummary> = {}): RunSummary {
     trigger: 'Manual',
     state: 'Completed',
     folder: 'INBOX',
+    searchFilter: null,
     messagesExamined: 10,
     messagesMatched: 3,
     plannedActions: 4,

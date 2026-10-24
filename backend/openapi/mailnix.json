@@ -1330,6 +1330,7 @@
           "capabilities",
           "blastRadiusLimit",
           "purgeTrashAfterDays",
+          "lastPurgeAt",
           "createdAt"
         ],
         "type": "object",
@@ -1411,6 +1412,13 @@
               "integer"
             ],
             "format": "int32"
+          },
+          "lastPurgeAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           },
           "createdAt": {
             "type": "string",
@@ -1521,7 +1529,8 @@
           "MoveTo",
           "Delete",
           "MarkAsSpam",
-          "Archive"
+          "Archive",
+          "Purge"
         ]
       },
       "AuthConfigResponse": {
@@ -3082,6 +3091,8 @@
           "conditions",
           "actions",
           "usedBy",
+          "lastScheduledAt",
+          "nextRunAt",
           "createdAt",
           "updatedAt"
         ],
@@ -3146,6 +3157,20 @@
             "items": {
               "$ref": "#/components/schemas/RuleSummary"
             }
+          },
+          "lastScheduledAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "nextRunAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
           },
           "createdAt": {
             "type": "string",
@@ -3285,6 +3310,7 @@
           "trigger",
           "state",
           "folder",
+          "searchFilter",
           "messagesExamined",
           "messagesMatched",
           "plannedActions",
@@ -3321,6 +3347,12 @@
           },
           "folder": {
             "type": "string"
+          },
+          "searchFilter": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "messagesExamined": {
             "type": "integer",
@@ -3404,7 +3436,8 @@
           "NewMail",
           "Manual",
           "Scheduled",
-          "Undo"
+          "Undo",
+          "Purge"
         ]
       },
       "SkipReason": {

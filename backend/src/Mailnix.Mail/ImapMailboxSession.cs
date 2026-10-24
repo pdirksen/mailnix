@@ -72,6 +72,29 @@ internal sealed class ImapMailboxSession(ImapClient client) : IMailboxSession
         return snapshots;
     }
 
+    public async Task<SearchResult> SearchAsync(string folder, SearchFilter? filter, CancellationToken ct)
+    {
+        var mailFolder = await GetOpenFolderAsync(folder, writable: false, ct);
+        if (mailFolder.Count == 0)
+        {
+            return new SearchResult([], filter is not null);
+        }
+
+        if (filter is not null)
+        {
+            try
+            {
+                return new SearchResult(Ascending(await mailFolder.SearchAsync(ToQuery(filter), ct)), true);
+            }
+            catch (ImapCommandException)
+            {
+                // The server refused the criteria (e.g. unsupported search key): fall back to every message.
+            }
+        }
+
+        return new SearchResult(Ascending(await mailFolder.SearchAsync(SearchQuery.All, ct)), false);
+    }
+
     public async Task<IReadOnlyList<MessageSnapshot>> FetchAsync(string folder, IReadOnlyList<uint> uids, FetchRequirements requirements, CancellationToken ct)
     {
         if (uids.Count == 0)
@@ -275,6 +298,24 @@ internal sealed class ImapMailboxSession(ImapClient client) : IMailboxSession
         return true;
     }
 
+    public async Task<bool> PurgeAsync(string folder, IReadOnlyList<uint> uids, CancellationToken ct)
+    {
+        if (!client.Capabilities.HasFlag(ImapCapabilities.UidPlus))
+        {
+            return false;
+        }
+
+        var mailFolder = await GetOpenFolderAsync(folder, writable: true, ct);
+        foreach (var batch in uids.Chunk(500))
+        {
+            IList<UniqueId> set = [.. batch.Select(u => new UniqueId(u))];
+            await mailFolder.StoreAsync(set, new StoreFlagsRequest(StoreAction.Add, MessageFlags.Deleted) { Silent = true }, ct);
+            await mailFolder.ExpungeAsync(set, ct);
+        }
+
+        return true;
+    }
+
     public async Task<uint?> AppendAsync(string folder, MimeMessage message, CancellationToken ct)
     {
         var mailFolder = await EnsureFolderAsync(folder, ct);
@@ -357,6 +398,29 @@ internal sealed class ImapMailboxSession(ImapClient client) : IMailboxSession
 
         return MessageReader.ToSnapshot(summary, folder.FullName, requirements, body);
     }
+
+    private static List<uint> Ascending(IList<UniqueId> uids) => [.. uids.Select(u => u.Id).Order()];
+
+    internal static SearchQuery ToQuery(SearchFilter filter) => filter switch
+    {
+        SearchAnd and => and.Children.Select(ToQuery).Aggregate(SearchQuery.And),
+        SearchOr or => or.Children.Select(ToQuery).Aggregate(SearchQuery.Or),
+        SearchNot not => SearchQuery.Not(ToQuery(not.Inner)),
+        SearchText { Field: SearchTextField.From } text => SearchQuery.FromContains(text.Value),
+        SearchText { Field: SearchTextField.To } text => SearchQuery.ToContains(text.Value),
+        SearchText { Field: SearchTextField.Cc } text => SearchQuery.CcContains(text.Value),
+        SearchText { Field: SearchTextField.Subject } text => SearchQuery.SubjectContains(text.Value),
+        SearchText text => SearchQuery.HeaderContains(text.HeaderName!, text.Value),
+        SearchFlagIs { Flag: SearchFlagKind.Seen } flag => flag.Set ? SearchQuery.Seen : SearchQuery.NotSeen,
+        SearchFlagIs { Flag: SearchFlagKind.Flagged } flag => flag.Set ? SearchQuery.Flagged : SearchQuery.NotFlagged,
+        SearchFlagIs { Flag: SearchFlagKind.Answered } flag => flag.Set ? SearchQuery.Answered : SearchQuery.NotAnswered,
+        SearchKeyword keyword => SearchQuery.HasKeyword(keyword.Keyword),
+        SearchLarger larger => SearchQuery.LargerThan((int)Math.Clamp(larger.Bytes, 0, int.MaxValue)),
+        SearchSmaller smaller => SearchQuery.SmallerThan((int)Math.Clamp(smaller.Bytes, 1, int.MaxValue)),
+        SearchBefore before => SearchQuery.DeliveredBefore(before.Day.ToDateTime(TimeOnly.MinValue)),
+        SearchSince since => SearchQuery.DeliveredAfter(since.Day.ToDateTime(TimeOnly.MinValue)),
+        _ => throw new ArgumentOutOfRangeException(nameof(filter), filter, "Unknown search filter."),
+    };
 
     /// <summary>Keeps one folder open; reopens when a different folder or stronger access is needed.</summary>
     private async Task<IMailFolder> GetOpenFolderAsync(string folder, bool writable, CancellationToken ct, bool forceReopen = false)

@@ -173,8 +173,9 @@
       "blastRadius": "Bestätigungsschwelle",
       "blastRadiusHint": "Läufe, die mehr E-Mails verschieben oder löschen würden, pausieren und fragen vorher nach.",
       "purgeTrash": "Papierkorb automatisch leeren",
-      "purgeTrashHint": "E-Mails, die schon eine Weile im Papierkorb liegen, endgültig löschen. Standardmäßig aus.",
-      "purgeDays": "Nach wie vielen Tagen"
+      "purgeTrashHint": "Löscht E-Mails endgültig, die eine Weile im Papierkorb liegen. Gezählt ab dem Zeitpunkt, an dem mailnix sie dort zum ersten Mal sieht. Standardmäßig aus.",
+      "purgeDays": "Nach wie vielen Tagen",
+      "lastPurge": "Zuletzt geprüft {time}"
     },
     "tabs": {
       "overview": "Übersicht",
@@ -439,7 +440,8 @@
       "otherGroup": "E-Mail verändern",
       "pickFolder": "Ordner wählen",
       "placeholders": "Einfügen",
-      "example": "z. B. {path}"
+      "example": "z. B. {path}",
+      "Purge": "Endgültig gelöscht"
     },
     "preview": {
       "title": "Vorschau",
@@ -535,7 +537,8 @@
           "description": "Markiert E-Mails mit großen Anhängen und versieht sie mit einem Schlagwort."
         }
       }
-    }
+    },
+    "nextRun": "nächster Lauf {time}"
   },
   "activity": {
     "title": "Aktivität",
@@ -550,7 +553,8 @@
       "NewMail": "Neue E-Mails",
       "Manual": "Manuell gestartet",
       "Scheduled": "Zeitgesteuert",
-      "Undo": "Rückgängig"
+      "Undo": "Rückgängig",
+      "Purge": "Papierkorb leeren"
     },
     "states": {
       "Queued": "Wartet",
@@ -590,14 +594,16 @@
     "cancelled": "Lauf abgebrochen.",
     "notWaiting": "Dieser Lauf wartet nicht auf Bestätigung.",
     "time": "Zeit",
-    "messagesAffected": "{count} E-Mails betroffen"
+    "messagesAffected": "{count} E-Mails betroffen",
+    "searchFilter": "Vom Mailserver vorausgewählt:",
+    "purgeCounts": "{executed} von {examined} E-Mails im Papierkorb endgültig gelöscht"
   },
   "runNow": {
     "button": "Jetzt ausführen",
     "title": "Regeln jetzt ausführen",
-    "text": "Wendet die aktiven Regeln auf die neuesten E-Mails eines Ordners an. Große Läufe fragen vorher nach.",
+    "text": "Wendet die aktiven Regeln auf die neuesten E-Mails eines Ordners an, die passen könnten (der Mailserver wählt sie vor). Große Läufe fragen vorher nach.",
     "ruleTitle": "Auf vorhandene E-Mails anwenden",
-    "ruleText": "Wendet diese Regel auf die neuesten E-Mails eines Ordners an, auch wenn sie ausgeschaltet ist.",
+    "ruleText": "Wendet diese Regel auf die neuesten passenden E-Mails eines Ordners an, auch wenn sie ausgeschaltet ist.",
     "folder": "Ordner",
     "limit": "Neueste E-Mails",
     "start": "Starten",

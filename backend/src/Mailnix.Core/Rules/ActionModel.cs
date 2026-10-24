@@ -15,6 +15,9 @@ public enum ActionType
     Delete,
     MarkAsSpam,
     Archive,
+
+    /// <summary>Permanent removal by the Trash purge (logged like an action); never a rule action.</summary>
+    Purge,
 }
 
 /// <summary>What a matching rule does. At most one action per message may be terminal (move it somewhere).</summary>

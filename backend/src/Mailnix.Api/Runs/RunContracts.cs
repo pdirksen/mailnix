@@ -21,6 +21,7 @@ public sealed record RunSummary(
     RunTrigger Trigger,
     RunState State,
     string Folder,
+    string? SearchFilter,
     int MessagesExamined,
     int MessagesMatched,
     int PlannedActions,
@@ -43,6 +44,7 @@ public sealed record RunSummary(
         run.Trigger,
         run.State,
         run.Folder,
+        run.SearchFilter,
         run.MessagesExamined,
         run.MessagesMatched,
         run.PlannedActions,
@@ -57,7 +59,7 @@ public sealed record RunSummary(
         run.UndoRunId,
         run.UndoRuleId,
         CanUndo: run.State is RunState.Completed or RunState.CompletedWithErrors
-            && run.Trigger != RunTrigger.Undo && run.UndoneByRunId is null && run.ExecutedActions > 0);
+            && run.Trigger is not (RunTrigger.Undo or RunTrigger.Purge) && run.UndoneByRunId is null && run.ExecutedActions > 0);
 }
 
 public sealed record ActionLogItem(

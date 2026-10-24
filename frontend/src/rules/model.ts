@@ -35,7 +35,7 @@ export type RuleAction =
 export const TERMINAL_ACTIONS: readonly ActionType[] = ['MoveTo', 'Delete', 'MarkAsSpam', 'Archive']
 export const NON_TERMINAL_ACTIONS: readonly ActionType[] = ['MarkRead', 'MarkUnread', 'Flag', 'Unflag', 'AddKeyword', 'RemoveKeyword', 'CopyTo']
 
-export const isTerminal = (action: Pick<RuleAction, 'type'>) => TERMINAL_ACTIONS.includes(action.type)
+export const isTerminal = (action: { type: string }) => (TERMINAL_ACTIONS as readonly string[]).includes(action.type)
 
 /** Operators without an operand. */
 export const UNARY_OPERATORS: readonly ConditionOperator[] = ['Exists', 'NotExists', 'IsTrue', 'IsFalse']

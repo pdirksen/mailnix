@@ -38,6 +38,9 @@ public sealed partial class NamedList
 
     public int Count => _values.Count;
 
+    /// <summary>The normalized entries (see <see cref="Normalize"/>).</summary>
+    public IReadOnlyCollection<string> Entries => _values;
+
     /// <summary>The form entries are stored and compared in (lowercase; domains as punycode).</summary>
     public static string Normalize(NamedListKind kind, string entry)
     {

@@ -18,6 +18,10 @@ public sealed record ActionOutcome(
     uint? TargetUid = null,
     uint? TargetUidValidity = null);
 
+/// <param name="Uids">Matching UIDs, ascending.</param>
+/// <param name="Filtered">False when the server rejected the search and all messages were returned instead.</param>
+public sealed record SearchResult(IReadOnlyList<uint> Uids, bool Filtered);
+
 public enum IdleOutcome
 {
     NewMessages,
@@ -46,6 +50,12 @@ public interface IMailboxSession : IAsyncDisposable
     /// <summary>The newest messages, newest first.</summary>
     Task<IReadOnlyList<MessageSnapshot>> FetchLatestAsync(string folder, int limit, FetchRequirements requirements, CancellationToken ct);
 
+    /// <summary>
+    /// UIDs of the messages matching <paramref name="filter"/> (null: all messages). If the server cannot run the
+    /// search, all UIDs are returned (<see cref="SearchResult.Filtered"/> = false): the filter only narrows down.
+    /// </summary>
+    Task<SearchResult> SearchAsync(string folder, SearchFilter? filter, CancellationToken ct);
+
     /// <summary>Messages with the given UIDs (missing ones are left out).</summary>
     Task<IReadOnlyList<MessageSnapshot>> FetchAsync(string folder, IReadOnlyList<uint> uids, FetchRequirements requirements, CancellationToken ct);
 
@@ -71,6 +81,9 @@ public interface IMailboxSession : IAsyncDisposable
 
     /// <summary>Permanently removes exactly this message. False if the server cannot expunge single messages (no UIDPLUS).</summary>
     Task<bool> ExpungeAsync(string folder, uint uid, CancellationToken ct);
+
+    /// <summary>Permanently removes exactly these messages. False if the server cannot expunge single messages (no UIDPLUS).</summary>
+    Task<bool> PurgeAsync(string folder, IReadOnlyList<uint> uids, CancellationToken ct);
 
     Task<uint?> AppendAsync(string folder, MimeMessage message, CancellationToken ct);
 

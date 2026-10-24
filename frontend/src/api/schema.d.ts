@@ -1583,6 +1583,8 @@ export interface components {
             /** Format: int32 */
             purgeTrashAfterDays: null | number;
             /** Format: date-time */
+            lastPurgeAt: null | string;
+            /** Format: date-time */
             createdAt: string;
         };
         ActionLogItem: {
@@ -1606,7 +1608,7 @@ export interface components {
             undoneAt: null | string;
         };
         /** @enum {unknown} */
-        ActionType: "MarkRead" | "MarkUnread" | "Flag" | "Unflag" | "AddKeyword" | "RemoveKeyword" | "CopyTo" | "MoveTo" | "Delete" | "MarkAsSpam" | "Archive";
+        ActionType: "MarkRead" | "MarkUnread" | "Flag" | "Unflag" | "AddKeyword" | "RemoveKeyword" | "CopyTo" | "MoveTo" | "Delete" | "MarkAsSpam" | "Archive" | "Purge";
         AuthConfigResponse: {
             registrationOpen: boolean;
         };
@@ -1995,6 +1997,10 @@ export interface components {
             actions: components["schemas"]["RuleAction"][];
             usedBy: components["schemas"]["RuleSummary"][];
             /** Format: date-time */
+            lastScheduledAt: null | string;
+            /** Format: date-time */
+            nextRunAt: null | string;
+            /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
@@ -2037,6 +2043,7 @@ export interface components {
             trigger: components["schemas"]["RunTrigger"];
             state: components["schemas"]["RunState"];
             folder: string;
+            searchFilter: null | string;
             /** Format: int32 */
             messagesExamined: number;
             /** Format: int32 */
@@ -2065,7 +2072,7 @@ export interface components {
             canUndo: boolean;
         };
         /** @enum {unknown} */
-        RunTrigger: "NewMail" | "Manual" | "Scheduled" | "Undo";
+        RunTrigger: "NewMail" | "Manual" | "Scheduled" | "Undo" | "Purge";
         /** @enum {unknown} */
         SkipReason: "TerminalActionAlreadyPlanned" | "ContradictsEarlierAction" | "Duplicate" | "AlreadyInTargetFolder" | "NoChange" | "SpecialFolderNotConfigured";
         /** @enum {unknown} */

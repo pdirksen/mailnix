@@ -59,6 +59,23 @@ describe('RunItem', () => {
     expect(wrapper.text()).toContain('Undone')
   })
 
+  it('shows the server-side preselection of a run', async () => {
+    apiMock.GET.mockResolvedValue(apiResult(200, { run: testRun(), pending: [], actions: [] }))
+    const wrapper = mountItem(testRun({ trigger: 'Scheduled', searchFilter: 'SUBJECT "invoice"' }), true)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Scheduled')
+    expect(wrapper.get('[data-testid="search-filter"]').text()).toContain('SUBJECT "invoice"')
+  })
+
+  it('summarizes Trash purges, which cannot be undone', () => {
+    const wrapper = mountItem(testRun({ trigger: 'Purge', folder: 'Trash', executedActions: 3, messagesExamined: 40, canUndo: false }))
+
+    expect(wrapper.text()).toContain('Trash purge')
+    expect(wrapper.text()).toContain('3 of 40 messages in Trash deleted permanently')
+    expect(wrapper.find('[data-testid="undo-run"]').exists()).toBe(false)
+  })
+
   it('loads the actions when opened', async () => {
     apiMock.GET.mockResolvedValue(
       apiResult(200, {

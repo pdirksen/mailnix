@@ -185,6 +185,9 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
 
+                    b.Property<DateTimeOffset?>("LastPurgeAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -287,6 +290,9 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
 
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LastScheduledAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -475,6 +481,10 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.PrimitiveCollection<List<Guid>>("RuleIds")
                         .HasColumnType("uuid[]");
 
+                    b.Property<string>("SearchFilter")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
                     b.Property<DateTimeOffset?>("StartedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -532,6 +542,29 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.HasKey("Id");
 
                     b.ToTable("Tenants");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.TrashObservation", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Folder")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<long>("Uid")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("FirstSeenAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UidValidity")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("AccountId", "Folder", "Uid");
+
+                    b.ToTable("TrashObservations");
                 });
 
             modelBuilder.Entity("Mailnix.Infrastructure.Identity.AppRole", b =>
@@ -850,6 +883,15 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                 });
 
             modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleRun", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.TrashObservation", b =>
                 {
                     b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
                         .WithMany()

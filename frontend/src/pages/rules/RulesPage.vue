@@ -28,6 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { useConnectionErrors } from '@/lib/connectionErrors'
+import { formatRelative } from '@/lib/format'
 import { countConditions, fromApi, toDraft } from '@/rules/model'
 import { useAccountsStore } from '@/stores/accounts'
 import { type Rule, useRulesStore } from '@/stores/rules'
@@ -50,7 +51,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const rules = useRulesStore()
@@ -241,7 +242,10 @@ function summary(rule: Rule) {
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
               <RouterLink :to="{ name: 'rule-edit', params: { id: rule.id } }" class="truncate font-medium hover:underline">{{ rule.name }}</RouterLink>
-              <Badge v-if="rule.trigger !== 'OnNew'" variant="secondary">{{ $t(`rules.triggers.${rule.trigger}`) }}</Badge>
+              <Badge v-if="rule.trigger !== 'OnNew'" variant="secondary" :title="rule.schedule ?? undefined">
+                {{ $t(`rules.triggers.${rule.trigger}`)
+                }}<template v-if="rule.nextRunAt"> · {{ $t('rules.nextRun', { time: formatRelative(rule.nextRunAt, locale) }) }}</template>
+              </Badge>
               <Badge v-if="rule.dryRun" variant="outline">{{ $t('rules.dryRun') }}</Badge>
               <Badge v-if="rule.actions.length === 0" variant="outline">{{ $t('rules.filterOnly') }}</Badge>
               <Badge v-if="rule.usedBy.length" variant="outline">{{ $t('rules.usedBy', { count: rule.usedBy.length }, rule.usedBy.length) }}</Badge>

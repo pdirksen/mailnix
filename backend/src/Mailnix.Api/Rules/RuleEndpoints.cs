@@ -36,7 +36,8 @@ internal static class RuleEndpoints
             .OrderBy(r => r.AccountId).ThenBy(r => r.Priority).ThenBy(r => r.Name)
             .ToListAsync(ct);
         var usedBy = await UsedByAsync(db, [.. rules.Select(r => r.Id)], ct);
-        return TypedResults.Ok(rules.Select(r => RuleResponse.From(r, [.. usedBy[r.Id]])).ToList());
+        var zone = await ZoneAsync(db, userId, ct);
+        return TypedResults.Ok(rules.Select(r => RuleResponse.From(r, [.. usedBy[r.Id]], zone)).ToList());
     }
 
     private static async Task<Results<Ok<RuleResponse>, NotFound>> Get(Guid id, ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
@@ -46,7 +47,7 @@ internal static class RuleEndpoints
             return TypedResults.NotFound();
         }
 
-        return TypedResults.Ok(RuleResponse.From(rule, [.. (await UsedByAsync(db, [rule.Id], ct))[rule.Id]]));
+        return TypedResults.Ok(RuleResponse.From(rule, [.. (await UsedByAsync(db, [rule.Id], ct))[rule.Id]], await ZoneAsync(db, rule.UserId, ct)));
     }
 
     private static async Task<Results<Created<RuleResponse>, ValidationProblem, NotFound>> Create(
@@ -98,7 +99,7 @@ internal static class RuleEndpoints
         db.Rules.Add(rule);
         await db.SaveChangesAsync(ct);
 
-        return TypedResults.Created($"/api/rules/{rule.Id}", RuleResponse.From(rule, []));
+        return TypedResults.Created($"/api/rules/{rule.Id}", RuleResponse.From(rule, [], await ZoneAsync(db, userId, ct)));
     }
 
     private static async Task<Results<Ok<RuleResponse>, ValidationProblem, NotFound>> Update(
@@ -136,8 +137,11 @@ internal static class RuleEndpoints
         RuleService.SyncReferences(rule, request.Conditions);
         await db.SaveChangesAsync(ct);
 
-        return TypedResults.Ok(RuleResponse.From(rule, [.. (await UsedByAsync(db, [rule.Id], ct))[rule.Id]]));
+        return TypedResults.Ok(RuleResponse.From(rule, [.. (await UsedByAsync(db, [rule.Id], ct))[rule.Id]], await ZoneAsync(db, rule.UserId, ct)));
     }
+
+    private static async Task<TimeZoneInfo> ZoneAsync(MailnixDbContext db, Guid userId, CancellationToken ct) =>
+        RuleSchedule.Zone(await db.Users.Where(u => u.Id == userId).Select(u => u.TimeZone).SingleOrDefaultAsync(ct));
 
     private static async Task<Results<NoContent, NotFound, ProblemHttpResult>> Delete(
         Guid id,

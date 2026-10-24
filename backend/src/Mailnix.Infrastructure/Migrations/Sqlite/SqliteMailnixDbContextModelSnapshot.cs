@@ -180,6 +180,9 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                         .HasMaxLength(40)
                         .HasColumnType("TEXT");
 
+                    b.Property<long?>("LastPurgeAt")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -281,6 +284,9 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("LastScheduledAt")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -470,6 +476,10 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                     b.PrimitiveCollection<string>("RuleIds")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("SearchFilter")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
                     b.Property<long?>("StartedAt")
                         .HasColumnType("INTEGER");
 
@@ -527,6 +537,29 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                     b.HasKey("Id");
 
                     b.ToTable("Tenants");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.TrashObservation", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Folder")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<uint>("Uid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("FirstSeenAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("UidValidity")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("AccountId", "Folder", "Uid");
+
+                    b.ToTable("TrashObservations");
                 });
 
             modelBuilder.Entity("Mailnix.Infrastructure.Identity.AppRole", b =>
@@ -839,6 +872,15 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                 });
 
             modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleRun", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.TrashObservation", b =>
                 {
                     b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
                         .WithMany()

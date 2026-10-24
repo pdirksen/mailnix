@@ -173,8 +173,9 @@
       "blastRadius": "Confirmation threshold",
       "blastRadiusHint": "Runs that would move or delete more messages than this pause and ask you first.",
       "purgeTrash": "Empty trash automatically",
-      "purgeTrashHint": "Permanently delete messages that have been in the trash for a while. Off by default.",
-      "purgeDays": "After how many days"
+      "purgeTrashHint": "Permanently delete messages that have been in the trash for a while. Counted from when mailnix first sees them there. Off by default.",
+      "purgeDays": "After how many days",
+      "lastPurge": "Last checked {time}"
     },
     "tabs": {
       "overview": "Overview",
@@ -439,7 +440,8 @@
       "otherGroup": "Change the message",
       "pickFolder": "Choose a folder",
       "placeholders": "Insert",
-      "example": "e.g. {path}"
+      "example": "e.g. {path}",
+      "Purge": "Deleted permanently"
     },
     "preview": {
       "title": "Preview",
@@ -535,7 +537,8 @@
           "description": "Flags messages with big attachments and tags them."
         }
       }
-    }
+    },
+    "nextRun": "next {time}"
   },
   "activity": {
     "title": "Activity",
@@ -550,7 +553,8 @@
       "NewMail": "New mail",
       "Manual": "Run manually",
       "Scheduled": "Scheduled",
-      "Undo": "Undo"
+      "Undo": "Undo",
+      "Purge": "Trash purge"
     },
     "states": {
       "Queued": "Queued",
@@ -590,14 +594,16 @@
     "cancelled": "Run cancelled.",
     "notWaiting": "This run is not waiting for confirmation.",
     "time": "Time",
-    "messagesAffected": "{count} messages affected"
+    "messagesAffected": "{count} messages affected",
+    "searchFilter": "Preselected by the mail server:",
+    "purgeCounts": "{executed} of {examined} messages in Trash deleted permanently"
   },
   "runNow": {
     "button": "Run now",
     "title": "Run rules now",
-    "text": "Applies the active rules to the newest messages of a folder. Large runs ask for confirmation first.",
+    "text": "Applies the active rules to the newest messages of a folder that could match (the mail server preselects them). Large runs ask for confirmation first.",
     "ruleTitle": "Apply to existing mail",
-    "ruleText": "Applies this rule to the newest messages of a folder, even if it is switched off.",
+    "ruleText": "Applies this rule to the newest messages of a folder that could match, even if it is switched off.",
     "folder": "Folder",
     "limit": "Newest messages",
     "start": "Start",

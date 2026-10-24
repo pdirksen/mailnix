@@ -139,11 +139,25 @@ test('run rules now and undo a rule, with live status updates (real mailbox, tes
     },
   })
   expect(rule.status()).toBe(201)
+  const nightly = await page.request.post('/api/rules', {
+    headers: csrf,
+    data: {
+      accountId,
+      name: 'Nightly e2e',
+      trigger: 'Scheduled',
+      schedule: '0 3 * * *',
+      sourceFolders: [TEST_FOLDER],
+      conditions: { kind: 'condition', field: 'Subject', operator: 'Contains', value: 'mailnix-e2e-nightly-7f3a' },
+      actions: [{ type: 'Flag' }],
+    },
+  })
+  expect(nightly.status()).toBe(201)
 
   await page.getByRole('link', { name: 'Activity' }).click()
   await expect(page.getByText('Nothing happened yet')).toBeVisible()
 
   await page.getByRole('link', { name: 'Rules', exact: true }).click()
+  await expect(page.getByTestId('rule-Nightly e2e')).toContainText(/Scheduled · next in \d+ hours?/)
   await page.getByTestId('run-now').click()
   await expect(page.getByTestId('run-folder')).toContainText(TEST_FOLDER)
   await page.getByTestId('start-run').click()
@@ -154,8 +168,9 @@ test('run rules now and undo a rule, with live status updates (real mailbox, tes
   await expect(runs).toHaveCount(1)
   await expect(runs.first()).toContainText('Done', { timeout: 60_000 })
   await expect(runs.first()).toContainText(/0 actions on 0 of \d+ messages/)
-  // Opened from the toast, the run's details are expanded.
+  // Opened from the toast, the run's details are expanded; the mail server preselected the candidates.
   await expect(runs.first()).toContainText('No actions.')
+  await expect(runs.first().getByTestId('search-filter')).toContainText('SUBJECT "mailnix-e2e-matches-nothing-7f3a" OR SUBJECT "mailnix-e2e-nightly-7f3a"')
   await runs.first().getByRole('button', { name: 'Details' }).click()
   await expect(runs.first()).not.toContainText('No actions.')
 

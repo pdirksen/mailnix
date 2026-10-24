@@ -143,7 +143,7 @@ async function save() {
         <CardTitle>{{ $t('accounts.safety.title') }}</CardTitle>
       </CardHeader>
       <CardContent>
-        <SafetyFields v-model="safety" :errors="safetyValidation.errors.value" />
+        <SafetyFields v-model="safety" :errors="safetyValidation.errors.value" :last-purge-at="account.lastPurgeAt" />
       </CardContent>
     </Card>
 

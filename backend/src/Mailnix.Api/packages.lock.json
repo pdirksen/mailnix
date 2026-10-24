@@ -223,6 +223,7 @@
       "mailnix.infrastructure": {
         "type": "Project",
         "dependencies": {
+          "Cronos": "[0.13.0, )",
           "Mailnix.Core": "[1.0.0, )",
           "Mailnix.Mail": "[1.0.0, )",
           "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[10.0.13, )",
