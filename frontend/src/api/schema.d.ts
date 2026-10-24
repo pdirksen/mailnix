@@ -1095,6 +1095,155 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/accounts/{id}/rules/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PreviewRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PreviewResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rule-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RuleTemplateInfo"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rule-templates/{templateId}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    templateId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RuleDraftRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RuleDraftResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1125,8 +1274,18 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        /** @enum {unknown} */
+        ActionType: "MarkRead" | "MarkUnread" | "Flag" | "Unflag" | "AddKeyword" | "RemoveKeyword" | "CopyTo" | "MoveTo" | "Delete" | "MarkAsSpam" | "Archive";
         AuthConfigResponse: {
             registrationOpen: boolean;
+        };
+        Condition: {
+            field: components["schemas"]["ConditionField"];
+            operator: components["schemas"]["ConditionOperator"];
+            value?: null | string;
+            headerName?: null | string;
+            /** @default false */
+            caseSensitive: boolean;
         };
         /** @enum {unknown} */
         ConditionField: "From" | "FromName" | "FromDomain" | "To" | "Cc" | "ReplyTo" | "Recipients" | "Subject" | "Header" | "Body" | "Size" | "Date" | "AgeDays" | "IsUnread" | "IsFlagged" | "IsAnswered" | "Keyword" | "IsNewsletter" | "ListId" | "IsAutoReply" | "IsReply" | "IsReplyToMyMail" | "SpfResult" | "DkimResult" | "DmarcResult" | "DisplayNameMismatch" | "SpamScore" | "IAmOnlyInCcOrBcc" | "DeliveredTo" | "PlusTag" | "RecipientCount" | "HasAttachment" | "AttachmentCount" | "AttachmentName" | "AttachmentExtension" | "AttachmentMimeType" | "AttachmentSize" | "Rule";
@@ -1334,6 +1493,72 @@ export interface components {
         };
         /** @enum {unknown} */
         NamedListKind: "Address" | "Domain" | "Pattern";
+        PreviewAction: {
+            type: components["schemas"]["ActionType"];
+            targetFolder: null | string;
+            keyword: null | string;
+            /** Format: uuid */
+            ruleId: string;
+            ruleName: string;
+        };
+        PreviewMessage: {
+            /** Format: uint32 */
+            uid: number;
+            from: null | string;
+            fromName: null | string;
+            subject: null | string;
+            /** Format: date-time */
+            date: null | string;
+            isSeen: boolean;
+            matched: boolean;
+            trace: null | components["schemas"]["TraceNode"];
+            actions: components["schemas"]["PreviewAction"][];
+            skipped: components["schemas"]["PreviewSkippedAction"][];
+            otherRulesActions: components["schemas"]["PreviewAction"][];
+        };
+        PreviewRequest: {
+            conditions: components["schemas"]["ConditionNode"];
+            actions: components["schemas"]["RuleAction"][];
+            /** Format: uuid */
+            ruleId?: null | string;
+            name?: null | string;
+            /** @default false */
+            stopProcessing: boolean;
+            folder?: null | string;
+            /**
+             * Format: int32
+             * @default 100
+             */
+            limit: number;
+            /** @default false */
+            refresh: boolean;
+        };
+        PreviewResponse: {
+            folder: string;
+            /** Format: int32 */
+            totalInFolder: number;
+            /** Format: int32 */
+            limit: number;
+            /** Format: int32 */
+            examined: number;
+            /** Format: int32 */
+            matched: number;
+            /** Format: int32 */
+            terminalActions: number;
+            /** Format: int32 */
+            confirmationThreshold: number;
+            exceedsConfirmationThreshold: boolean;
+            /** Format: date-time */
+            fetchedAt: string;
+            fromCache: boolean;
+            messages: components["schemas"]["PreviewMessage"][];
+        };
+        PreviewSkippedAction: {
+            type: components["schemas"]["ActionType"];
+            targetFolder: null | string;
+            reason: components["schemas"]["SkipReason"];
+            blockedByRuleName: null | string;
+        };
         RegisterRequest: {
             email: string;
             password: string;
@@ -1393,6 +1618,19 @@ export interface components {
             /** @enum {string} */
             type?: "Unflag";
         };
+        RuleDraftRequest: {
+            name: string;
+            parameters?: null | {
+                [key: string]: string;
+            };
+        };
+        RuleDraftResponse: {
+            name: string;
+            conditions: components["schemas"]["ConditionNode"];
+            actions: components["schemas"]["RuleAction"][];
+            trigger: components["schemas"]["RuleTrigger"];
+            schedule: null | string;
+        };
         RuleResponse: {
             /** Format: uuid */
             id: string;
@@ -1423,6 +1661,10 @@ export interface components {
             /** Format: uuid */
             accountId: string;
         };
+        RuleTemplateInfo: {
+            id: string;
+            parameters: components["schemas"]["TemplateParameterInfo"][];
+        };
         /** @enum {unknown} */
         RuleTrigger: "OnNew" | "Scheduled" | "Manual";
         RuleValidationError: {
@@ -1435,6 +1677,8 @@ export interface components {
             errors: components["schemas"]["RuleValidationError"][];
         };
         /** @enum {unknown} */
+        SkipReason: "TerminalActionAlreadyPlanned" | "ContradictsEarlierAction" | "Duplicate" | "AlreadyInTargetFolder" | "NoChange" | "SpecialFolderNotConfigured";
+        /** @enum {unknown} */
         SpecialFolderKind: "Inbox" | "Sent" | "Drafts" | "Trash" | "Junk" | "Archive" | "All" | "Flagged" | null;
         SpecialFolderMap: {
             sent: null | string;
@@ -1443,6 +1687,13 @@ export interface components {
             junk: null | string;
             archive: null | string;
         };
+        TemplateParameterInfo: {
+            name: string;
+            type: components["schemas"]["TemplateParameterType"];
+            default: null | string;
+        };
+        /** @enum {unknown} */
+        TemplateParameterType: "Folder" | "Days" | "Megabytes" | "DomainList";
         TestConnectionRequest: {
             host: string;
             /** Format: int32 */
@@ -1451,6 +1702,17 @@ export interface components {
             username: string;
             password: string;
         };
+        TraceNode: {
+            result: boolean;
+            operator?: null | components["schemas"]["GroupOperator"];
+            condition?: null | components["schemas"]["Condition"];
+            actual?: string[];
+            note?: null | components["schemas"]["TraceNote"];
+            referencedRuleName?: null | string;
+            children?: components["schemas"]["TraceNode"][];
+        };
+        /** @enum {unknown} */
+        TraceNote: "NotLoaded" | "RegexTimeout" | "InvalidValue" | "ListNotFound" | "RuleNotFound" | "ReferenceDepthExceeded" | null;
         UpdateAccountRequest: {
             name: string;
             host: string;

@@ -7,7 +7,8 @@
     "dashboard": "Dashboard",
     "toggleSidebar": "Toggle sidebar",
     "accounts": "Accounts",
-    "lists": "Lists"
+    "lists": "Lists",
+    "rules": "Rules"
   },
   "common": {
     "language": "Language",
@@ -248,5 +249,290 @@
     "importLine": "Line {line}",
     "export": "Export CSV",
     "saveFailed": "Saving failed"
+  },
+  "rules": {
+    "title": "Rules",
+    "subtitle": "Rules run from top to bottom. The first rule that moves a message wins; flags and keywords of all matching rules apply.",
+    "account": "Account",
+    "noAccounts": "Add a mail account first to create rules.",
+    "add": "New rule",
+    "fromTemplate": "From template",
+    "empty": "No rules for this account yet",
+    "emptyHint": "Start from a template or build a rule from scratch.",
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "copyOf": "Copy of {name}",
+    "delete": "Delete",
+    "deleteTitle": "Delete \"{name}\"?",
+    "deleteText": "The rule stops running. Messages are not affected.",
+    "deleted": "Rule deleted.",
+    "inUse": "This rule is used by other rules and cannot be deleted: {rules}",
+    "saved": "Rule saved.",
+    "created": "Rule created.",
+    "reordered": "Order saved.",
+    "dragHandle": "Drag to reorder",
+    "enabled": "Active",
+    "disabled": "Off",
+    "dryRun": "Dry run",
+    "filterOnly": "Filter only",
+    "usedBy": "used by {count} rule | used by {count} rules",
+    "conditionCount": "{count} condition | {count} conditions",
+    "noActions": "no actions",
+    "notFound": "This rule does not exist.",
+    "triggers": {
+      "OnNew": "New mail",
+      "OnNewHint": "Runs on new messages in the source folders.",
+      "Scheduled": "Scheduled",
+      "ScheduledHint": "Runs regularly over existing messages, e.g. for cleanups.",
+      "Manual": "Manual",
+      "ManualHint": "Runs only when you start it."
+    },
+    "editor": {
+      "newTitle": "New rule",
+      "editTitle": "Edit rule",
+      "basics": "Basics",
+      "name": "Name",
+      "description": "Description",
+      "trigger": "When",
+      "schedule": "Schedule",
+      "scheduleHint": "Cron expression (minute hour day month weekday), in UTC.",
+      "schedulePresets": {
+        "hourly": "Every hour",
+        "daily": "Daily at 03:00",
+        "weekly": "Weekly on Monday 03:00",
+        "custom": "Custom"
+      },
+      "sourceFolders": "Folders",
+      "sourceFoldersHint": "Leave empty to use the account's watched folders.",
+      "watchedFolders": "Watched folders ({folders})",
+      "options": "Options",
+      "enabledHint": "Inactive rules run no actions but can still be used as a filter by other rules.",
+      "dryRunHint": "Only log what the rule would do, without changing messages.",
+      "stopProcessing": "Stop after this rule",
+      "stopProcessingHint": "When this rule matches, later rules are not evaluated.",
+      "conditions": "Conditions",
+      "actions": "Actions",
+      "actionsHint": "Without actions, the rule only serves as a filter for other rules.",
+      "save": "Save rule",
+      "unsaved": "You have unsaved changes. Leave anyway?",
+      "invalid": "Fix the marked problems first.",
+      "saveFailed": "Saving failed"
+    },
+    "groups": {
+      "match": "Match",
+      "ofTheFollowing": "of the following",
+      "All": "all",
+      "Any": "any",
+      "None": "none",
+      "addCondition": "Add condition",
+      "addGroup": "Add group",
+      "removeGroup": "Remove group",
+      "removeCondition": "Remove condition"
+    },
+    "categories": {
+      "Sender": "Sender",
+      "Recipients": "Recipients",
+      "Content": "Content",
+      "Status": "Status",
+      "MailType": "Kind of mail",
+      "SenderTrust": "Sender trust",
+      "Attachments": "Attachments",
+      "Rules": "Other rules"
+    },
+    "fields": {
+      "From": "Sender address",
+      "FromName": "Sender name",
+      "FromDomain": "Sender domain",
+      "ReplyTo": "Reply-to address",
+      "To": "To",
+      "Cc": "Cc",
+      "Recipients": "Any recipient (To or Cc)",
+      "IAmOnlyInCcOrBcc": "I am only in Cc/Bcc",
+      "DeliveredTo": "Delivered to",
+      "PlusTag": "Plus tag (me+tag@…)",
+      "RecipientCount": "Number of recipients",
+      "Subject": "Subject",
+      "Header": "Header",
+      "Body": "Message text",
+      "Size": "Size",
+      "Date": "Date",
+      "AgeDays": "Age",
+      "IsUnread": "Unread",
+      "IsFlagged": "Flagged",
+      "IsAnswered": "Answered",
+      "Keyword": "Keyword",
+      "IsNewsletter": "Newsletter / bulk mail",
+      "ListId": "Mailing list ID",
+      "IsAutoReply": "Automatic reply",
+      "IsReply": "Reply",
+      "IsReplyToMyMail": "Reply to a mail I sent",
+      "SpfResult": "SPF result",
+      "DkimResult": "DKIM result",
+      "DmarcResult": "DMARC result",
+      "DisplayNameMismatch": "Display name shows another address",
+      "SpamScore": "Spam score",
+      "HasAttachment": "Has attachments",
+      "AttachmentCount": "Number of attachments",
+      "AttachmentName": "Attachment name",
+      "AttachmentExtension": "Attachment type (extension)",
+      "AttachmentMimeType": "Attachment MIME type",
+      "AttachmentSize": "Largest attachment",
+      "Rule": "Rule"
+    },
+    "operators": {
+      "Equals": "is",
+      "NotEquals": "is not",
+      "Contains": "contains",
+      "NotContains": "does not contain",
+      "StartsWith": "starts with",
+      "EndsWith": "ends with",
+      "Regex": "matches pattern",
+      "DomainMatches": "is (incl. subdomains)",
+      "InList": "is in list",
+      "NotInList": "is not in list",
+      "Exists": "is present",
+      "NotExists": "is missing",
+      "GreaterThan": "more than",
+      "LessThan": "less than",
+      "Before": "before",
+      "After": "after",
+      "IsTrue": "yes",
+      "IsFalse": "no",
+      "Matches": "matches",
+      "NotMatches": "does not match"
+    },
+    "value": {
+      "placeholder": "Value",
+      "headerName": "Header name",
+      "caseSensitive": "Match upper/lower case",
+      "chooseList": "Choose a list",
+      "noLists": "No suitable lists yet",
+      "chooseRule": "Choose a rule",
+      "noRules": "No other rules yet",
+      "days": "days",
+      "units": {
+        "B": "bytes",
+        "KB": "KB",
+        "MB": "MB"
+      }
+    },
+    "actions": {
+      "MarkRead": "Mark as read",
+      "MarkUnread": "Mark as unread",
+      "Flag": "Flag",
+      "Unflag": "Remove flag",
+      "AddKeyword": "Add keyword",
+      "RemoveKeyword": "Remove keyword",
+      "CopyTo": "Copy to folder",
+      "MoveTo": "Move to folder",
+      "Delete": "Move to trash",
+      "MarkAsSpam": "Move to spam",
+      "Archive": "Move to archive",
+      "add": "Add action",
+      "remove": "Remove action",
+      "keyword": "Keyword",
+      "folder": "Folder",
+      "oneTerminal": "A rule can move a message only once.",
+      "terminalGroup": "Move the message (only one)",
+      "otherGroup": "Change the message",
+      "pickFolder": "Choose a folder",
+      "placeholders": "Insert",
+      "example": "e.g. {path}"
+    },
+    "preview": {
+      "title": "Preview",
+      "hint": "Try the rule on the newest messages of a folder. Nothing is changed on the server.",
+      "folder": "Folder",
+      "limit": "Messages",
+      "run": "Run preview",
+      "refresh": "Read again",
+      "running": "Reading messages…",
+      "invalid": "Complete the rule to see a preview.",
+      "summary": "{matched} of {examined} messages match",
+      "terminal": "{count} would be moved",
+      "fromCache": "Messages read {time}.",
+      "threshold": "In this sample alone, the rule would move more messages than the confirmation threshold ({threshold}). Such runs pause and ask first.",
+      "limitReduced": "Rules on the message text read at most {limit} messages.",
+      "onlyMatches": "Only matches",
+      "all": "All",
+      "noMessages": "No messages to show.",
+      "date": "Date",
+      "from": "From",
+      "subject": "Subject",
+      "result": "Result",
+      "matched": "Matches",
+      "notMatched": "No match",
+      "willDo": "Would do",
+      "skipped": "Skipped",
+      "otherRules": "Other rules",
+      "why": "Why",
+      "noSubject": "(no subject)"
+    },
+    "skipReasons": {
+      "TerminalActionAlreadyPlanned": "\"{rule}\" already moves this message",
+      "ContradictsEarlierAction": "\"{rule}\" does the opposite",
+      "Duplicate": "\"{rule}\" already does this",
+      "AlreadyInTargetFolder": "already in this folder",
+      "NoChange": "nothing to change",
+      "SpecialFolderNotConfigured": "no such folder configured for the account"
+    },
+    "trace": {
+      "found": "found: {values}",
+      "nothingFound": "not present",
+      "notes": {
+        "NotLoaded": "data not loaded",
+        "RegexTimeout": "pattern took too long",
+        "InvalidValue": "invalid value",
+        "ListNotFound": "list missing",
+        "RuleNotFound": "rule missing",
+        "ReferenceDepthExceeded": "rules reference each other too deeply"
+      },
+      "rule": "rule \"{name}\""
+    },
+    "templates": {
+      "title": "Start from a template",
+      "hint": "Templates fill in the rule builder. Check the preview, adjust and save.",
+      "use": "Use template",
+      "parameters": {
+        "folder": "Target folder",
+        "days": "Older than (days)",
+        "megabytes": "Larger than (MB)",
+        "list": "Domain list"
+      },
+      "items": {
+        "newsletters-to-folder": {
+          "name": "Newsletters into a folder",
+          "description": "Moves newsletters and bulk mail out of the inbox."
+        },
+        "newsletter-cleanup": {
+          "name": "Clean up old newsletters",
+          "description": "Daily: archives newsletters older than a few days, marked as read."
+        },
+        "archive-by-year": {
+          "name": "Archive by year",
+          "description": "Daily: moves unflagged messages older than a few months into a folder per year."
+        },
+        "sort-by-sender-domain": {
+          "name": "Sort by sender domain",
+          "description": "Messages from domains in a list go into one folder per domain."
+        },
+        "auto-replies": {
+          "name": "Auto-replies out of the way",
+          "description": "Out-of-office and other automatic replies go into their own folder, marked as read."
+        },
+        "shops-by-plus-tag": {
+          "name": "Shops by plus tag",
+          "description": "Mail to me+shopname{'@'}… goes into one folder per tag."
+        },
+        "quarantine-failed-dmarc": {
+          "name": "Quarantine suspicious senders",
+          "description": "Mail failing DMARC or with a spoofed display name goes to spam."
+        },
+        "large-attachments": {
+          "name": "Flag large attachments",
+          "description": "Flags messages with big attachments and tags them."
+        }
+      }
+    }
   }
 }

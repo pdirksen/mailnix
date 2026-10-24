@@ -10,6 +10,7 @@ public static class MailServiceCollectionExtensions
         services.AddOptions<MailOptions>().Bind(configuration.GetSection(MailOptions.Section));
         services.AddSingleton<IImapConnector, ImapConnector>();
         services.AddSingleton<IMailboxProbe, MailboxProbe>();
+        services.AddSingleton<IMessageReader, MessageReader>();
         return services;
     }
 }

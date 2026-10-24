@@ -146,10 +146,10 @@ public static class FieldCatalog
     public static bool IsUnary(ConditionOperator op) =>
         op is ConditionOperator.Exists or ConditionOperator.NotExists or ConditionOperator.IsTrue or ConditionOperator.IsFalse;
 
-    /// <summary>What must be fetched to evaluate these rules, including rules they reference.</summary>
-    public static FetchRequirements RequiredFetch(IEnumerable<RuleDefinition> rules, IReadOnlyDictionary<Guid, RuleDefinition> allRules)
+    /// <summary>Fields used by these rules, including (transitively) referenced rules.</summary>
+    public static IReadOnlySet<ConditionField> UsedFields(IEnumerable<RuleDefinition> rules, IReadOnlyDictionary<Guid, RuleDefinition> allRules)
     {
-        var result = FetchRequirements.None;
+        var fields = new HashSet<ConditionField>();
         var visited = new HashSet<Guid>();
 
         void Visit(ConditionNode node)
@@ -170,8 +170,8 @@ public static class FieldCatalog
                     }
 
                     break;
-                case Condition condition when TryGet(condition.Field, out var definition):
-                    result |= definition.Fetch;
+                case Condition condition:
+                    fields.Add(condition.Field);
                     break;
             }
         }
@@ -182,6 +182,10 @@ public static class FieldCatalog
             Visit(rule.Conditions);
         }
 
-        return result;
+        return fields;
     }
+
+    /// <summary>What must be fetched to evaluate these rules, including rules they reference.</summary>
+    public static FetchRequirements RequiredFetch(IEnumerable<RuleDefinition> rules, IReadOnlyDictionary<Guid, RuleDefinition> allRules) =>
+        UsedFields(rules, allRules).Aggregate(FetchRequirements.None, (result, field) => result | Get(field).Fetch);
 }

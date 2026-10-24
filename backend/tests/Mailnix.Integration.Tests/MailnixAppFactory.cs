@@ -2,6 +2,8 @@ using System.Net.Http.Json;
 using Mailnix.Api.Hosting;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Mailnix.Integration.Tests;
 
@@ -10,10 +12,18 @@ public sealed class MailnixAppFactory : WebApplicationFactory<Program>
 {
     private readonly string _databasePath = Path.Combine(Path.GetTempPath(), $"mailnix-test-{Guid.NewGuid():N}.db");
     private readonly Dictionary<string, string?> _settings = [];
+    private readonly List<Action<IServiceCollection>> _services = [];
 
     public MailnixAppFactory WithSetting(string key, string? value)
     {
         _settings[key] = value;
+        return this;
+    }
+
+    /// <summary>Replaces or adds services, e.g. fakes for the mail server.</summary>
+    public MailnixAppFactory WithServices(Action<IServiceCollection> configure)
+    {
+        _services.Add(configure);
         return this;
     }
 
@@ -34,6 +44,8 @@ public sealed class MailnixAppFactory : WebApplicationFactory<Program>
         {
             builder.UseSetting(key, value);
         }
+
+        builder.ConfigureTestServices(services => _services.ForEach(configure => configure(services)));
     }
 
     public override async ValueTask DisposeAsync()

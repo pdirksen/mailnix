@@ -53,7 +53,7 @@ public static class MessageSnapshotFactory
     }
 
     /// <summary>Visible text of an HTML body: text nodes outside script/style, line breaks at block elements.</summary>
-    internal static string? HtmlToText(string? html)
+    public static string? HtmlToText(string? html)
     {
         if (html is null)
         {

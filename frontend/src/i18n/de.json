@@ -7,7 +7,8 @@
     "dashboard": "Dashboard",
     "toggleSidebar": "Seitenleiste ein-/ausblenden",
     "accounts": "Konten",
-    "lists": "Listen"
+    "lists": "Listen",
+    "rules": "Regeln"
   },
   "common": {
     "language": "Sprache",
@@ -248,5 +249,290 @@
     "importLine": "Zeile {line}",
     "export": "CSV exportieren",
     "saveFailed": "Speichern fehlgeschlagen"
+  },
+  "rules": {
+    "title": "Regeln",
+    "subtitle": "Regeln laufen von oben nach unten. Die erste Regel, die eine E-Mail verschiebt, gewinnt; Markierungen und Schlagwörter aller passenden Regeln werden angewendet.",
+    "account": "Konto",
+    "noAccounts": "Füge zuerst ein E-Mail-Konto hinzu, um Regeln zu erstellen.",
+    "add": "Neue Regel",
+    "fromTemplate": "Aus Vorlage",
+    "empty": "Noch keine Regeln für dieses Konto",
+    "emptyHint": "Starte mit einer Vorlage oder baue eine Regel von Grund auf.",
+    "edit": "Bearbeiten",
+    "duplicate": "Duplizieren",
+    "copyOf": "Kopie von {name}",
+    "delete": "Löschen",
+    "deleteTitle": "„{name}“ löschen?",
+    "deleteText": "Die Regel läuft nicht mehr. E-Mails bleiben unverändert.",
+    "deleted": "Regel gelöscht.",
+    "inUse": "Diese Regel wird von anderen Regeln verwendet und kann nicht gelöscht werden: {rules}",
+    "saved": "Regel gespeichert.",
+    "created": "Regel erstellt.",
+    "reordered": "Reihenfolge gespeichert.",
+    "dragHandle": "Zum Sortieren ziehen",
+    "enabled": "Aktiv",
+    "disabled": "Aus",
+    "dryRun": "Probelauf",
+    "filterOnly": "Nur Filter",
+    "usedBy": "in {count} Regel verwendet | in {count} Regeln verwendet",
+    "conditionCount": "{count} Bedingung | {count} Bedingungen",
+    "noActions": "keine Aktionen",
+    "notFound": "Diese Regel existiert nicht.",
+    "triggers": {
+      "OnNew": "Neue E-Mails",
+      "OnNewHint": "Läuft bei neuen E-Mails in den Quellordnern.",
+      "Scheduled": "Zeitgesteuert",
+      "ScheduledHint": "Läuft regelmäßig über vorhandene E-Mails, z. B. zum Aufräumen.",
+      "Manual": "Manuell",
+      "ManualHint": "Läuft nur, wenn du sie startest."
+    },
+    "editor": {
+      "newTitle": "Neue Regel",
+      "editTitle": "Regel bearbeiten",
+      "basics": "Grundlagen",
+      "name": "Name",
+      "description": "Beschreibung",
+      "trigger": "Wann",
+      "schedule": "Zeitplan",
+      "scheduleHint": "Cron-Ausdruck (Minute Stunde Tag Monat Wochentag), in UTC.",
+      "schedulePresets": {
+        "hourly": "Stündlich",
+        "daily": "Täglich um 03:00",
+        "weekly": "Wöchentlich montags 03:00",
+        "custom": "Benutzerdefiniert"
+      },
+      "sourceFolders": "Ordner",
+      "sourceFoldersHint": "Leer lassen, um die überwachten Ordner des Kontos zu verwenden.",
+      "watchedFolders": "Überwachte Ordner ({folders})",
+      "options": "Optionen",
+      "enabledHint": "Inaktive Regeln führen keine Aktionen aus, können aber von anderen Regeln als Filter genutzt werden.",
+      "dryRunHint": "Nur protokollieren, was die Regel tun würde, ohne E-Mails zu verändern.",
+      "stopProcessing": "Nach dieser Regel aufhören",
+      "stopProcessingHint": "Wenn diese Regel passt, werden spätere Regeln nicht mehr geprüft.",
+      "conditions": "Bedingungen",
+      "actions": "Aktionen",
+      "actionsHint": "Ohne Aktionen dient die Regel nur als Filter für andere Regeln.",
+      "save": "Regel speichern",
+      "unsaved": "Es gibt ungespeicherte Änderungen. Trotzdem verlassen?",
+      "invalid": "Behebe zuerst die markierten Probleme.",
+      "saveFailed": "Speichern fehlgeschlagen"
+    },
+    "groups": {
+      "match": "Erfülle",
+      "ofTheFollowing": "der folgenden",
+      "All": "alle",
+      "Any": "mindestens eine",
+      "None": "keine",
+      "addCondition": "Bedingung hinzufügen",
+      "addGroup": "Gruppe hinzufügen",
+      "removeGroup": "Gruppe entfernen",
+      "removeCondition": "Bedingung entfernen"
+    },
+    "categories": {
+      "Sender": "Absender",
+      "Recipients": "Empfänger",
+      "Content": "Inhalt",
+      "Status": "Status",
+      "MailType": "Art der E-Mail",
+      "SenderTrust": "Vertrauenswürdigkeit",
+      "Attachments": "Anhänge",
+      "Rules": "Andere Regeln"
+    },
+    "fields": {
+      "From": "Absenderadresse",
+      "FromName": "Absendername",
+      "FromDomain": "Absenderdomain",
+      "ReplyTo": "Antwortadresse",
+      "To": "An",
+      "Cc": "Cc",
+      "Recipients": "Ein Empfänger (An oder Cc)",
+      "IAmOnlyInCcOrBcc": "Ich bin nur in Cc/Bcc",
+      "DeliveredTo": "Zugestellt an",
+      "PlusTag": "Plus-Tag (ich+tag@…)",
+      "RecipientCount": "Anzahl Empfänger",
+      "Subject": "Betreff",
+      "Header": "Header",
+      "Body": "Nachrichtentext",
+      "Size": "Größe",
+      "Date": "Datum",
+      "AgeDays": "Alter",
+      "IsUnread": "Ungelesen",
+      "IsFlagged": "Markiert",
+      "IsAnswered": "Beantwortet",
+      "Keyword": "Schlagwort",
+      "IsNewsletter": "Newsletter / Massen-E-Mail",
+      "ListId": "Mailinglisten-ID",
+      "IsAutoReply": "Automatische Antwort",
+      "IsReply": "Antwort",
+      "IsReplyToMyMail": "Antwort auf eine E-Mail von mir",
+      "SpfResult": "SPF-Ergebnis",
+      "DkimResult": "DKIM-Ergebnis",
+      "DmarcResult": "DMARC-Ergebnis",
+      "DisplayNameMismatch": "Anzeigename zeigt andere Adresse",
+      "SpamScore": "Spam-Wert",
+      "HasAttachment": "Hat Anhänge",
+      "AttachmentCount": "Anzahl Anhänge",
+      "AttachmentName": "Anhangname",
+      "AttachmentExtension": "Anhangtyp (Endung)",
+      "AttachmentMimeType": "MIME-Typ des Anhangs",
+      "AttachmentSize": "Größter Anhang",
+      "Rule": "Regel"
+    },
+    "operators": {
+      "Equals": "ist",
+      "NotEquals": "ist nicht",
+      "Contains": "enthält",
+      "NotContains": "enthält nicht",
+      "StartsWith": "beginnt mit",
+      "EndsWith": "endet mit",
+      "Regex": "passt auf Muster",
+      "DomainMatches": "ist (inkl. Subdomains)",
+      "InList": "ist in Liste",
+      "NotInList": "ist nicht in Liste",
+      "Exists": "ist vorhanden",
+      "NotExists": "fehlt",
+      "GreaterThan": "mehr als",
+      "LessThan": "weniger als",
+      "Before": "vor",
+      "After": "nach",
+      "IsTrue": "ja",
+      "IsFalse": "nein",
+      "Matches": "passt auf",
+      "NotMatches": "passt nicht auf"
+    },
+    "value": {
+      "placeholder": "Wert",
+      "headerName": "Header-Name",
+      "caseSensitive": "Groß-/Kleinschreibung beachten",
+      "chooseList": "Liste wählen",
+      "noLists": "Noch keine passenden Listen",
+      "chooseRule": "Regel wählen",
+      "noRules": "Noch keine anderen Regeln",
+      "days": "Tage",
+      "units": {
+        "B": "Bytes",
+        "KB": "KB",
+        "MB": "MB"
+      }
+    },
+    "actions": {
+      "MarkRead": "Als gelesen markieren",
+      "MarkUnread": "Als ungelesen markieren",
+      "Flag": "Markieren",
+      "Unflag": "Markierung entfernen",
+      "AddKeyword": "Schlagwort hinzufügen",
+      "RemoveKeyword": "Schlagwort entfernen",
+      "CopyTo": "In Ordner kopieren",
+      "MoveTo": "In Ordner verschieben",
+      "Delete": "In den Papierkorb",
+      "MarkAsSpam": "In den Spam-Ordner",
+      "Archive": "Ins Archiv",
+      "add": "Aktion hinzufügen",
+      "remove": "Aktion entfernen",
+      "keyword": "Schlagwort",
+      "folder": "Ordner",
+      "oneTerminal": "Eine Regel kann eine E-Mail nur einmal verschieben.",
+      "terminalGroup": "E-Mail verschieben (nur eine)",
+      "otherGroup": "E-Mail verändern",
+      "pickFolder": "Ordner wählen",
+      "placeholders": "Einfügen",
+      "example": "z. B. {path}"
+    },
+    "preview": {
+      "title": "Vorschau",
+      "hint": "Probiere die Regel an den neuesten E-Mails eines Ordners aus. Auf dem Server wird nichts verändert.",
+      "folder": "Ordner",
+      "limit": "E-Mails",
+      "run": "Vorschau starten",
+      "refresh": "Neu einlesen",
+      "running": "E-Mails werden gelesen…",
+      "invalid": "Vervollständige die Regel, um eine Vorschau zu sehen.",
+      "summary": "{matched} von {examined} E-Mails passen",
+      "terminal": "{count} würden verschoben",
+      "fromCache": "E-Mails gelesen {time}.",
+      "threshold": "Schon in dieser Stichprobe würde die Regel mehr E-Mails verschieben als die Bestätigungsschwelle ({threshold}). Solche Läufe pausieren und fragen vorher nach.",
+      "limitReduced": "Regeln auf den Nachrichtentext lesen höchstens {limit} E-Mails.",
+      "onlyMatches": "Nur Treffer",
+      "all": "Alle",
+      "noMessages": "Keine E-Mails anzuzeigen.",
+      "date": "Datum",
+      "from": "Von",
+      "subject": "Betreff",
+      "result": "Ergebnis",
+      "matched": "Passt",
+      "notMatched": "Passt nicht",
+      "willDo": "Würde",
+      "skipped": "Übersprungen",
+      "otherRules": "Andere Regeln",
+      "why": "Warum",
+      "noSubject": "(kein Betreff)"
+    },
+    "skipReasons": {
+      "TerminalActionAlreadyPlanned": "„{rule}“ verschiebt diese E-Mail bereits",
+      "ContradictsEarlierAction": "„{rule}“ macht das Gegenteil",
+      "Duplicate": "„{rule}“ macht das bereits",
+      "AlreadyInTargetFolder": "liegt bereits in diesem Ordner",
+      "NoChange": "nichts zu ändern",
+      "SpecialFolderNotConfigured": "für das Konto ist kein solcher Ordner festgelegt"
+    },
+    "trace": {
+      "found": "gefunden: {values}",
+      "nothingFound": "nicht vorhanden",
+      "notes": {
+        "NotLoaded": "Daten nicht geladen",
+        "RegexTimeout": "Muster dauerte zu lange",
+        "InvalidValue": "ungültiger Wert",
+        "ListNotFound": "Liste fehlt",
+        "RuleNotFound": "Regel fehlt",
+        "ReferenceDepthExceeded": "Regeln verweisen zu tief aufeinander"
+      },
+      "rule": "Regel „{name}“"
+    },
+    "templates": {
+      "title": "Mit einer Vorlage starten",
+      "hint": "Vorlagen füllen den Regel-Editor aus. Prüfe die Vorschau, passe an und speichere.",
+      "use": "Vorlage verwenden",
+      "parameters": {
+        "folder": "Zielordner",
+        "days": "Älter als (Tage)",
+        "megabytes": "Größer als (MB)",
+        "list": "Domainliste"
+      },
+      "items": {
+        "newsletters-to-folder": {
+          "name": "Newsletter in einen Ordner",
+          "description": "Verschiebt Newsletter und Massen-E-Mails aus dem Posteingang."
+        },
+        "newsletter-cleanup": {
+          "name": "Alte Newsletter aufräumen",
+          "description": "Täglich: archiviert Newsletter, die älter als ein paar Tage sind, als gelesen."
+        },
+        "archive-by-year": {
+          "name": "Nach Jahr archivieren",
+          "description": "Täglich: verschiebt nicht markierte E-Mails, die älter als ein paar Monate sind, in einen Ordner pro Jahr."
+        },
+        "sort-by-sender-domain": {
+          "name": "Nach Absenderdomain sortieren",
+          "description": "E-Mails von Domains aus einer Liste kommen in einen Ordner pro Domain."
+        },
+        "auto-replies": {
+          "name": "Automatische Antworten wegsortieren",
+          "description": "Abwesenheitsnotizen und andere automatische Antworten kommen gelesen in einen eigenen Ordner."
+        },
+        "shops-by-plus-tag": {
+          "name": "Shops nach Plus-Tag",
+          "description": "E-Mails an ich+shopname{'@'}… kommen in einen Ordner pro Tag."
+        },
+        "quarantine-failed-dmarc": {
+          "name": "Verdächtige Absender in Quarantäne",
+          "description": "E-Mails mit DMARC-Fehler oder gefälschtem Anzeigenamen kommen in den Spam-Ordner."
+        },
+        "large-attachments": {
+          "name": "Große Anhänge markieren",
+          "description": "Markiert E-Mails mit großen Anhängen und versieht sie mit einem Schlagwort."
+        }
+      }
+    }
   }
 }

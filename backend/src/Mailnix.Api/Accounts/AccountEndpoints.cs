@@ -350,10 +350,10 @@ internal static class AccountEndpoints
         account.LastCheckedAt = now;
     }
 
-    private static ImapConnectionSettings ToSettings(MailAccount account, string password) =>
+    internal static ImapConnectionSettings ToSettings(MailAccount account, string password) =>
         new(account.Host, account.Port, account.Security, account.Username, password);
 
-    private static string? TryUnprotect(MailSecretProtector secrets, MailAccount account)
+    internal static string? TryUnprotect(MailSecretProtector secrets, MailAccount account)
     {
         try
         {
@@ -377,14 +377,14 @@ internal static class AccountEndpoints
     private static MailboxOverview ToOverview(MailboxProbeResult result) =>
         new(result.Capabilities, result.Delimiter.ToString(), result.Folders, result.SpecialFolders);
 
-    private static ProblemHttpResult ConnectionProblem(MailConnectionException error) =>
+    internal static ProblemHttpResult ConnectionProblem(MailConnectionException error) =>
         TypedResults.Problem(
             statusCode: StatusCodes.Status422UnprocessableEntity,
             title: error.Message,
             extensions: new Dictionary<string, object?> { ["errorCode"] = error.Code.ToString() });
 
     // Happens if the data protection keys were lost (e.g. database restored without them).
-    private static ProblemHttpResult CredentialsUnreadableProblem() =>
+    internal static ProblemHttpResult CredentialsUnreadableProblem() =>
         TypedResults.Problem(
             statusCode: StatusCodes.Status409Conflict,
             title: "The stored password can no longer be decrypted. Please enter it again.",

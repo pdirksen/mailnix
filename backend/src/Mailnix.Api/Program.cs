@@ -38,6 +38,7 @@ builder.Services.ConfigureHttpJsonOptions(json =>
     json.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
 });
 builder.Services.AddScoped<RuleService>();
+builder.Services.AddMemoryCache();
 builder.Services.AddProblemDetails();
 builder.Services.AddValidation();
 builder.Services.AddOpenApi();
@@ -92,6 +93,7 @@ if (hostOptions.ServesApi)
     api.MapAccountEndpoints();
     api.MapRuleEndpoints();
     api.MapListEndpoints();
+    api.MapPreviewEndpoints();
     api.MapFallback("{**path}", () => TypedResults.NotFound()).AllowAnonymous();
 
     app.MapFallbackToFile("index.html", new StaticFileOptions

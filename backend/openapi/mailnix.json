@@ -914,6 +914,133 @@
           }
         }
       }
+    },
+    "/api/accounts/{id}/rules/preview": {
+      "post": {
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rule-templates": {
+      "get": {
+        "tags": [
+          "Rules"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RuleTemplateInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rule-templates/{templateId}/draft": {
+      "post": {
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleDraftResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1025,6 +1152,21 @@
           }
         }
       },
+      "ActionType": {
+        "enum": [
+          "MarkRead",
+          "MarkUnread",
+          "Flag",
+          "Unflag",
+          "AddKeyword",
+          "RemoveKeyword",
+          "CopyTo",
+          "MoveTo",
+          "Delete",
+          "MarkAsSpam",
+          "Archive"
+        ]
+      },
       "AuthConfigResponse": {
         "required": [
           "registrationOpen"
@@ -1033,6 +1175,37 @@
         "properties": {
           "registrationOpen": {
             "type": "boolean"
+          }
+        }
+      },
+      "Condition": {
+        "required": [
+          "field",
+          "operator"
+        ],
+        "type": "object",
+        "properties": {
+          "field": {
+            "$ref": "#/components/schemas/ConditionField"
+          },
+          "operator": {
+            "$ref": "#/components/schemas/ConditionOperator"
+          },
+          "value": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "headerName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "caseSensitive": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -1930,6 +2103,261 @@
           "Pattern"
         ]
       },
+      "PreviewAction": {
+        "required": [
+          "type",
+          "targetFolder",
+          "keyword",
+          "ruleId",
+          "ruleName"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ActionType"
+          },
+          "targetFolder": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "keyword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string"
+          }
+        }
+      },
+      "PreviewMessage": {
+        "required": [
+          "uid",
+          "from",
+          "fromName",
+          "subject",
+          "date",
+          "isSeen",
+          "matched",
+          "trace",
+          "actions",
+          "skipped",
+          "otherRulesActions"
+        ],
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fromName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subject": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "date": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isSeen": {
+            "type": "boolean"
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "trace": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TraceNode"
+              }
+            ]
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewAction"
+            }
+          },
+          "skipped": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewSkippedAction"
+            }
+          },
+          "otherRulesActions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewAction"
+            }
+          }
+        }
+      },
+      "PreviewRequest": {
+        "required": [
+          "conditions",
+          "actions"
+        ],
+        "type": "object",
+        "properties": {
+          "conditions": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleAction"
+            }
+          },
+          "ruleId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "stopProcessing": {
+            "type": "boolean",
+            "default": false
+          },
+          "folder": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 100
+          },
+          "refresh": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "PreviewResponse": {
+        "required": [
+          "folder",
+          "totalInFolder",
+          "limit",
+          "examined",
+          "matched",
+          "terminalActions",
+          "confirmationThreshold",
+          "exceedsConfirmationThreshold",
+          "fetchedAt",
+          "fromCache",
+          "messages"
+        ],
+        "type": "object",
+        "properties": {
+          "folder": {
+            "type": "string"
+          },
+          "totalInFolder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "examined": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "terminalActions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "confirmationThreshold": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exceedsConfirmationThreshold": {
+            "type": "boolean"
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fromCache": {
+            "type": "boolean"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewMessage"
+            }
+          }
+        }
+      },
+      "PreviewSkippedAction": {
+        "required": [
+          "type",
+          "targetFolder",
+          "reason",
+          "blockedByRuleName"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/ActionType"
+          },
+          "targetFolder": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "reason": {
+            "$ref": "#/components/schemas/SkipReason"
+          },
+          "blockedByRuleName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "RegisterRequest": {
         "required": [
           "email",
@@ -2162,6 +2590,59 @@
           }
         }
       },
+      "RuleDraftRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RuleDraftResponse": {
+        "required": [
+          "name",
+          "conditions",
+          "actions",
+          "trigger",
+          "schedule"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "conditions": {
+            "$ref": "#/components/schemas/ConditionNode"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleAction"
+            }
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/RuleTrigger"
+          },
+          "schedule": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "RuleResponse": {
         "required": [
           "id",
@@ -2274,6 +2755,24 @@
           }
         }
       },
+      "RuleTemplateInfo": {
+        "required": [
+          "id",
+          "parameters"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateParameterInfo"
+            }
+          }
+        }
+      },
       "RuleTrigger": {
         "enum": [
           "OnNew",
@@ -2317,6 +2816,16 @@
             }
           }
         }
+      },
+      "SkipReason": {
+        "enum": [
+          "TerminalActionAlreadyPlanned",
+          "ContradictsEarlierAction",
+          "Duplicate",
+          "AlreadyInTargetFolder",
+          "NoChange",
+          "SpecialFolderNotConfigured"
+        ]
       },
       "SpecialFolderKind": {
         "enum": [
@@ -2373,6 +2882,36 @@
           }
         }
       },
+      "TemplateParameterInfo": {
+        "required": [
+          "name",
+          "type",
+          "default"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TemplateParameterType"
+          },
+          "default": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "TemplateParameterType": {
+        "enum": [
+          "Folder",
+          "Days",
+          "Megabytes",
+          "DomainList"
+        ]
+      },
       "TestConnectionRequest": {
         "required": [
           "host",
@@ -2400,6 +2939,76 @@
             "type": "string"
           }
         }
+      },
+      "TraceNode": {
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "boolean"
+          },
+          "operator": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GroupOperator"
+              }
+            ]
+          },
+          "condition": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Condition"
+              }
+            ]
+          },
+          "actual": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TraceNote"
+              }
+            ]
+          },
+          "referencedRuleName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TraceNode"
+            }
+          }
+        }
+      },
+      "TraceNote": {
+        "enum": [
+          "NotLoaded",
+          "RegexTimeout",
+          "InvalidValue",
+          "ListNotFound",
+          "RuleNotFound",
+          "ReferenceDepthExceeded",
+          null
+        ]
       },
       "UpdateAccountRequest": {
         "required": [

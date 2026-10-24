@@ -3,8 +3,8 @@
 Rule-based mail sorting with a web UI, in the spirit of imapfilter: connect IMAP, Google or Microsoft 365
 mailboxes, build rules visually, preview what they would do, and let mailnix move, flag or trash incoming mail.
 
-> Status: early development. Auth, IMAP accounts (setup wizard, connection test, folder discovery), the rule
-> engine with its API, and named lists are in place; the visual rule builder, mail processing and stats follow.
+> Status: early development. Auth, IMAP accounts, the rule engine, named lists and the visual rule builder with a
+> read-only preview against real mail are in place; executing rules on the mailbox, scheduling and stats follow.
 
 ## Repository layout
 

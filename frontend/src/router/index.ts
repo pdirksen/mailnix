@@ -49,6 +49,25 @@ export const routes: RouteRecordRaw[] = [
         meta: { titleKey: 'nav.accounts' },
       },
       {
+        path: 'rules',
+        name: 'rules',
+        component: () => import('@/pages/rules/RulesPage.vue'),
+        meta: { titleKey: 'nav.rules' },
+      },
+      {
+        path: 'rules/new',
+        name: 'rule-new',
+        component: () => import('@/pages/rules/RuleEditorPage.vue'),
+        meta: { titleKey: 'rules.editor.newTitle' },
+      },
+      {
+        path: 'rules/:id',
+        name: 'rule-edit',
+        component: () => import('@/pages/rules/RuleEditorPage.vue'),
+        props: true,
+        meta: { titleKey: 'rules.editor.editTitle' },
+      },
+      {
         path: 'lists',
         name: 'lists',
         component: () => import('@/pages/lists/ListsPage.vue'),
