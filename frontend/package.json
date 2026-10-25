@@ -19,6 +19,7 @@
     "gen:api": "openapi-typescript ../backend/openapi/mailnix.json -o src/api/schema.d.ts",
     "license:check": "node scripts/check-licenses.mjs",
     "license:notices": "node scripts/check-licenses.mjs --notices dist/THIRD-PARTY-NOTICES.md",
+    "brand:icons": "node scripts/render-icons.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {

@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/logo-lockup-dark.svg">
+    <img src="docs/brand/logo-lockup-light.svg" alt="mailnix" width="230">
+  </picture>
+</p>
+
 # mailnix
 
 Rule-based mail sorting with a web UI, in the spirit of imapfilter: connect IMAP, Google or Microsoft 365

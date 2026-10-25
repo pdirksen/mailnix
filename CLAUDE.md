@@ -34,6 +34,7 @@ npm run type-check && npm run lint && npm test
 npx vitest run src/pages/auth/RegisterPage.spec.ts
 npm run license:check
 npm run test:e2e                    # Playwright against a running instance on :5080
+npm run brand:icons                 # after changing src/assets/brand/logo-mark.svg: favicon, PNG icons, mailnix.ico, docs/brand
 ```
 
 E2E needs the backend to serve the built SPA. Run `npm run build` and copy `frontend/dist` to
