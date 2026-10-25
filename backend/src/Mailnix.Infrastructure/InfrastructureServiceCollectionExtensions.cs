@@ -78,6 +78,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<KeyProtectionUpgrade>();
         services.AddSingleton<MailSecretProtector>();
         services.AddScoped<RuleSetLoader>();
+        services.AddScoped<StatsRecorder>();
         services.AddSingleton(TimeProvider.System);
 
         return services;

@@ -33,6 +33,14 @@ public abstract class MailnixDbContext(DbContextOptions options)
 
     public DbSet<TrashObservation> TrashObservations => Set<TrashObservation>();
 
+    public DbSet<StatsDaily> StatsDaily => Set<StatsDaily>();
+
+    public DbSet<SenderDaily> SenderDaily => Set<SenderDaily>();
+
+    public DbSet<SecurityDaily> SecurityDaily => Set<SecurityDaily>();
+
+    public DbSet<FolderSnapshot> FolderSnapshots => Set<FolderSnapshot>();
+
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -141,6 +149,37 @@ public abstract class MailnixDbContext(DbContextOptions options)
             e.HasKey(f => new { f.AccountId, f.Folder });
             e.HasOne<MailAccount>().WithMany().HasForeignKey(f => f.AccountId).OnDelete(DeleteBehavior.Cascade);
             e.Property(f => f.Folder).HasMaxLength(500);
+        });
+
+        builder.Entity<StatsDaily>(e =>
+        {
+            e.HasKey(s => new { s.AccountId, s.Date, s.RuleId, s.Metric });
+            e.HasOne<MailAccount>().WithMany().HasForeignKey(s => s.AccountId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(s => new { s.UserId, s.Date });
+            e.Property(s => s.Metric).HasMaxLength(30);
+        });
+
+        builder.Entity<SenderDaily>(e =>
+        {
+            e.HasKey(s => new { s.AccountId, s.Date, s.Domain });
+            e.HasOne<MailAccount>().WithMany().HasForeignKey(s => s.AccountId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(s => new { s.UserId, s.Date });
+            e.Property(s => s.Domain).HasMaxLength(253);
+        });
+
+        builder.Entity<SecurityDaily>(e =>
+        {
+            e.HasKey(s => new { s.AccountId, s.Date });
+            e.HasOne<MailAccount>().WithMany().HasForeignKey(s => s.AccountId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(s => new { s.UserId, s.Date });
+        });
+
+        builder.Entity<FolderSnapshot>(e =>
+        {
+            e.HasKey(s => new { s.AccountId, s.Folder, s.Date });
+            e.HasOne<MailAccount>().WithMany().HasForeignKey(s => s.AccountId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(s => new { s.UserId, s.Date });
+            e.Property(s => s.Folder).HasMaxLength(500);
         });
 
         builder.Entity<TrashObservation>(e =>

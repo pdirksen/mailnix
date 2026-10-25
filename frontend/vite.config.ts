@@ -21,6 +21,10 @@ export default defineConfig({
       '/healthz': backend,
     },
   },
+  build: {
+    // The charts chunk (tree-shaken ECharts, ~530 kB) is only loaded by pages that show charts.
+    chunkSizeWarningLimit: 600,
+  },
   test: {
     environment: 'jsdom',
     include: ['src/**/*.spec.ts'],

@@ -237,6 +237,25 @@ internal sealed class ImapMailboxSession(ImapClient client) : IMailboxSession
         return summaries.Select(s => s.Envelope?.MessageId).OfType<string>().ToHashSet(StringComparer.Ordinal);
     }
 
+    public async Task<IReadOnlyList<FolderCount>> FolderCountsAsync(CancellationToken ct)
+    {
+        var personal = client.PersonalNamespaces.FirstOrDefault() ?? new FolderNamespace(client.Inbox.DirectorySeparator, string.Empty);
+        var items = StatusItems.Count | StatusItems.Unread;
+        var listed = await client.GetFoldersAsync(personal, items, subscribedOnly: false, ct);
+
+        // INBOX may live outside the personal namespace (see MailboxProbe).
+        var folders = listed.ToList();
+        if (!folders.Any(f => f.FullName.Equals(client.Inbox.FullName, StringComparison.OrdinalIgnoreCase)))
+        {
+            await client.Inbox.StatusAsync(items, ct);
+            folders.Insert(0, client.Inbox);
+        }
+
+        return [.. folders
+            .Where(f => !f.Attributes.HasFlag(FolderAttributes.NoSelect) && !f.Attributes.HasFlag(FolderAttributes.NonExistent))
+            .Select(f => new FolderCount(f.FullName, f.Count, f.Unread))];
+    }
+
     public async Task<uint?> LocateAsync(string folder, uint uidValidity, uint uid, string? messageId, CancellationToken ct)
     {
         var mailFolder = await GetOpenFolderAsync(folder, writable: true, ct);

@@ -72,6 +72,9 @@ public class RuleRun
 
     public int? UndoCount { get; set; }
 
+    /// <summary>Undo runs: revert these logged actions (and whatever else their runs did to the same messages).</summary>
+    public List<Guid>? UndoActionIds { get; set; }
+
     /// <summary>For runs awaiting confirmation: the planned actions (JSON), executed as-is once confirmed.</summary>
     public string? PendingPlanJson { get; set; }
 

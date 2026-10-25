@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ActionsList, { type ActionFilters } from '@/components/runs/ActionsList.vue'
 import RunItem from '@/components/runs/RunItem.vue'
 import {
   AlertDialog,
@@ -12,7 +13,12 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type { ActionType } from '@/lib/charts'
+import { useRulesStore } from '@/stores/rules'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useConnectionErrors } from '@/lib/connectionErrors'
@@ -37,6 +43,7 @@ const { describeRequestError } = useConnectionErrors()
 const loading = ref(!runs.loaded)
 
 async function refresh() {
+  actionsKey.value++
   loading.value = true
   try {
     await Promise.all([runs.fetchRecent(200), accounts.loaded ? Promise.resolve() : accounts.fetchAll()])
@@ -47,7 +54,10 @@ async function refresh() {
   }
 }
 
-onMounted(refresh)
+onMounted(() => {
+  void refresh()
+  void rules.fetchAll().catch(() => {})
+})
 
 function queryFilter(name: string) {
   return computed({
@@ -58,6 +68,38 @@ function queryFilter(name: string) {
 
 const accountFilter = queryFilter('account')
 const stateFilter = queryFilter('state')
+
+// Runs (what happened when) or single actions (what happened to which message).
+const view = computed({
+  get: () => (route.query.view === 'actions' ? 'actions' : 'runs'),
+  set: (value: string) => void router.replace({ query: { ...route.query, view: value === 'actions' ? 'actions' : undefined } }),
+})
+const ACTIONS: ActionType[] = ['MoveTo', 'Delete', 'Archive', 'MarkAsSpam', 'CopyTo', 'Flag', 'Unflag', 'MarkRead', 'MarkUnread', 'AddKeyword', 'RemoveKeyword', 'Purge']
+const actionFilter = queryFilter('action')
+const ruleFilter = queryFilter('rule')
+const rules = useRulesStore()
+
+function queryText(name: string) {
+  return computed({
+    get: () => (typeof route.query[name] === 'string' ? (route.query[name] as string) : ''),
+    set: (value: string) => void router.replace({ query: { ...route.query, [name]: value || undefined } }),
+  })
+}
+const fromFilter = queryText('from')
+const toFilter = queryText('to')
+const failedOnly = computed({
+  get: () => route.query.failed === 'true',
+  set: (value: boolean) => void router.replace({ query: { ...route.query, failed: value ? 'true' : undefined } }),
+})
+const actionFilters = computed<ActionFilters>(() => ({
+  accountId: accountFilter.value === ALL ? undefined : accountFilter.value,
+  ruleId: ruleFilter.value === ALL ? undefined : ruleFilter.value,
+  action: actionFilter.value === ALL ? undefined : (actionFilter.value as ActionType),
+  from: fromFilter.value || undefined,
+  to: toFilter.value || undefined,
+  failedOnly: failedOnly.value || undefined,
+}))
+const actionsKey = ref(0)
 const highlighted = computed(() => (typeof route.query.run === 'string' ? route.query.run : undefined))
 
 const visible = computed(() =>
@@ -104,6 +146,13 @@ async function confirmUndo() {
       </Button>
     </div>
 
+    <Tabs v-model="view">
+      <TabsList>
+        <TabsTrigger value="runs" data-testid="view-runs">{{ $t('activity.views.runs') }}</TabsTrigger>
+        <TabsTrigger value="actions" data-testid="view-actions">{{ $t('activity.views.actions') }}</TabsTrigger>
+      </TabsList>
+    </Tabs>
+
     <div class="flex flex-wrap items-center gap-4">
       <div class="flex items-center gap-2">
         <Label for="activity-account">{{ $t('activity.account') }}</Label>
@@ -115,7 +164,7 @@ async function confirmUndo() {
           </SelectContent>
         </Select>
       </div>
-      <div class="flex items-center gap-2">
+      <div v-if="view === 'runs'" class="flex items-center gap-2">
         <Label for="activity-state">{{ $t('activity.state') }}</Label>
         <Select v-model="stateFilter">
           <SelectTrigger id="activity-state" class="w-56"><SelectValue /></SelectTrigger>
@@ -125,9 +174,43 @@ async function confirmUndo() {
           </SelectContent>
         </Select>
       </div>
+      <template v-if="view === 'actions'">
+        <div class="flex items-center gap-2">
+          <Label for="activity-action">{{ $t('activity.action') }}</Label>
+          <Select v-model="actionFilter">
+            <SelectTrigger id="activity-action" class="w-48"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem :value="ALL">{{ $t('activity.allActions') }}</SelectItem>
+              <SelectItem v-for="action in ACTIONS" :key="action" :value="action">{{ $t(`rules.actions.${action}`) }}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div v-if="ruleFilter !== ALL" class="flex items-center gap-2">
+          <Label for="activity-rule">{{ $t('activity.rule') }}</Label>
+          <Select v-model="ruleFilter">
+            <SelectTrigger id="activity-rule" class="w-48"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem :value="ALL">{{ $t('activity.allRules') }}</SelectItem>
+              <SelectItem v-for="rule in rules.rules" :key="rule.id" :value="rule.id">{{ rule.name }}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div class="flex items-center gap-2">
+          <Label for="activity-from">{{ $t('activity.from') }}</Label>
+          <Input id="activity-from" v-model="fromFilter" type="date" class="w-40" />
+          <Label for="activity-to">{{ $t('activity.to') }}</Label>
+          <Input id="activity-to" v-model="toFilter" type="date" class="w-40" />
+        </div>
+        <label class="flex items-center gap-2 text-sm">
+          <Checkbox v-model="failedOnly" />
+          {{ $t('activity.failedOnly') }}
+        </label>
+      </template>
     </div>
 
-    <div v-if="loading && !runs.loaded" class="grid gap-2">
+    <ActionsList v-if="view === 'actions'" :filters="actionFilters" selectable :refresh-key="actionsKey" />
+
+    <div v-else-if="loading && !runs.loaded" class="grid gap-2">
       <Skeleton v-for="i in 3" :key="i" class="h-16" />
     </div>
 

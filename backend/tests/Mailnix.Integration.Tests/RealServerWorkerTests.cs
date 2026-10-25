@@ -83,8 +83,16 @@ public sealed class RealServerWorkerTests
                 moved.IsFlagged.ShouldBeTrue();
             }
 
-            var run = (await client.GetFromJsonAsync<List<RunSummary>>("/api/runs", Json, Ct))!.Single();
-            run.State.ShouldBe(Infrastructure.Data.RunState.Completed);
+            // The run is saved right after the move on the server, so it may not be listed yet.
+            RunSummary run = null!;
+            await EventuallyAsync(async () =>
+                (run = (await client.GetFromJsonAsync<List<RunSummary>>("/api/runs", Json, Ct))!.SingleOrDefault()!) is { State: Infrastructure.Data.RunState.Completed });
+
+            // Counted for the stats: one new message, three actions (read, flag, move) by one rule.
+            var overview = await client.GetFromJsonAsync<Api.Stats.OverviewResponse>("/api/stats/overview", Json, Ct);
+            overview!.TodayKpis.ShouldSatisfyAllConditions(k => k.Processed.ShouldBe(1), k => k.Actions.ShouldBe(3), k => k.Moved.ShouldBe(1));
+            var senders = await client.GetFromJsonAsync<Api.Stats.SendersResponse>("/api/stats/senders", Json, Ct);
+            senders!.TopProcessed.Single().Domain.ShouldBe("mailnix.invalid");
 
             // Undo: back in the watched folder, flags restored, and not processed again.
             (await client.PostAsync($"/api/runs/{run.Id}/undo", null, Ct)).StatusCode.ShouldBe(HttpStatusCode.Accepted);

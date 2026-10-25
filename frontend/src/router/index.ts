@@ -88,6 +88,12 @@ export const routes: RouteRecordRaw[] = [
         meta: { titleKey: 'oauth.title' },
       },
       {
+        path: 'stats',
+        name: 'stats',
+        component: () => import('@/pages/stats/StatsPage.vue'),
+        meta: { titleKey: 'nav.stats' },
+      },
+      {
         path: 'activity',
         name: 'activity',
         component: () => import('@/pages/activity/ActivityPage.vue'),

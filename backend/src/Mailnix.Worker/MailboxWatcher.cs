@@ -116,6 +116,46 @@ internal sealed partial class MailboxWatcher(
         }
     }
 
+    /// <summary>Once a day (in the user's time zone): message and unread counts of every folder, for the stats.</summary>
+    private async Task SnapshotFoldersAsync(IMailboxSession session, MailAccount account, IServiceProvider services, CancellationToken ct)
+    {
+        var db = services.GetRequiredService<MailnixDbContext>();
+        var day = await services.GetRequiredService<StatsRecorder>().TodayAsync(account, ct);
+        if (await db.FolderSnapshots.AnyAsync(s => s.AccountId == account.Id && s.Date == day, ct))
+        {
+            return;
+        }
+
+        IReadOnlyList<FolderCount> counts;
+        try
+        {
+            counts = await session.FolderCountsAsync(ct);
+        }
+        catch (ImapCommandException ex)
+        {
+            // Stats only; mail processing goes on. Tried again on the next pass.
+            LogSnapshotFailed(account.Id, ex);
+            return;
+        }
+
+        var now = time.GetUtcNow();
+        foreach (var folder in counts)
+        {
+            db.FolderSnapshots.Add(new FolderSnapshot
+            {
+                AccountId = account.Id,
+                UserId = account.UserId,
+                Folder = folder.Folder,
+                Date = day,
+                Messages = folder.Messages,
+                Unread = folder.Unread,
+                CapturedAt = now,
+            });
+        }
+
+        await db.SaveChangesAsync(ct);
+    }
+
     /// <summary>One pass: queued jobs, then new mail in every watched folder. Returns the account as of this pass.</summary>
     private async Task<MailAccount?> PassAsync(IMailboxSession session, CancellationToken ct)
     {
@@ -142,6 +182,8 @@ internal sealed partial class MailboxWatcher(
                 missing.Add(folder);
             }
         }
+
+        await SnapshotFoldersAsync(session, account, scope.ServiceProvider, ct);
 
         if (missing.Count > 0)
         {
@@ -209,6 +251,9 @@ internal sealed partial class MailboxWatcher(
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Account {AccountId}: connection lost")]
     private partial void LogConnectionLost(Guid accountId, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Account {AccountId}: folder sizes could not be read for the stats")]
+    private partial void LogSnapshotFailed(Guid accountId, Exception exception);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Account {AccountId}: unexpected error in the mailbox watcher")]
     private partial void LogUnexpected(Guid accountId, Exception exception);

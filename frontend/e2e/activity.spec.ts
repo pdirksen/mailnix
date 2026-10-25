@@ -153,7 +153,7 @@ test('run rules now and undo a rule, with live status updates (real mailbox, tes
   })
   expect(nightly.status()).toBe(201)
 
-  await page.getByRole('link', { name: 'Activity' }).click()
+  await page.getByRole('link', { name: 'Activity', exact: true }).click()
   await expect(page.getByText('Nothing happened yet')).toBeVisible()
 
   await page.getByRole('link', { name: 'Rules', exact: true }).click()
@@ -180,7 +180,7 @@ test('run rules now and undo a rule, with live status updates (real mailbox, tes
   await page.getByTestId('start-undo-rule').click()
   await expect(page.getByText('Undo started.')).toBeVisible()
 
-  await page.getByRole('link', { name: 'Activity' }).click()
+  await page.getByRole('link', { name: 'Activity', exact: true }).click()
   await expect(runs).toHaveCount(2)
   await expect(runs.first()).toContainText('Undo')
   await expect(runs.first()).toContainText('Done', { timeout: 60_000 })

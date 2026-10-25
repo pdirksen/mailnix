@@ -7,6 +7,7 @@ using Mailnix.Api.Hosting;
 using Mailnix.Api.Lists;
 using Mailnix.Api.Rules;
 using Mailnix.Api.Runs;
+using Mailnix.Api.Stats;
 using Mailnix.Core.Rules;
 using Mailnix.Infrastructure;
 using Mailnix.Infrastructure.Data;
@@ -119,6 +120,8 @@ if (hostOptions.ServesApi)
     api.MapListEndpoints();
     api.MapPreviewEndpoints();
     api.MapRunEndpoints();
+    api.MapStatsEndpoints();
+    api.MapActivityEndpoints();
     app.MapHub<LiveHub>("/hubs/live");
     api.MapFallback("{**path}", () => TypedResults.NotFound()).AllowAnonymous();
 

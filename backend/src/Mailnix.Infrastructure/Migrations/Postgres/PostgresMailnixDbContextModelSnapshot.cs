@@ -118,6 +118,37 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.ToTable("ActionLog");
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.FolderSnapshot", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Folder")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CapturedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Messages")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Unread")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AccountId", "Folder", "Date");
+
+                    b.HasIndex("UserId", "Date");
+
+                    b.ToTable("FolderSnapshots");
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.FolderState", b =>
                 {
                     b.Property<Guid>("AccountId")
@@ -501,6 +532,9 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.PrimitiveCollection<List<Guid>>("UndoActionIds")
+                        .HasColumnType("uuid[]");
+
                     b.Property<int?>("UndoCount")
                         .HasColumnType("integer");
 
@@ -523,6 +557,104 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.HasIndex("UserId", "CreatedAt");
 
                     b.ToTable("Runs");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.SecurityDaily", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("DkimFailed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DmarcFailed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HighSpam")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Processed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SpfFailed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Spoofing")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AccountId", "Date");
+
+                    b.HasIndex("UserId", "Date");
+
+                    b.ToTable("SecurityDaily");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.SenderDaily", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Domain")
+                        .HasMaxLength(253)
+                        .HasColumnType("character varying(253)");
+
+                    b.Property<int>("Actioned")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AuthFailed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Bulk")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Processed")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AccountId", "Date", "Domain");
+
+                    b.HasIndex("UserId", "Date");
+
+                    b.ToTable("SenderDaily");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.StatsDaily", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("RuleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Metric")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AccountId", "Date", "RuleId", "Metric");
+
+                    b.HasIndex("UserId", "Date");
+
+                    b.ToTable("StatsDaily");
                 });
 
             modelBuilder.Entity("Mailnix.Infrastructure.Data.Tenant", b =>
@@ -812,6 +944,15 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.FolderSnapshot", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.FolderState", b =>
                 {
                     b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
@@ -883,6 +1024,33 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                 });
 
             modelBuilder.Entity("Mailnix.Infrastructure.Data.RuleRun", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.SecurityDaily", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.SenderDaily", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.StatsDaily", b =>
                 {
                     b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
                         .WithMany()

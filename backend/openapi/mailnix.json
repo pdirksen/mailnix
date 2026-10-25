@@ -1150,6 +1150,133 @@
         }
       }
     },
+    "/api/activity/actions": {
+      "get": {
+        "tags": [
+          "Activity"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ActionType"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "failedOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/activity/actions/undo": {
+      "post": {
+        "tags": [
+          "Activity"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoActionsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RunSummary"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rule-templates": {
       "get": {
         "tags": [
@@ -1403,10 +1530,502 @@
           }
         }
       }
+    },
+    "/api/stats/overview": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats/timeseries": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "metric",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "actions"
+            }
+          },
+          {
+            "name": "groupBy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "action"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "schema": {
+              "default": "Day",
+              "$ref": "#/components/schemas/Granularity"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeSeries"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats/rules": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleStatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats/senders": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "schema": {
+              "default": "Day",
+              "$ref": "#/components/schemas/Granularity"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 15
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats/folders": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoldersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats/security": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "schema": {
+              "default": "Day",
+              "$ref": "#/components/schemas/Granularity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecurityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats/reliability": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "schema": {
+              "default": "Day",
+              "$ref": "#/components/schemas/Granularity"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReliabilityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats/export": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "section",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "volume"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "accountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "schema": {
+              "default": "Day",
+              "$ref": "#/components/schemas/Granularity"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AccountHealth": {
+        "required": [
+          "id",
+          "name",
+          "provider",
+          "enabled",
+          "status",
+          "lastErrorCode",
+          "lastCheckedAt",
+          "processedToday",
+          "actionsToday"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/MailProvider"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MailAccountStatus"
+          },
+          "lastErrorCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ConnectionErrorCode"
+              }
+            ]
+          },
+          "lastCheckedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "processedToday": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "actionsToday": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "AccountResponse": {
         "required": [
           "id",
@@ -1522,6 +2141,115 @@
           }
         }
       },
+      "ActionEntry": {
+        "required": [
+          "id",
+          "runId",
+          "accountId",
+          "accountName",
+          "ruleId",
+          "ruleName",
+          "action",
+          "keyword",
+          "sourceFolder",
+          "targetFolder",
+          "from",
+          "subject",
+          "dryRun",
+          "success",
+          "error",
+          "createdAt",
+          "undoneAt",
+          "canUndo"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "action": {
+            "$ref": "#/components/schemas/ActionType"
+          },
+          "keyword": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sourceFolder": {
+            "type": "string"
+          },
+          "targetFolder": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subject": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "undoneAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "canUndo": {
+            "type": "boolean"
+          }
+        }
+      },
       "ActionLogItem": {
         "required": [
           "id",
@@ -1610,6 +2338,28 @@
               "string"
             ],
             "format": "date-time"
+          }
+        }
+      },
+      "ActionPage": {
+        "required": [
+          "items",
+          "nextBefore"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ActionEntry"
+            }
+          },
+          "nextBefore": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -2181,11 +2931,120 @@
           }
         }
       },
+      "FolderRow": {
+        "required": [
+          "accountId",
+          "accountName",
+          "folder",
+          "messages",
+          "unread",
+          "change"
+        ],
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "folder": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unread": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "change": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "FoldersResponse": {
+        "required": [
+          "date",
+          "folders",
+          "growth"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FolderRow"
+            }
+          },
+          "growth": {
+            "$ref": "#/components/schemas/TimeSeries"
+          }
+        }
+      },
+      "Granularity": {
+        "enum": [
+          "Day",
+          "Week",
+          "Month"
+        ]
+      },
       "GroupOperator": {
         "enum": [
           "All",
           "Any",
           "None"
+        ]
+      },
+      "Hint": {
+        "required": [
+          "kind"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/HintKind"
+          },
+          "ruleId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "count": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "HintKind": {
+        "enum": [
+          "NoRules",
+          "NeverMatched",
+          "DryRunReady"
         ]
       },
       "HttpValidationProblemDetails": {
@@ -2257,6 +3116,43 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "KpiSet": {
+        "required": [
+          "processed",
+          "actions",
+          "moved",
+          "trashed",
+          "flagged",
+          "failed"
+        ],
+        "type": "object",
+        "properties": {
+          "processed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "actions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "moved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trashed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "flagged": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -2611,6 +3507,69 @@
           }
         }
       },
+      "OverviewResponse": {
+        "required": [
+          "today",
+          "todayKpis",
+          "yesterdayKpis",
+          "pendingConfirmations",
+          "accountsWithErrors",
+          "unread",
+          "accounts",
+          "activity",
+          "topRules",
+          "hints"
+        ],
+        "type": "object",
+        "properties": {
+          "today": {
+            "type": "string",
+            "format": "date"
+          },
+          "todayKpis": {
+            "$ref": "#/components/schemas/KpiSet"
+          },
+          "yesterdayKpis": {
+            "$ref": "#/components/schemas/KpiSet"
+          },
+          "pendingConfirmations": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accountsWithErrors": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unread": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountHealth"
+            }
+          },
+          "activity": {
+            "$ref": "#/components/schemas/TimeSeries"
+          },
+          "topRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleCount"
+            }
+          },
+          "hints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Hint"
+            }
+          }
+        }
+      },
       "PendingActionItem": {
         "required": [
           "ruleName",
@@ -2953,6 +3912,43 @@
           }
         }
       },
+      "ReliabilityResponse": {
+        "required": [
+          "runsByState",
+          "byTrigger",
+          "failedActions",
+          "pendingNow",
+          "accounts"
+        ],
+        "type": "object",
+        "properties": {
+          "runsByState": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RunStateCount"
+            }
+          },
+          "byTrigger": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TriggerStats"
+            }
+          },
+          "failedActions": {
+            "$ref": "#/components/schemas/TimeSeries"
+          },
+          "pendingNow": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountHealth"
+            }
+          }
+        }
+      },
       "ReorderRulesRequest": {
         "required": [
           "accountId",
@@ -3164,6 +4160,32 @@
           }
         }
       },
+      "RuleCount": {
+        "required": [
+          "ruleId",
+          "name",
+          "accountId",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "RuleDraftRequest": {
         "required": [
           "name"
@@ -3324,6 +4346,101 @@
           }
         }
       },
+      "RuleStatsResponse": {
+        "required": [
+          "from",
+          "to",
+          "rules"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleStatsRow"
+            }
+          }
+        }
+      },
+      "RuleStatsRow": {
+        "required": [
+          "ruleId",
+          "name",
+          "accountId",
+          "accountName",
+          "enabled",
+          "dryRun",
+          "matched",
+          "actions",
+          "failed",
+          "undone",
+          "dryRunActions",
+          "lastMatch",
+          "matchesPerDay"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "matched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "actions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "undone": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dryRunActions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastMatch": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "matchesPerDay": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
       "RuleSummary": {
         "required": [
           "id",
@@ -3443,6 +4560,22 @@
           "Cancelled",
           "Expired"
         ]
+      },
+      "RunStateCount": {
+        "required": [
+          "state",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/RunState"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       },
       "RunSummary": {
         "required": [
@@ -3581,6 +4714,151 @@
           "Undo",
           "Purge"
         ]
+      },
+      "SecurityResponse": {
+        "required": [
+          "totals",
+          "series",
+          "topFailingDomains"
+        ],
+        "type": "object",
+        "properties": {
+          "totals": {
+            "$ref": "#/components/schemas/SecurityTotals"
+          },
+          "series": {
+            "$ref": "#/components/schemas/TimeSeries"
+          },
+          "topFailingDomains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SenderRow"
+            }
+          }
+        }
+      },
+      "SecurityTotals": {
+        "required": [
+          "processed",
+          "spfFailed",
+          "dkimFailed",
+          "dmarcFailed",
+          "spoofing",
+          "highSpam"
+        ],
+        "type": "object",
+        "properties": {
+          "processed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "spfFailed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dkimFailed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dmarcFailed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "spoofing": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "highSpam": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SenderRow": {
+        "required": [
+          "domain",
+          "processed",
+          "actioned",
+          "bulk",
+          "authFailed"
+        ],
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "processed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "actioned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bulk": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "authFailed": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SendersResponse": {
+        "required": [
+          "totals",
+          "topProcessed",
+          "topActioned",
+          "volume"
+        ],
+        "type": "object",
+        "properties": {
+          "totals": {
+            "$ref": "#/components/schemas/SenderRow"
+          },
+          "topProcessed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SenderRow"
+            }
+          },
+          "topActioned": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SenderRow"
+            }
+          },
+          "volume": {
+            "$ref": "#/components/schemas/TimeSeries"
+          }
+        }
+      },
+      "Series": {
+        "required": [
+          "key",
+          "name",
+          "values"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
       },
       "SkipReason": {
         "enum": [
@@ -3760,6 +5038,28 @@
           }
         }
       },
+      "TimeSeries": {
+        "required": [
+          "buckets",
+          "series"
+        ],
+        "type": "object",
+        "properties": {
+          "buckets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Series"
+            }
+          }
+        }
+      },
       "TraceNode": {
         "required": [
           "result"
@@ -3829,6 +5129,50 @@
           "ReferenceDepthExceeded",
           null
         ]
+      },
+      "TriggerStats": {
+        "required": [
+          "trigger",
+          "runs",
+          "failed",
+          "averageSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "$ref": "#/components/schemas/RunTrigger"
+          },
+          "runs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageSeconds": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "UndoActionsRequest": {
+        "required": [
+          "actionIds"
+        ],
+        "type": "object",
+        "properties": {
+          "actionIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
       },
       "UndoRuleRequest": {
         "type": "object",
@@ -4045,6 +5389,12 @@
     },
     {
       "name": "Runs"
+    },
+    {
+      "name": "Activity"
+    },
+    {
+      "name": "Stats"
     }
   ]
 }

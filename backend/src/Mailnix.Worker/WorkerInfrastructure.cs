@@ -55,6 +55,12 @@ public sealed class WorkerOptions
 
     /// <summary>At most this many messages are purged per run.</summary>
     public int MaxPurgePerRun { get; set; } = 5000;
+
+    /// <summary>
+    /// Runs and their action log are kept this long; older ones can no longer be undone. The stats keep their
+    /// daily counters regardless.
+    /// </summary>
+    public TimeSpan ActionLogRetention { get; set; } = TimeSpan.FromDays(90);
 }
 
 /// <summary>Lets the API nudge the worker: new jobs for an account, or changed accounts.</summary>

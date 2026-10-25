@@ -5,6 +5,10 @@ import ActionList from '@/components/rules/ActionList.vue'
 import ConditionGroupEditor from '@/components/rules/ConditionGroupEditor.vue'
 import CronInput from '@/components/rules/CronInput.vue'
 import PreviewPanel from '@/components/rules/PreviewPanel.vue'
+import RuleStatsPanel from '@/components/rules/RuleStatsPanel.vue'
+import ActionsList from '@/components/runs/ActionsList.vue'
+import UndoRuleDialog from '@/components/runs/UndoRuleDialog.vue'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import SourceFoldersPicker from '@/components/rules/SourceFoldersPicker.vue'
 import RunNowDialog from '@/components/runs/RunNowDialog.vue'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -22,7 +26,7 @@ import { type ConditionField, type FieldDefinition, newCondition, newGroup, type
 import { type Account, useAccountsStore } from '@/stores/accounts'
 import { useListsStore } from '@/stores/lists'
 import { type RuleDraft, useRulesStore } from '@/stores/rules'
-import { ArrowLeftIcon, CircleAlertIcon, Loader2Icon, PlayIcon } from '@lucide/vue'
+import { ArrowLeftIcon, CircleAlertIcon, Loader2Icon, PlayIcon, Undo2Icon } from '@lucide/vue'
 import { useDebounceFn } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -141,6 +145,9 @@ watch(account, () => void validate())
 const saving = ref(false)
 // Runs use the saved rule, so applying it needs the changes saved first.
 const runDialogOpen = ref(false)
+const undoDialogOpen = ref(false)
+// Right column of a saved rule: preview, what it did (stats) and its actions (history).
+const sideTab = ref<'preview' | 'stats' | 'history'>('preview')
 const saveError = ref<string[]>([])
 
 async function save() {
@@ -296,7 +303,27 @@ onBeforeRouteLeave((to) => {
         </div>
 
         <div class="min-w-0 xl:sticky xl:top-20">
+          <Tabs v-if="ruleId" v-model="sideTab" class="mb-4">
+            <TabsList>
+              <TabsTrigger value="preview">{{ $t('rules.editor.tabs.preview') }}</TabsTrigger>
+              <TabsTrigger value="stats" data-testid="rule-tab-stats">{{ $t('rules.editor.tabs.stats') }}</TabsTrigger>
+              <TabsTrigger value="history" data-testid="rule-tab-history">{{ $t('rules.editor.tabs.history') }}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="stats" class="mt-4">
+              <RuleStatsPanel :rule-id="ruleId" />
+            </TabsContent>
+            <TabsContent value="history" class="mt-4 grid gap-3">
+              <div class="flex justify-end">
+                <Button size="sm" variant="outline" @click="undoDialogOpen = true">
+                  <Undo2Icon />
+                  {{ $t('undoRule.menu') }}
+                </Button>
+              </div>
+              <ActionsList :filters="{ ruleId }" selectable />
+            </TabsContent>
+          </Tabs>
           <PreviewPanel
+            v-show="!ruleId || sideTab === 'preview'"
             :account-id="account.id"
             :rule-id="ruleId"
             :draft="draft"
@@ -307,6 +334,7 @@ onBeforeRouteLeave((to) => {
         </div>
       </div>
       <RunNowDialog v-if="ruleId" v-model:open="runDialogOpen" :account-id="account.id" :rule-id="ruleId" />
+      <UndoRuleDialog v-if="ruleId" v-model:open="undoDialogOpen" :rule-id="ruleId" :rule-name="draft.name" />
     </template>
   </div>
 </template>

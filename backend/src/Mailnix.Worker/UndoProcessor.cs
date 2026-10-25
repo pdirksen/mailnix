@@ -11,7 +11,7 @@ namespace Mailnix.Worker;
 /// Reverts logged actions: moves messages back, removes copies and restores flags and keywords.
 /// Messages that can no longer be found are reported, never guessed.
 /// </summary>
-internal sealed class UndoProcessor(MailnixDbContext db, TimeProvider time)
+internal sealed class UndoProcessor(MailnixDbContext db, StatsRecorder stats, TimeProvider time)
 {
     public async Task UndoAsync(IMailboxSession session, MailAccount account, RuleRun run, CancellationToken ct)
     {
@@ -21,9 +21,21 @@ internal sealed class UndoProcessor(MailnixDbContext db, TimeProvider time)
         {
             entries = await query.Where(a => a.RunId == runId).ToListAsync(ct);
         }
+        else if (run.UndoActionIds is { Count: > 0 } actionIds)
+        {
+            // A message is put back as a whole: everything its run did to it, not only the selected action
+            // (a flag cannot be restored on a message that is no longer where the flag was set).
+            var selected = await query.Where(a => actionIds.Contains(a.Id)).Select(a => new { a.RunId, a.SourceUid }).ToListAsync(ct);
+            var runIds = selected.Select(s => s.RunId).Distinct().ToList();
+            entries = [.. (await query.Where(a => runIds.Contains(a.RunId)).ToListAsync(ct))
+                .Where(a => selected.Any(s => s.RunId == a.RunId && s.SourceUid == a.SourceUid))];
+        }
         else
         {
-            entries = await query.Where(a => a.RuleId == run.UndoRuleId).OrderByDescending(a => a.CreatedAt).Take(run.UndoCount ?? 10).ToListAsync(ct);
+            // Actions of one run share a timestamp; within it, the newest message (highest UID) counts as last.
+            entries = await query.Where(a => a.RuleId == run.UndoRuleId)
+                .OrderByDescending(a => a.CreatedAt).ThenByDescending(a => a.SourceUid)
+                .Take(run.UndoCount ?? 10).ToListAsync(ct);
         }
 
         var errors = new List<string>();
@@ -43,6 +55,7 @@ internal sealed class UndoProcessor(MailnixDbContext db, TimeProvider time)
         }
 
         var undone = entries.Count(e => e.UndoneAt is not null);
+        await stats.UndoneAsync(account, entries.Where(e => e.UndoneAt is not null), ct);
         run.MessagesExamined = entries.Select(e => (e.RunId, e.SourceUid)).Distinct().Count();
         run.PlannedActions = entries.Count;
         run.ExecutedActions = undone;

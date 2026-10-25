@@ -6,7 +6,7 @@ mailboxes, build rules visually, preview what they would do, and let mailnix mov
 > Status: early development. Auth, IMAP accounts, the rule engine, named lists, the visual rule builder with a
 > preview against real mail, rule execution (new mail via IDLE, "run now", confirmation of large runs, undo,
 > live status), scheduled rules with server-side preselection, the optional Trash purge, and
-> OAuth sign-in for Gmail and Microsoft 365 are in place; stats and the SaaS mode follow.
+> OAuth sign-in for Gmail and Microsoft 365, and the dashboard and stats are in place; the SaaS mode follows.
 
 ## Repository layout
 
@@ -139,6 +139,7 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Worker__SearchPushdown` | `true` | Let the mail server preselect messages for manual and scheduled runs (IMAP SEARCH; results are always re-checked by mailnix) |
 | `Mailnix__Worker__ScheduleCheckInterval` | `00:00:30` | How often due scheduled rules and Trash purges are looked for |
 | `Mailnix__Worker__MaxScheduledRunMessages` | `5000` | Candidates a scheduled run checks at most (newest first) |
+| `Mailnix__Worker__ActionLogRetention` | `90.00:00:00` | Runs and their action log are kept this long (older ones can no longer be undone); the stats keep their daily counters |
 | `Mailnix__Worker__PurgeInterval` | `1.00:00:00` | How often Trash is checked when purging is switched on for an account |
 | `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | `false` | Set to `true` behind a TLS-terminating reverse proxy |
 

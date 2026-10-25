@@ -9,7 +9,8 @@
     "accounts": "Accounts",
     "lists": "Lists",
     "rules": "Rules",
-    "activity": "Activity"
+    "activity": "Activity",
+    "stats": "Stats"
   },
   "common": {
     "language": "Language",
@@ -327,7 +328,12 @@
       "unsaved": "You have unsaved changes. Leave anyway?",
       "invalid": "Fix the marked problems first.",
       "saveFailed": "Saving failed",
-      "saveFirst": "Save your changes first."
+      "saveFirst": "Save your changes first.",
+      "tabs": {
+        "preview": "Preview",
+        "stats": "Stats",
+        "history": "History"
+      }
     },
     "groups": {
       "match": "Match",
@@ -609,7 +615,22 @@
     "time": "Time",
     "messagesAffected": "{count} messages affected",
     "searchFilter": "Preselected by the mail server:",
-    "purgeCounts": "{executed} of {examined} messages in Trash deleted permanently"
+    "purgeCounts": "{executed} of {examined} messages in Trash deleted permanently",
+    "views": {
+      "runs": "Runs",
+      "actions": "Actions"
+    },
+    "allActions": "All actions",
+    "allRules": "All rules",
+    "from": "From",
+    "to": "to",
+    "failedOnly": "Failed only",
+    "select": "Select",
+    "selectAll": "Select all that can be undone",
+    "undoSelected": "Undo 1 action | Undo {count} actions",
+    "undoSelectedTitle": "Undo 1 action? | Undo {count} actions?",
+    "undoSelectedText": "Each message is put back as a whole: whatever its run did to it is undone, not only the selected action.",
+    "loadMore": "Load more"
   },
   "runNow": {
     "button": "Run now",
@@ -649,5 +670,133 @@
     "added": "Account added. Check its folders and settings.",
     "reconnected": "Account reconnected.",
     "signedInAs": "Signed in with {provider} as {email}."
+  },
+  "dashboard": {
+    "subtitle": "Today in your mailboxes. Numbers update as mail comes in.",
+    "today": "Today",
+    "vsYesterday": "vs. yesterday",
+    "kpis": {
+      "processed": "New mail today",
+      "actions": "Actions today",
+      "moved": "Moved",
+      "trashed": "Trashed",
+      "unread": "Unread (watched folders)",
+      "pending": "Waiting for confirmation",
+      "accountErrors": "Accounts with problems"
+    },
+    "hints": {
+      "NoRules": "No rules yet. Start from a template, then check the preview before switching it on.",
+      "NeverMatched": "\"{rule}\" has not acted on anything in 30 days. Check its conditions in the preview.",
+      "DryRunReady": "\"{rule}\" would have acted {count} times in two weeks (dry run). Ready to switch dry run off?"
+    },
+    "openRule": "Open rule",
+    "toRules": "Start from a template",
+    "accountToday": "Today: {processed} new, {actions} actions",
+    "noAccounts": "Add a mailbox to see what mailnix does in it.",
+    "activityTitle": "Actions in the last 30 days",
+    "activityDescription": "Click a day to see its actions.",
+    "topRules": "Most active rules (7 days)",
+    "messages": "messages",
+    "recent": "Latest actions",
+    "allActivity": "All activity"
+  },
+  "stats": {
+    "title": "Stats",
+    "subtitle": "What arrives, what your rules do with it, and how reliably.",
+    "range": "Period",
+    "ranges": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days",
+      "12m": "Last 12 months"
+    },
+    "granularity": "Per",
+    "granularities": {
+      "Day": "Day",
+      "Week": "Week",
+      "Month": "Month"
+    },
+    "newData": "New activity, refresh",
+    "sections": {
+      "volume": "Volume",
+      "rules": "Rules",
+      "senders": "Senders",
+      "folders": "Folders",
+      "security": "Sender trust",
+      "reliability": "Reliability"
+    },
+    "volumeDescription": "New mail compared with the actions rules took. Click a point for that period's actions.",
+    "byActionTitle": "Actions by type",
+    "byActionDescription": "Click a column for its actions.",
+    "rulesDescription": "Matched: messages a rule acted on in the period. Undone: actions reverted.",
+    "ruleColumns": {
+      "name": "Rule",
+      "matched": "Matched",
+      "actions": "Actions",
+      "failed": "Failed",
+      "undone": "Undone",
+      "lastMatch": "Last match"
+    },
+    "neverMatched": "No matches",
+    "topSenders": "Top sender domains",
+    "sendersSummary": "{total} new messages, {bulk} newsletters or bulk mail",
+    "bulkCount": "· {count} bulk",
+    "topActioned": "Domains rules act on most",
+    "topActionedDescription": "Messages a rule acted on, of all new messages from the domain.",
+    "ofProcessed": "of {count}",
+    "foldersDescription": "Latest daily count; change since the start of the last 90 days.",
+    "folderColumns": {
+      "folder": "Folder",
+      "messages": "Messages",
+      "unread": "Unread",
+      "change": "Change"
+    },
+    "folderGrowth": "Mailbox size",
+    "folderGrowthDescription": "Messages in all folders, once a day.",
+    "keys": {
+      "processed": "New mail",
+      "actions": "Actions",
+      "messages": "Messages",
+      "unread": "Unread",
+      "spf": "SPF failed",
+      "dkim": "DKIM failed",
+      "dmarc": "DMARC failed",
+      "spoofing": "Spoofed display name",
+      "highSpam": "High spam score",
+      "failed": "Failed actions"
+    },
+    "authFailures": "Failed sender checks",
+    "authFailuresDescription": "New mail whose sender authentication failed (from the receiving server's Authentication-Results).",
+    "failingDomains": "Domains failing sender checks",
+    "pendingNow": "{count} runs are waiting for confirmation.",
+    "triggerColumns": {
+      "trigger": "Started by",
+      "runs": "Runs",
+      "failed": "With errors",
+      "duration": "Average time"
+    },
+    "seconds": "{value} s",
+    "failedActions": "Failed actions",
+    "noData": "Nothing in this period yet.",
+    "period": "Period",
+    "view": "View",
+    "views": {
+      "chart": "Chart",
+      "table": "Table"
+    },
+    "export": "Download as CSV",
+    "groups": {
+      "moved": "Moved",
+      "trashed": "Trashed",
+      "flags": "Flags",
+      "read": "Read status",
+      "labels": "Copies & keywords",
+      "purged": "Deleted permanently"
+    },
+    "dryRunActions": "Dry-run actions",
+    "lastMatch": "Last acted on mail on {date}.",
+    "neverMatchedYet": "Has not acted on any mail yet.",
+    "ruleMatches": "Messages acted on",
+    "last30Days": "Last 30 days"
   }
 }

@@ -6,6 +6,9 @@ namespace Mailnix.Mail;
 
 public sealed record FolderStatus(string Folder, uint UidValidity, uint UidNext, int Count);
 
+/// <summary>Size of a selectable folder (IMAP STATUS).</summary>
+public sealed record FolderCount(string Folder, int Messages, int Unread);
+
 /// <summary>The actions planned for one message.</summary>
 public sealed record MessageActions(MessageSnapshot Message, IReadOnlyList<PlannedAction> Actions);
 
@@ -69,6 +72,9 @@ public interface IMailboxSession : IAsyncDisposable
     Task<IdleOutcome> IdleAsync(string folder, TimeSpan timeout, CancellationToken wake, CancellationToken ct);
 
     Task<IReadOnlySet<string>> MessageIdsAsync(string folder, int limit, CancellationToken ct);
+
+    /// <summary>Message and unread counts of every selectable folder (read-only).</summary>
+    Task<IReadOnlyList<FolderCount>> FolderCountsAsync(CancellationToken ct);
 
     /// <summary>Current UID of a message: the recorded UID if still valid, otherwise found by Message-ID; null if gone.</summary>
     Task<uint?> LocateAsync(string folder, uint uidValidity, uint uid, string? messageId, CancellationToken ct);

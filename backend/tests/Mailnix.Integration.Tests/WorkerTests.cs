@@ -121,7 +121,8 @@ public sealed class WorkerTests : IAsyncLifetime
         _mail.Messages("INBOX").Select(m => m.Subject).ShouldBe(["old newsletter", "Hello"], ignoreOrder: true);
 
         RunSummary run = null!;
-        await EventuallyAsync(async () => (run = (await RunsAsync()).Single()).State == Infrastructure.Data.RunState.Completed);
+        // The run is saved right after the server-side move, so it may not be listed yet.
+        await EventuallyAsync(async () => (run = (await RunsAsync()).SingleOrDefault()!) is { State: Infrastructure.Data.RunState.Completed });
         run.Trigger.ShouldBe(RunTrigger.NewMail);
         run.ExecutedActions.ShouldBe(2);
         run.CanUndo.ShouldBeTrue();
@@ -131,10 +132,10 @@ public sealed class WorkerTests : IAsyncLifetime
 
         // Undo: back to the inbox, unread again.
         (await _client.PostAsync($"/api/runs/{run.Id}/undo", null, Ct)).StatusCode.ShouldBe(HttpStatusCode.Accepted);
-        await EventuallyAsync(() => Task.FromResult(_mail.Messages("INBOX").Any(m => m.Subject == "Autumn sale")));
+        // Moving back comes before restoring the flags: wait for the whole undo, not just the message.
+        await EventuallyAsync(async () => (await RunsAsync()).Single(r => r.Id == run.Id).UndoneByRunId != null);
         _mail.Messages("INBOX").Single(m => m.Subject == "Autumn sale").IsSeen.ShouldBeFalse();
         _mail.Messages(target).ShouldBeEmpty();
-        await EventuallyAsync(async () => (await RunsAsync()).Single(r => r.Id == run.Id).UndoneByRunId != null);
         (await RunsAsync()).Single(r => r.Id == run.Id).CanUndo.ShouldBeFalse();
 
         // The message moved back by undo is not processed again (it was moved there by mailnix).

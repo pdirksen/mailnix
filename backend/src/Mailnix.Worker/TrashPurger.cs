@@ -14,6 +14,7 @@ namespace Mailnix.Worker;
 /// </summary>
 internal sealed partial class TrashPurger(
     MailnixDbContext db,
+    StatsRecorder stats,
     IOptions<WorkerOptions> options,
     TimeProvider time,
     ILogger<TrashPurger> logger)
@@ -75,10 +76,9 @@ internal sealed partial class TrashPurger(
                 return;
             }
 
-            foreach (var message in messages)
-            {
-                db.ActionLog.Add(Entry(run, account, trash, status.UidValidity, message, now));
-            }
+            var entries = messages.Select(m => Entry(run, account, trash, status.UidValidity, m, now)).ToList();
+            db.ActionLog.AddRange(entries);
+            await stats.ActionsAsync(account, entries, ct);
 
             db.TrashObservations.RemoveRange(messages.Select(m => known[m.Uid]));
             run.ExecutedActions = messages.Count;

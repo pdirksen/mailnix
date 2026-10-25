@@ -1377,6 +1377,98 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/activity/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    accountId?: string;
+                    ruleId?: string;
+                    action?: components["schemas"]["ActionType"];
+                    from?: string;
+                    to?: string;
+                    failedOnly?: boolean;
+                    before?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ActionPage"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/activity/actions/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UndoActionsRequest"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RunSummary"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rule-templates": {
         parameters: {
             query?: never;
@@ -1684,10 +1776,354 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/stats/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    accountId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OverviewResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/timeseries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    metric?: string;
+                    groupBy?: string;
+                    from?: string;
+                    to?: string;
+                    granularity?: components["schemas"]["Granularity"];
+                    accountId?: string;
+                    ruleId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TimeSeries"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    accountId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RuleStatsResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/senders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    accountId?: string;
+                    granularity?: components["schemas"]["Granularity"];
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SendersResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/folders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    accountId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FoldersResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/security": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    accountId?: string;
+                    granularity?: components["schemas"]["Granularity"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SecurityResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/reliability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    from?: string;
+                    to?: string;
+                    accountId?: string;
+                    granularity?: components["schemas"]["Granularity"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReliabilityResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stats/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    section?: string;
+                    from?: string;
+                    to?: string;
+                    accountId?: string;
+                    granularity?: components["schemas"]["Granularity"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AccountHealth: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            provider: components["schemas"]["MailProvider"];
+            enabled: boolean;
+            status: components["schemas"]["MailAccountStatus"];
+            lastErrorCode: null | components["schemas"]["ConnectionErrorCode"];
+            /** Format: date-time */
+            lastCheckedAt: null | string;
+            /** Format: int32 */
+            processedToday: number;
+            /** Format: int32 */
+            actionsToday: number;
+        };
         AccountResponse: {
             /** Format: uuid */
             id: string;
@@ -1716,6 +2152,32 @@ export interface components {
             /** Format: date-time */
             createdAt: string;
         };
+        ActionEntry: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            runId: string;
+            /** Format: uuid */
+            accountId: string;
+            accountName: string;
+            /** Format: uuid */
+            ruleId: null | string;
+            ruleName: null | string;
+            action: components["schemas"]["ActionType"];
+            keyword: null | string;
+            sourceFolder: string;
+            targetFolder: null | string;
+            from: null | string;
+            subject: null | string;
+            dryRun: boolean;
+            success: boolean;
+            error: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            undoneAt: null | string;
+            canUndo: boolean;
+        };
         ActionLogItem: {
             /** Format: uuid */
             id: string;
@@ -1735,6 +2197,11 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             undoneAt: null | string;
+        };
+        ActionPage: {
+            items: components["schemas"]["ActionEntry"][];
+            /** Format: uuid */
+            nextBefore: null | string;
         };
         /** @enum {unknown} */
         ActionType: "MarkRead" | "MarkUnread" | "Flag" | "Unflag" | "AddKeyword" | "RemoveKeyword" | "CopyTo" | "MoveTo" | "Delete" | "MarkAsSpam" | "Archive" | "Purge";
@@ -1858,8 +2325,38 @@ export interface components {
             folders: components["schemas"]["MailFolderInfo"][];
             specialFolders: components["schemas"]["SpecialFolderMap"];
         };
+        FolderRow: {
+            /** Format: uuid */
+            accountId: string;
+            accountName: string;
+            folder: string;
+            /** Format: int32 */
+            messages: number;
+            /** Format: int32 */
+            unread: number;
+            /** Format: int32 */
+            change: null | number;
+        };
+        FoldersResponse: {
+            /** Format: date */
+            date: null | string;
+            folders: components["schemas"]["FolderRow"][];
+            growth: components["schemas"]["TimeSeries"];
+        };
+        /** @enum {unknown} */
+        Granularity: "Day" | "Week" | "Month";
         /** @enum {unknown} */
         GroupOperator: "All" | "Any" | "None";
+        Hint: {
+            kind: components["schemas"]["HintKind"];
+            /** Format: uuid */
+            ruleId?: null | string;
+            ruleName?: null | string;
+            /** Format: int32 */
+            count?: null | number;
+        };
+        /** @enum {unknown} */
+        HintKind: "NoRules" | "NeverMatched" | "DryRunReady";
         HttpValidationProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -1878,6 +2375,20 @@ export interface components {
             line: number;
             value: string;
             message: string;
+        };
+        KpiSet: {
+            /** Format: int32 */
+            processed: number;
+            /** Format: int32 */
+            actions: number;
+            /** Format: int32 */
+            moved: number;
+            /** Format: int32 */
+            trashed: number;
+            /** Format: int32 */
+            flagged: number;
+            /** Format: int32 */
+            failed: number;
         };
         ListEntryDto: {
             value: string;
@@ -1967,6 +2478,22 @@ export interface components {
             provider: components["schemas"]["MailProvider"];
             configured: boolean;
         };
+        OverviewResponse: {
+            /** Format: date */
+            today: string;
+            todayKpis: components["schemas"]["KpiSet"];
+            yesterdayKpis: components["schemas"]["KpiSet"];
+            /** Format: int32 */
+            pendingConfirmations: number;
+            /** Format: int32 */
+            accountsWithErrors: number;
+            /** Format: int32 */
+            unread: null | number;
+            accounts: components["schemas"]["AccountHealth"][];
+            activity: components["schemas"]["TimeSeries"];
+            topRules: components["schemas"]["RuleCount"][];
+            hints: components["schemas"]["Hint"][];
+        };
         PendingActionItem: {
             ruleName: string;
             type: components["schemas"]["ActionType"];
@@ -2052,6 +2579,14 @@ export interface components {
             password: string;
             displayName?: null | string;
         };
+        ReliabilityResponse: {
+            runsByState: components["schemas"]["RunStateCount"][];
+            byTrigger: components["schemas"]["TriggerStats"][];
+            failedActions: components["schemas"]["TimeSeries"];
+            /** Format: int32 */
+            pendingNow: number;
+            accounts: components["schemas"]["AccountHealth"][];
+        };
         ReorderRulesRequest: {
             /** Format: uuid */
             accountId: string;
@@ -2106,6 +2641,15 @@ export interface components {
             /** @enum {string} */
             type?: "Unflag";
         };
+        RuleCount: {
+            /** Format: uuid */
+            ruleId: string;
+            name: string;
+            /** Format: uuid */
+            accountId: string;
+            /** Format: int32 */
+            count: number;
+        };
         RuleDraftRequest: {
             name: string;
             parameters?: null | {
@@ -2146,6 +2690,37 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        RuleStatsResponse: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            rules: components["schemas"]["RuleStatsRow"][];
+        };
+        RuleStatsRow: {
+            /** Format: uuid */
+            ruleId: string;
+            name: string;
+            /** Format: uuid */
+            accountId: string;
+            accountName: string;
+            enabled: boolean;
+            dryRun: boolean;
+            /** Format: int32 */
+            matched: number;
+            /** Format: int32 */
+            actions: number;
+            /** Format: int32 */
+            failed: number;
+            /** Format: int32 */
+            undone: number;
+            /** Format: int32 */
+            dryRunActions: number;
+            /** Format: date */
+            lastMatch: null | string;
+            /** Format: double */
+            matchesPerDay: number;
+        };
         RuleSummary: {
             /** Format: uuid */
             id: string;
@@ -2175,6 +2750,11 @@ export interface components {
         };
         /** @enum {unknown} */
         RunState: "Queued" | "Running" | "AwaitingConfirmation" | "Completed" | "CompletedWithErrors" | "Failed" | "Cancelled" | "Expired";
+        RunStateCount: {
+            state: components["schemas"]["RunState"];
+            /** Format: int32 */
+            count: number;
+        };
         RunSummary: {
             /** Format: uuid */
             id: string;
@@ -2214,6 +2794,47 @@ export interface components {
         };
         /** @enum {unknown} */
         RunTrigger: "NewMail" | "Manual" | "Scheduled" | "Undo" | "Purge";
+        SecurityResponse: {
+            totals: components["schemas"]["SecurityTotals"];
+            series: components["schemas"]["TimeSeries"];
+            topFailingDomains: components["schemas"]["SenderRow"][];
+        };
+        SecurityTotals: {
+            /** Format: int32 */
+            processed: number;
+            /** Format: int32 */
+            spfFailed: number;
+            /** Format: int32 */
+            dkimFailed: number;
+            /** Format: int32 */
+            dmarcFailed: number;
+            /** Format: int32 */
+            spoofing: number;
+            /** Format: int32 */
+            highSpam: number;
+        };
+        SenderRow: {
+            domain: string;
+            /** Format: int32 */
+            processed: number;
+            /** Format: int32 */
+            actioned: number;
+            /** Format: int32 */
+            bulk: number;
+            /** Format: int32 */
+            authFailed: number;
+        };
+        SendersResponse: {
+            totals: components["schemas"]["SenderRow"];
+            topProcessed: components["schemas"]["SenderRow"][];
+            topActioned: components["schemas"]["SenderRow"][];
+            volume: components["schemas"]["TimeSeries"];
+        };
+        Series: {
+            key: string;
+            name: null | string;
+            values: number[];
+        };
         /** @enum {unknown} */
         SkipReason: "TerminalActionAlreadyPlanned" | "ContradictsEarlierAction" | "Duplicate" | "AlreadyInTargetFolder" | "NoChange" | "SpecialFolderNotConfigured";
         /** @enum {unknown} */
@@ -2257,6 +2878,10 @@ export interface components {
             username: string;
             password: string;
         };
+        TimeSeries: {
+            buckets: string[];
+            series: components["schemas"]["Series"][];
+        };
         TraceNode: {
             result: boolean;
             operator?: null | components["schemas"]["GroupOperator"];
@@ -2268,6 +2893,18 @@ export interface components {
         };
         /** @enum {unknown} */
         TraceNote: "NotLoaded" | "RegexTimeout" | "InvalidValue" | "ListNotFound" | "RuleNotFound" | "ReferenceDepthExceeded" | null;
+        TriggerStats: {
+            trigger: components["schemas"]["RunTrigger"];
+            /** Format: int32 */
+            runs: number;
+            /** Format: int32 */
+            failed: number;
+            /** Format: double */
+            averageSeconds: null | number;
+        };
+        UndoActionsRequest: {
+            actionIds: string[];
+        };
         UndoRuleRequest: {
             /**
              * Format: int32

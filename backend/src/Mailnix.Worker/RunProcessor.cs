@@ -57,6 +57,7 @@ internal sealed partial class RunProcessor(
     MailnixDbContext db,
     RuleSetLoader loader,
     TrashPurger purger,
+    StatsRecorder stats,
     ILiveNotifier notifier,
     IOptions<WorkerOptions> options,
     TimeProvider time,
@@ -98,26 +99,30 @@ internal sealed partial class RunProcessor(
         var rules = loaded.AccountRules
             .Where(r => r.Enabled && loaded.Stored[r.Id].Trigger == RuleTrigger.OnNew && loaded.AppliesTo(r.Id, folder, account.WatchedFolders))
             .ToList();
-        var requirements = rules.Count == 0 ? FetchRequirements.None : FieldCatalog.RequiredFetch(rules, loaded.Context.Rules);
+        // Headers are always read (BODY.PEEK, the message stays unread): the stats need sender and trust details.
+        var requirements = (rules.Count == 0 ? FetchRequirements.None : FieldCatalog.RequiredFetch(rules, loaded.Context.Rules)) | FetchRequirements.Headers;
         var messages = await session.FetchNewAsync(folder, state.LastProcessedUid, Options.MaxNewMessagesPerPass, requirements, ct);
         if (messages.Count == 0)
         {
             return;
         }
 
+        // Messages mailnix itself just put here (rules, undo) are not new mail: neither processed again nor counted.
+        var since = now - Options.LoopGuardWindow;
+        var uids = messages.Select(m => m.Uid).ToList();
+        var placedByUs = await db.ActionLog
+            .Where(a => a.AccountId == account.Id && a.TargetFolder == folder && a.TargetUidValidity == status.UidValidity
+                && a.TargetUid != null && uids.Contains(a.TargetUid.Value) && a.CreatedAt > since && a.Success && !a.DryRun)
+            .Select(a => a.TargetUid!.Value)
+            .ToListAsync(ct);
+        var candidates = messages.Where(m => !placedByUs.Contains(m.Uid)).ToList();
+
+        var actioned = new HashSet<uint>();
         if (rules.Count > 0)
         {
-            var since = now - Options.LoopGuardWindow;
-            var uids = messages.Select(m => m.Uid).ToList();
-            var placedByUs = await db.ActionLog
-                .Where(a => a.AccountId == account.Id && a.TargetFolder == folder && a.TargetUidValidity == status.UidValidity
-                    && a.TargetUid != null && uids.Contains(a.TargetUid.Value) && a.CreatedAt > since && a.Success && !a.DryRun)
-                .Select(a => a.TargetUid!.Value)
-                .ToListAsync(ct);
-
-            var candidates = messages.Where(m => !placedByUs.Contains(m.Uid)).ToList();
             var context = await ContextAsync(session, account, loaded, rules, ct);
             var planned = Plan(candidates, rules, context);
+            actioned = [.. planned.Where(p => p.Pending.Actions.Any(a => !a.DryRun)).Select(p => p.Message.Uid)];
             if (planned.Any(p => p.Pending.Actions.Count > 0))
             {
                 var run = NewRun(account, RunTrigger.NewMail, folder, RunState.Running);
@@ -126,6 +131,8 @@ internal sealed partial class RunProcessor(
                 await ApplyAsync(session, account, run, folder, status.UidValidity, planned, candidates.Count, gate: true, ct);
             }
         }
+
+        await stats.NewMailAsync(account, [.. candidates.Select(m => (new MessageFacts(m, loaded.Context), actioned.Contains(m.Uid)))], ct);
 
         state.LastProcessedUid = messages.Max(m => m.Uid);
         state.UpdatedAt = now;
@@ -230,14 +237,18 @@ internal sealed partial class RunProcessor(
             .Where(s => plan.Messages.First(m => m.Uid == s.Uid).MessageId is not { } id || s.MessageId == id)
             .ToDictionary(s => s.Uid);
         var gone = plan.Messages.Where(m => !present.ContainsKey(m.Uid)).ToList();
+        var missing = new List<ActionLogEntry>();
         foreach (var message in gone)
         {
             foreach (var action in message.Actions.Where(a => !a.DryRun))
             {
-                db.ActionLog.Add(Entry(run, account, run.Folder, plan.UidValidity, message, action, success: false, "The message is no longer in the folder."));
+                missing.Add(Entry(run, account, run.Folder, plan.UidValidity, message, action, success: false, "The message is no longer in the folder."));
                 run.FailedActions++;
             }
         }
+
+        db.ActionLog.AddRange(missing);
+        await stats.ActionsAsync(account, missing, ct);
 
         var remaining = plan.Messages.Where(m => present.ContainsKey(m.Uid)).Select(m => (present[m.Uid], m)).ToList();
         await ExecuteAndLogAsync(session, account, run, run.Folder, plan.UidValidity, remaining, ct);
@@ -288,11 +299,12 @@ internal sealed partial class RunProcessor(
         List<(MessageSnapshot Message, PendingMessage Pending)> work,
         CancellationToken ct)
     {
+        var logged = new List<ActionLogEntry>();
         foreach (var (_, pending) in work)
         {
             foreach (var action in pending.Actions.Where(a => a.DryRun))
             {
-                db.ActionLog.Add(Entry(run, account, folder, uidValidity, pending, action, success: true, null, dryRun: true));
+                logged.Add(Entry(run, account, folder, uidValidity, pending, action, success: true, null, dryRun: true));
             }
         }
 
@@ -300,27 +312,28 @@ internal sealed partial class RunProcessor(
             .Select(w => new MessageActions(w.Message, [.. w.Pending.Actions.Where(a => !a.DryRun).Select(a => a.ToPlanned())]))
             .Where(w => w.Actions.Count > 0)
             .ToList();
-        if (live.Count == 0)
+        if (live.Count > 0)
         {
-            return;
+            var outcomes = await session.ExecuteAsync(folder, live, ct);
+            var byUid = work.ToDictionary(w => w.Message.Uid, w => w.Pending);
+            foreach (var outcome in outcomes)
+            {
+                var pending = byUid[outcome.Uid];
+                var action = pending.Actions.First(a => !a.DryRun && a.ToPlanned() == outcome.Action);
+                logged.Add(Entry(run, account, folder, uidValidity, pending, action, outcome.Success, outcome.Error, false, outcome.TargetUid, outcome.TargetUidValidity));
+                if (outcome.Success)
+                {
+                    run.ExecutedActions++;
+                }
+                else
+                {
+                    run.FailedActions++;
+                }
+            }
         }
 
-        var outcomes = await session.ExecuteAsync(folder, live, ct);
-        var byUid = work.ToDictionary(w => w.Message.Uid, w => w.Pending);
-        foreach (var outcome in outcomes)
-        {
-            var pending = byUid[outcome.Uid];
-            var action = pending.Actions.First(a => !a.DryRun && a.ToPlanned() == outcome.Action);
-            db.ActionLog.Add(Entry(run, account, folder, uidValidity, pending, action, outcome.Success, outcome.Error, false, outcome.TargetUid, outcome.TargetUidValidity));
-            if (outcome.Success)
-            {
-                run.ExecutedActions++;
-            }
-            else
-            {
-                run.FailedActions++;
-            }
-        }
+        db.ActionLog.AddRange(logged);
+        await stats.ActionsAsync(account, logged, ct);
     }
 
     private static List<(MessageSnapshot Message, PendingMessage Pending)> Plan(IReadOnlyList<MessageSnapshot> messages, IReadOnlyList<RuleDefinition> rules, EvaluationContext context) =>

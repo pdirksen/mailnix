@@ -203,6 +203,14 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
         public Task<IReadOnlySet<string>> MessageIdsAsync(string folder, int limit, CancellationToken ct) =>
             Task.FromResult<IReadOnlySet<string>>(server.Messages(folder).Select(m => m.MessageId).OfType<string>().ToHashSet());
 
+        public Task<IReadOnlyList<FolderCount>> FolderCountsAsync(CancellationToken ct)
+        {
+            lock (server._lock)
+            {
+                return Task.FromResult<IReadOnlyList<FolderCount>>([.. server._folders.Select(f => new FolderCount(f.Key, f.Value.Messages.Count, f.Value.Messages.Count(m => !m.Snapshot.IsSeen)))]);
+            }
+        }
+
         public Task<uint?> LocateAsync(string folder, uint uidValidity, uint uid, string? messageId, CancellationToken ct)
         {
             lock (server._lock)

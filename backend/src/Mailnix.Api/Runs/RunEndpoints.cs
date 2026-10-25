@@ -204,7 +204,7 @@ internal static class RunEndpoints
         return TypedResults.Accepted($"/api/runs/{run.Id}", RunSummary.From(run, account.Name));
     }
 
-    private static RuleRun NewRun(MailAccount account, RunTrigger trigger, string folder, TimeProvider time) => new()
+    internal static RuleRun NewRun(MailAccount account, RunTrigger trigger, string folder, TimeProvider time) => new()
     {
         Id = Guid.CreateVersion7(),
         TenantId = account.TenantId,

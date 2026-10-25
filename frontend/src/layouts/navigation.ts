@@ -1,4 +1,4 @@
-import { HistoryIcon, LayoutDashboardIcon, ListChecksIcon, MailIcon, WorkflowIcon } from '@lucide/vue'
+import { ChartColumnIcon, HistoryIcon, LayoutDashboardIcon, ListChecksIcon, MailIcon, WorkflowIcon } from '@lucide/vue'
 import type { Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
@@ -19,4 +19,5 @@ export const navigation: NavigationItem[] = [
   { to: { name: 'rules' }, labelKey: 'nav.rules', icon: WorkflowIcon, matches: ['rule-new', 'rule-edit'] },
   { to: { name: 'lists' }, labelKey: 'nav.lists', icon: ListChecksIcon, matches: ['list-detail'] },
   { to: { name: 'activity' }, labelKey: 'nav.activity', icon: HistoryIcon, matches: ['run-review'] },
+  { to: { name: 'stats' }, labelKey: 'nav.stats', icon: ChartColumnIcon },
 ]

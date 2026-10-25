@@ -22,6 +22,8 @@ internal sealed partial class RuleScheduler(
 
     private WorkerOptions Options => options.Value;
 
+    private DateTimeOffset _lastCleanup = DateTimeOffset.MinValue;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!Options.Enabled)
@@ -117,11 +119,44 @@ internal sealed partial class RuleScheduler(
 
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
+        await CleanUpAsync(db, now, ct);
         foreach (var accountId in woken)
         {
             signals.Wake(accountId);
         }
     }
+
+    /// <summary>Once a day: finished runs (with their action log) older than the retention period.</summary>
+    private async Task CleanUpAsync(MailnixDbContext db, DateTimeOffset now, CancellationToken ct)
+    {
+        if (now - _lastCleanup < TimeSpan.FromDays(1))
+        {
+            return;
+        }
+
+        _lastCleanup = now;
+        if (await DeleteOldRunsAsync(db, now - Options.ActionLogRetention, ct) is var removed and > 0)
+        {
+            LogCleanedUp(removed);
+        }
+    }
+
+    /// <summary>Deletes finished runs created before <paramref name="cutoff"/> and their action log; the stats counters stay.</summary>
+    internal static async Task<int> DeleteOldRunsAsync(MailnixDbContext db, DateTimeOffset cutoff, CancellationToken ct)
+    {
+        RunState[] finished = [RunState.Completed, RunState.CompletedWithErrors, RunState.Failed, RunState.Cancelled, RunState.Expired];
+        var old = await db.Runs.Where(r => r.CreatedAt < cutoff && finished.Contains(r.State)).Select(r => r.Id).ToListAsync(ct);
+        foreach (var batch in old.Chunk(500))
+        {
+            await db.ActionLog.Where(a => batch.Contains(a.RunId)).ExecuteDeleteAsync(ct);
+            await db.Runs.Where(r => batch.Contains(r.Id)).ExecuteDeleteAsync(ct);
+        }
+
+        return old.Count;
+    }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Removed {Count} runs older than the retention period, with their action log")]
+    private partial void LogCleanedUp(int count);
 
     private static RuleRun NewRun(MailAccount account, RunTrigger trigger, string folder, DateTimeOffset now, Action<RuleRun> configure)
     {

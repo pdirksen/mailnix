@@ -9,7 +9,8 @@
     "accounts": "Konten",
     "lists": "Listen",
     "rules": "Regeln",
-    "activity": "Aktivität"
+    "activity": "Aktivität",
+    "stats": "Statistik"
   },
   "common": {
     "language": "Sprache",
@@ -327,7 +328,12 @@
       "unsaved": "Es gibt ungespeicherte Änderungen. Trotzdem verlassen?",
       "invalid": "Behebe zuerst die markierten Probleme.",
       "saveFailed": "Speichern fehlgeschlagen",
-      "saveFirst": "Speichere zuerst deine Änderungen."
+      "saveFirst": "Speichere zuerst deine Änderungen.",
+      "tabs": {
+        "preview": "Vorschau",
+        "stats": "Statistik",
+        "history": "Verlauf"
+      }
     },
     "groups": {
       "match": "Erfülle",
@@ -609,7 +615,22 @@
     "time": "Zeit",
     "messagesAffected": "{count} E-Mails betroffen",
     "searchFilter": "Vom Mailserver vorausgewählt:",
-    "purgeCounts": "{executed} von {examined} E-Mails im Papierkorb endgültig gelöscht"
+    "purgeCounts": "{executed} von {examined} E-Mails im Papierkorb endgültig gelöscht",
+    "views": {
+      "runs": "Läufe",
+      "actions": "Aktionen"
+    },
+    "allActions": "Alle Aktionen",
+    "allRules": "Alle Regeln",
+    "from": "Von",
+    "to": "bis",
+    "failedOnly": "Nur fehlgeschlagene",
+    "select": "Auswählen",
+    "selectAll": "Alle rückgängig machbaren auswählen",
+    "undoSelected": "1 Aktion rückgängig machen | {count} Aktionen rückgängig machen",
+    "undoSelectedTitle": "1 Aktion rückgängig machen? | {count} Aktionen rückgängig machen?",
+    "undoSelectedText": "Jede E-Mail wird als Ganzes zurückgesetzt: Alles, was ihr Lauf mit ihr gemacht hat, wird rückgängig gemacht, nicht nur die ausgewählte Aktion.",
+    "loadMore": "Mehr laden"
   },
   "runNow": {
     "button": "Jetzt ausführen",
@@ -649,5 +670,133 @@
     "added": "Konto hinzugefügt. Prüfe die Ordner und Einstellungen.",
     "reconnected": "Konto neu verbunden.",
     "signedInAs": "Angemeldet mit {provider} als {email}."
+  },
+  "dashboard": {
+    "subtitle": "Heute in deinen Postfächern. Die Zahlen aktualisieren sich, wenn E-Mails eingehen.",
+    "today": "Heute",
+    "vsYesterday": "ggü. gestern",
+    "kpis": {
+      "processed": "Neue E-Mails heute",
+      "actions": "Aktionen heute",
+      "moved": "Verschoben",
+      "trashed": "Gelöscht",
+      "unread": "Ungelesen (überwachte Ordner)",
+      "pending": "Warten auf Bestätigung",
+      "accountErrors": "Konten mit Problemen"
+    },
+    "hints": {
+      "NoRules": "Noch keine Regeln. Starte mit einer Vorlage und prüfe die Vorschau, bevor du sie einschaltest.",
+      "NeverMatched": "„{rule}“ hat seit 30 Tagen nichts bewirkt. Prüfe die Bedingungen in der Vorschau.",
+      "DryRunReady": "„{rule}“ hätte in zwei Wochen {count}-mal gehandelt (Probelauf). Bereit, den Probelauf auszuschalten?"
+    },
+    "openRule": "Regel öffnen",
+    "toRules": "Mit einer Vorlage starten",
+    "accountToday": "Heute: {processed} neu, {actions} Aktionen",
+    "noAccounts": "Füge ein Postfach hinzu, um zu sehen, was mailnix darin tut.",
+    "activityTitle": "Aktionen der letzten 30 Tage",
+    "activityDescription": "Klicke auf einen Tag, um seine Aktionen zu sehen.",
+    "topRules": "Aktivste Regeln (7 Tage)",
+    "messages": "E-Mails",
+    "recent": "Letzte Aktionen",
+    "allActivity": "Alle Aktivitäten"
+  },
+  "stats": {
+    "title": "Statistik",
+    "subtitle": "Was ankommt, was deine Regeln damit tun und wie zuverlässig.",
+    "range": "Zeitraum",
+    "ranges": {
+      "7d": "Letzte 7 Tage",
+      "30d": "Letzte 30 Tage",
+      "90d": "Letzte 90 Tage",
+      "12m": "Letzte 12 Monate"
+    },
+    "granularity": "Pro",
+    "granularities": {
+      "Day": "Tag",
+      "Week": "Woche",
+      "Month": "Monat"
+    },
+    "newData": "Neue Aktivität, aktualisieren",
+    "sections": {
+      "volume": "Menge",
+      "rules": "Regeln",
+      "senders": "Absender",
+      "folders": "Ordner",
+      "security": "Absender-Vertrauen",
+      "reliability": "Zuverlässigkeit"
+    },
+    "volumeDescription": "Neue E-Mails im Vergleich zu den Aktionen der Regeln. Klicke auf einen Punkt für die Aktionen dieses Zeitraums.",
+    "byActionTitle": "Aktionen nach Art",
+    "byActionDescription": "Klicke auf eine Säule für ihre Aktionen.",
+    "rulesDescription": "Treffer: E-Mails, auf die eine Regel im Zeitraum reagiert hat. Rückgängig: zurückgenommene Aktionen.",
+    "ruleColumns": {
+      "name": "Regel",
+      "matched": "Treffer",
+      "actions": "Aktionen",
+      "failed": "Fehlgeschlagen",
+      "undone": "Rückgängig",
+      "lastMatch": "Letzter Treffer"
+    },
+    "neverMatched": "Keine Treffer",
+    "topSenders": "Häufigste Absender-Domains",
+    "sendersSummary": "{total} neue E-Mails, davon {bulk} Newsletter oder Massen-E-Mails",
+    "bulkCount": "· {count} Massen-E-Mail",
+    "topActioned": "Domains, auf die Regeln am häufigsten reagieren",
+    "topActionedDescription": "E-Mails, auf die eine Regel reagiert hat, von allen neuen E-Mails der Domain.",
+    "ofProcessed": "von {count}",
+    "foldersDescription": "Letzte tägliche Zählung; Änderung seit Beginn der letzten 90 Tage.",
+    "folderColumns": {
+      "folder": "Ordner",
+      "messages": "E-Mails",
+      "unread": "Ungelesen",
+      "change": "Änderung"
+    },
+    "folderGrowth": "Postfachgröße",
+    "folderGrowthDescription": "E-Mails in allen Ordnern, einmal täglich.",
+    "keys": {
+      "processed": "Neue E-Mails",
+      "actions": "Aktionen",
+      "messages": "E-Mails",
+      "unread": "Ungelesen",
+      "spf": "SPF fehlgeschlagen",
+      "dkim": "DKIM fehlgeschlagen",
+      "dmarc": "DMARC fehlgeschlagen",
+      "spoofing": "Gefälschter Anzeigename",
+      "highSpam": "Hoher Spam-Wert",
+      "failed": "Fehlgeschlagene Aktionen"
+    },
+    "authFailures": "Fehlgeschlagene Absenderprüfungen",
+    "authFailuresDescription": "Neue E-Mails, deren Absenderprüfung fehlschlug (laut Authentication-Results des empfangenden Servers).",
+    "failingDomains": "Domains mit fehlgeschlagenen Prüfungen",
+    "pendingNow": "{count} Läufe warten auf Bestätigung.",
+    "triggerColumns": {
+      "trigger": "Gestartet durch",
+      "runs": "Läufe",
+      "failed": "Mit Fehlern",
+      "duration": "Durchschnittliche Dauer"
+    },
+    "seconds": "{value} s",
+    "failedActions": "Fehlgeschlagene Aktionen",
+    "noData": "In diesem Zeitraum noch nichts.",
+    "period": "Zeitraum",
+    "view": "Ansicht",
+    "views": {
+      "chart": "Diagramm",
+      "table": "Tabelle"
+    },
+    "export": "Als CSV herunterladen",
+    "groups": {
+      "moved": "Verschoben",
+      "trashed": "Gelöscht",
+      "flags": "Markierungen",
+      "read": "Gelesen-Status",
+      "labels": "Kopien & Schlagwörter",
+      "purged": "Endgültig gelöscht"
+    },
+    "dryRunActions": "Probelauf-Aktionen",
+    "lastMatch": "Zuletzt auf E-Mails reagiert am {date}.",
+    "neverMatchedYet": "Hat noch auf keine E-Mail reagiert.",
+    "ruleMatches": "E-Mails mit Aktionen",
+    "last30Days": "Letzte 30 Tage"
   }
 }
