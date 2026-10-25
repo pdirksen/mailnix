@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Mailnix.Api.Hosting;
+using Mailnix.Api.Team;
 using Mailnix.Api.Rules;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Infrastructure.OAuth;
@@ -95,6 +96,13 @@ internal static class AccountEndpoints
         IWorkerSignals signals,
         CancellationToken ct)
     {
+        var userId = user.GetUserId();
+        var tenantId = await db.Users.Where(u => u.Id == userId).Select(u => u.TenantId).SingleAsync(ct);
+        if (await TenantLimits.CheckAccountLimitAsync(db, tenantId, ct) is { } limitReached)
+        {
+            return limitReached;
+        }
+
         var settings = new ImapConnectionSettings(request.Host.Trim(), request.Port, request.Security, request.Username.Trim(), request.Password);
         MailboxProbeResult result;
         try
@@ -118,8 +126,6 @@ internal static class AccountEndpoints
             return TypedResults.ValidationProblem(purgeErrors);
         }
 
-        var userId = user.GetUserId();
-        var tenantId = await db.Users.Where(u => u.Id == userId).Select(u => u.TenantId).SingleAsync(ct);
         var now = time.GetUtcNow();
         var account = new MailAccount
         {

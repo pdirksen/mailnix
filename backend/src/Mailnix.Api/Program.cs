@@ -8,11 +8,13 @@ using Mailnix.Api.Lists;
 using Mailnix.Api.Rules;
 using Mailnix.Api.Runs;
 using Mailnix.Api.Stats;
+using Mailnix.Api.Team;
 using Mailnix.Core.Rules;
 using Mailnix.Infrastructure;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Mail;
 using Mailnix.Worker;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Net.Http.Headers;
 using Scalar.AspNetCore;
 using Serilog;
@@ -31,7 +33,12 @@ if (File.Exists(Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html"))
     Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 }
 
-var builder = WebApplication.CreateBuilder(args);
+// Deployments with several processes (SaaS) run this once before the others start: migrations, seed data and the
+// data protection key ring are then created by one process only.
+const string InitializeOnly = "--initialize-only";
+var initializeOnly = args.Contains(InitializeOnly);
+
+var builder = WebApplication.CreateBuilder(args.Where(a => a != InitializeOnly).ToArray());
 
 // The build-time OpenAPI generator boots the app without a database.
 var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
@@ -58,7 +65,20 @@ builder.Services.AddScoped<RuleService>();
 if (hostOptions.ServesApi)
 {
     builder.Services.AddSignalR().AddJsonProtocol(json => RuleJson.Configure(json.PayloadSerializerOptions));
-    builder.Services.AddSingleton<ILiveNotifier, HubLiveNotifier>();
+}
+
+// Live events: straight to the hub in one process; through the database between worker and API processes.
+switch (hostOptions.Mode)
+{
+    case MailnixMode.AllInOne:
+        builder.Services.AddSingleton<ILiveNotifier, HubLiveNotifier>();
+        break;
+    case MailnixMode.Worker:
+        builder.Services.AddSingleton<ILiveNotifier, OutboxLiveNotifier>();
+        break;
+    case MailnixMode.Api when !isOpenApiGeneration:
+        builder.Services.AddHostedService<LiveEventRelay>();
+        break;
 }
 
 builder.Services.AddMailnixWorker(builder.Configuration, runWatchers: hostOptions.Mode is MailnixMode.AllInOne or MailnixMode.Worker && !isOpenApiGeneration);
@@ -74,6 +94,13 @@ if (!isOpenApiGeneration)
 {
     await using var scope = app.Services.CreateAsyncScope();
     await scope.ServiceProvider.GetRequiredService<DatabaseInitializer>().InitializeAsync();
+    if (initializeOnly)
+    {
+        // Creates the first key if there is none yet, so all processes share it from the start.
+        scope.ServiceProvider.GetRequiredService<IDataProtectionProvider>().CreateProtector("mailnix.initialize").Protect("ready"u8.ToArray());
+        Log.Information("Database and keys are ready");
+        return;
+    }
 }
 
 app.UseMiddleware<SecurityHeadersMiddleware>();
@@ -98,6 +125,7 @@ if (hostOptions.ServesApi)
 }
 
 app.UseAuthentication();
+app.UseMiddleware<TenantScopeMiddleware>();
 app.UseAuthorization();
 app.UseRateLimiter();
 app.UseMiddleware<CsrfHeaderMiddleware>();
@@ -122,6 +150,8 @@ if (hostOptions.ServesApi)
     api.MapRunEndpoints();
     api.MapStatsEndpoints();
     api.MapActivityEndpoints();
+    api.MapTeamEndpoints();
+    api.MapSystemEndpoints();
     app.MapHub<LiveHub>("/hubs/live");
     api.MapFallback("{**path}", () => TypedResults.NotFound()).AllowAnonymous();
 

@@ -39,6 +39,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/invitations/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InvitationInfo"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/register": {
         parameters: {
             query?: never;
@@ -2105,6 +2149,312 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/team": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TeamResponse"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["RenameTenantRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateInvitationRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CreatedInvitation"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/invitations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/users/{id}/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SetTenantAdminRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/team/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/system": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SystemResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/system/tenants/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TenantLimitRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2207,6 +2557,7 @@ export interface components {
         ActionType: "MarkRead" | "MarkUnread" | "Flag" | "Unflag" | "AddKeyword" | "RemoveKeyword" | "CopyTo" | "MoveTo" | "Delete" | "MarkAsSpam" | "Archive" | "Purge";
         AuthConfigResponse: {
             registrationOpen: boolean;
+            multiTenant: boolean;
         };
         CompleteOAuthRequest: {
             state: string;
@@ -2270,6 +2621,13 @@ export interface components {
             blastRadiusLimit: number;
             /** Format: int32 */
             purgeTrashAfterDays?: null | number;
+        };
+        CreatedInvitation: {
+            invitation: components["schemas"]["InvitationItem"];
+            url: string;
+        };
+        CreateInvitationRequest: {
+            email?: null | string;
         };
         CreateListRequest: {
             name: string;
@@ -2376,6 +2734,19 @@ export interface components {
             value: string;
             message: string;
         };
+        InvitationInfo: {
+            tenantName: string;
+            email: null | string;
+        };
+        InvitationItem: {
+            /** Format: uuid */
+            id: string;
+            email: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
         KpiSet: {
             /** Format: int32 */
             processed: number;
@@ -2461,6 +2832,8 @@ export interface components {
             /** Format: int32 */
             unread: null | number;
         };
+        /** @enum {unknown} */
+        MailnixMode: "AllInOne" | "Api" | "Worker";
         /** @enum {unknown} */
         MailProvider: "Imap" | "Google" | "Microsoft";
         MeResponse: {
@@ -2578,6 +2951,8 @@ export interface components {
             email: string;
             password: string;
             displayName?: null | string;
+            organizationName?: null | string;
+            inviteToken?: null | string;
         };
         ReliabilityResponse: {
             runsByState: components["schemas"]["RunStateCount"][];
@@ -2586,6 +2961,9 @@ export interface components {
             /** Format: int32 */
             pendingNow: number;
             accounts: components["schemas"]["AccountHealth"][];
+        };
+        RenameTenantRequest: {
+            name: string;
         };
         ReorderRulesRequest: {
             /** Format: uuid */
@@ -2835,6 +3213,9 @@ export interface components {
             name: null | string;
             values: number[];
         };
+        SetTenantAdminRequest: {
+            isTenantAdmin: boolean;
+        };
         /** @enum {unknown} */
         SkipReason: "TerminalActionAlreadyPlanned" | "ContradictsEarlierAction" | "Duplicate" | "AlreadyInTargetFolder" | "NoChange" | "SpecialFolderNotConfigured";
         /** @enum {unknown} */
@@ -2863,6 +3244,37 @@ export interface components {
             limit: number;
             ruleIds?: null | string[];
         };
+        SystemResponse: {
+            mode: components["schemas"]["MailnixMode"];
+            multiTenant: boolean;
+            workers: components["schemas"]["WorkerInfo"][];
+            /** Format: int32 */
+            accounts: number;
+            /** Format: int32 */
+            unleasedAccounts: number;
+            /** Format: int32 */
+            queuedRuns: number;
+            /** Format: int32 */
+            awaitingConfirmation: number;
+            tenants: components["schemas"]["TenantRow"][];
+        };
+        TeamMember: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            displayName: null | string;
+            isTenantAdmin: boolean;
+            isAdmin: boolean;
+            /** Format: int32 */
+            accounts: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        TeamResponse: {
+            tenant: components["schemas"]["TenantInfo"];
+            users: components["schemas"]["TeamMember"][];
+            invitations: components["schemas"]["InvitationItem"][];
+        };
         TemplateParameterInfo: {
             name: string;
             type: components["schemas"]["TemplateParameterType"];
@@ -2870,6 +3282,32 @@ export interface components {
         };
         /** @enum {unknown} */
         TemplateParameterType: "Folder" | "Days" | "Megabytes" | "DomainList";
+        TenantInfo: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: int32 */
+            maxAccounts: null | number;
+            /** Format: int32 */
+            accounts: number;
+        };
+        TenantLimitRequest: {
+            /** Format: int32 */
+            maxAccounts: null | number;
+        };
+        TenantRow: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: int32 */
+            users: number;
+            /** Format: int32 */
+            accounts: number;
+            /** Format: int32 */
+            maxAccounts: null | number;
+            /** Format: date-time */
+            createdAt: string;
+        };
         TestConnectionRequest: {
             host: string;
             /** Format: int32 */
@@ -2957,6 +3395,17 @@ export interface components {
             ruleId?: null | string;
             trigger?: components["schemas"]["RuleTrigger"];
             schedule?: null | string;
+        };
+        WorkerInfo: {
+            id: string;
+            host: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            lastSeenAt: string;
+            /** Format: int32 */
+            leases: number;
+            alive: boolean;
         };
     };
     responses: never;

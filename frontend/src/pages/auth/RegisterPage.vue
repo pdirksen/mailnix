@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { api, ApiError, type Schemas } from '@/api/client'
 import FormField from '@/components/common/FormField.vue'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -9,22 +10,30 @@ import { toTypedSchema } from '@/lib/zodForm'
 import { useAuthStore } from '@/stores/auth'
 import { CircleAlertIcon, Loader2Icon } from '@lucide/vue'
 import { useForm } from 'vee-validate'
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { z } from 'zod'
 
 /** Must match the server's password policy (Identity RequiredLength). */
 const MIN_PASSWORD_LENGTH = 10
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const auth = useAuthStore()
+const route = useRoute()
 const router = useRouter()
+
+/** From an invitation link (/register?invite=…): joins the inviting organization instead of founding one. */
+const inviteToken = typeof route.query.invite === 'string' ? route.query.invite : undefined
+const invitation = ref<Schemas['InvitationInfo']>()
+const invitationInvalid = ref(false)
+const askOrganization = computed(() => auth.multiTenant && !inviteToken)
 
 const schema = z
   .object({
     email: z.email({ error: () => t('validation.email') }).max(256, { error: () => t('validation.maxLength', { max: 256 }) }),
     displayName: z.string().max(200, { error: () => t('validation.maxLength', { max: 200 }) }),
+    organizationName: z.string().max(200, { error: () => t('validation.maxLength', { max: 200 }) }),
     password: z
       .string()
       .min(MIN_PASSWORD_LENGTH, { error: () => t('validation.passwordLength', { min: MIN_PASSWORD_LENGTH }) })
@@ -38,22 +47,41 @@ const schema = z
 
 const { defineField, handleSubmit, errors, isSubmitting } = useForm({
   validationSchema: toTypedSchema(schema),
-  initialValues: { email: '', displayName: '', password: '', confirmPassword: '' },
+  initialValues: { email: '', displayName: '', organizationName: '', password: '', confirmPassword: '' },
 })
 const [email, emailAttrs] = defineField('email')
 const [displayName, displayNameAttrs] = defineField('displayName')
+const [organizationName, organizationNameAttrs] = defineField('organizationName')
 const [password, passwordAttrs] = defineField('password')
 const [confirmPassword, confirmPasswordAttrs] = defineField('confirmPassword')
 
+onMounted(async () => {
+  if (!inviteToken) return
+  const result = await api.GET('/api/auth/invitations/{token}', { params: { path: { token: inviteToken } } }).catch(() => undefined)
+  if (result?.data) {
+    invitation.value = result.data
+    if (result.data.email) email.value = result.data.email
+  } else {
+    invitationInvalid.value = true
+  }
+})
+
 const failure = ref<string[]>([])
 
-const onSubmit = handleSubmit(async ({ email, displayName, password }) => {
+const onSubmit = handleSubmit(async ({ email, displayName, organizationName, password }) => {
   failure.value = []
   try {
-    await auth.register({ email, password, displayName: displayName.trim() || null })
+    await auth.register({
+      email,
+      password,
+      displayName: displayName.trim() || null,
+      organizationName: askOrganization.value ? organizationName.trim() || null : null,
+      inviteToken: inviteToken ?? null,
+    })
     await router.replace({ name: 'dashboard' })
   } catch (error) {
-    failure.value = errorMessages(error, t('common.unexpectedError'))
+    const key = `auth.errors.${error instanceof ApiError ? error.code : ''}`
+    failure.value = te(key) ? [t(key)] : errorMessages(error, t('common.unexpectedError'))
   }
 })
 </script>
@@ -61,8 +89,18 @@ const onSubmit = handleSubmit(async ({ email, displayName, password }) => {
 <template>
   <Card>
     <CardHeader>
-      <CardTitle class="text-xl">{{ $t('auth.registerTitle') }}</CardTitle>
-      <CardDescription>{{ $t('auth.registerSubtitle') }}</CardDescription>
+      <CardTitle class="text-xl">
+        {{ invitation ? $t('auth.joinTitle', { organization: invitation.tenantName }) : $t('auth.registerTitle') }}
+      </CardTitle>
+      <CardDescription>
+        {{
+          invitation
+            ? $t('auth.joinSubtitle', { organization: invitation.tenantName })
+            : auth.multiTenant
+              ? $t('auth.registerSubtitleOrganization')
+              : $t('auth.registerSubtitle')
+        }}
+      </CardDescription>
     </CardHeader>
     <form novalidate @submit="onSubmit">
       <CardContent class="grid gap-4">
@@ -74,8 +112,36 @@ const onSubmit = handleSubmit(async ({ email, displayName, password }) => {
           </AlertDescription>
         </Alert>
 
+        <Alert v-if="invitationInvalid" variant="destructive" data-testid="invitation-invalid">
+          <CircleAlertIcon />
+          <AlertTitle>{{ $t('auth.errors.InvitationInvalid') }}</AlertTitle>
+          <AlertDescription>{{ $t('auth.invitationInvalidHint') }}</AlertDescription>
+        </Alert>
+
         <FormField id="email" v-slot="aria" :label="$t('auth.email')" :error="errors.email">
-          <Input id="email" v-model="email" v-bind="{ ...emailAttrs, ...aria }" type="email" autocomplete="email" />
+          <Input
+            id="email"
+            v-model="email"
+            v-bind="{ ...emailAttrs, ...aria }"
+            type="email"
+            autocomplete="email"
+            :readonly="!!invitation?.email"
+          />
+        </FormField>
+        <FormField
+          v-if="askOrganization"
+          id="organization"
+          v-slot="aria"
+          :label="$t('auth.organization')"
+          :hint="$t('auth.organizationHint')"
+          :error="errors.organizationName"
+        >
+          <Input
+            id="organization"
+            v-model="organizationName"
+            v-bind="{ ...organizationNameAttrs, ...aria }"
+            autocomplete="organization"
+          />
         </FormField>
         <FormField
           id="display-name"

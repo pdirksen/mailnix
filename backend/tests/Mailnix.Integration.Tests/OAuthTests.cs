@@ -191,6 +191,22 @@ public sealed class OAuthTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task The_mailbox_limit_of_the_organization_applies_to_new_but_not_to_reconnected_accounts()
+    {
+        var first = await AddAccountAsync();
+        await using (var scope = _app.Services.CreateAsyncScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<MailnixDbContext>().Tenants.ExecuteUpdateAsync(u => u.SetProperty(t => t.MaxAccounts, 1), Ct);
+        }
+
+        var second = await SignInAsync(await StartAsync());
+        second.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+        (await second.Content.ReadAsStringAsync(Ct)).ShouldContain("AccountLimitReached");
+
+        (await SignInAsync(await StartAsync(new { accountId = first.Account.Id }))).StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
     public async Task Tampered_or_foreign_state_is_rejected()
     {
         var url = await StartAsync();

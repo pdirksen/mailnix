@@ -61,6 +61,15 @@ public sealed class WorkerOptions
     /// daily counters regardless.
     /// </summary>
     public TimeSpan ActionLogRetention { get; set; } = TimeSpan.FromDays(90);
+
+    /// <summary>A worker holds a mailbox this long without renewing; then another worker may take it over.</summary>
+    public TimeSpan LeaseDuration { get; set; } = TimeSpan.FromSeconds(90);
+
+    /// <summary>Most mailboxes one worker process watches.</summary>
+    public int MaxAccountsPerWorker { get; set; } = 500;
+
+    /// <summary>How often the worker looks for runs queued by an API process.</summary>
+    public TimeSpan QueuePollInterval { get; set; } = TimeSpan.FromSeconds(2);
 }
 
 /// <summary>Lets the API nudge the worker: new jobs for an account, or changed accounts.</summary>

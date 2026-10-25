@@ -1,6 +1,7 @@
 using Mailnix.Infrastructure.Data;
 using Mailnix.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Mailnix.Api.Hosting;
 using Microsoft.AspNetCore.Identity;
 
 namespace Mailnix.Api.Auth;
@@ -15,7 +16,11 @@ public sealed class AuthOptions
 
 public static class Policies
 {
+    /// <summary>Runs the installation.</summary>
     public const string Admin = "Admin";
+
+    /// <summary>Manages their own tenant's users (installation admins may too).</summary>
+    public const string TenantAdmin = "TenantAdmin";
 }
 
 internal static class AuthServiceCollectionExtensions
@@ -47,6 +52,10 @@ internal static class AuthServiceCollectionExtensions
             };
         });
 
+        // Every minute the cookie is checked against the database and its roles reloaded, so removed users and
+        // changed admin rights take effect within a minute (default: 30 minutes).
+        services.Configure<SecurityStampValidatorOptions>(validator => validator.ValidationInterval = TimeSpan.FromMinutes(1));
+
         services.AddIdentityCore<AppUser>(identity =>
             {
                 identity.User.RequireUniqueEmail = true;
@@ -64,11 +73,13 @@ internal static class AuthServiceCollectionExtensions
             .AddRoles<AppRole>()
             .AddEntityFrameworkStores<MailnixDbContext>()
             .AddSignInManager()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddClaimsPrincipalFactory<MailnixClaimsPrincipalFactory>();
 
         services.AddAuthorizationBuilder()
             .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
-            .AddPolicy(Policies.Admin, policy => policy.RequireRole(Roles.Admin));
+            .AddPolicy(Policies.Admin, policy => policy.RequireRole(Roles.Admin))
+            .AddPolicy(Policies.TenantAdmin, policy => policy.RequireRole(Roles.TenantAdmin, Roles.Admin));
 
         return services;
     }

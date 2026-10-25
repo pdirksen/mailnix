@@ -2,6 +2,7 @@ using Mailnix.Infrastructure.Identity;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Mailnix.Infrastructure.Data;
@@ -13,6 +14,12 @@ namespace Mailnix.Infrastructure.Data;
 public abstract class MailnixDbContext(DbContextOptions options)
     : IdentityDbContext<AppUser, AppRole, Guid>(options), IDataProtectionKeyContext
 {
+    /// <summary>
+    /// The tenant of the signed-in user (set per request): accounts, rules, lists and runs of other tenants are
+    /// filtered out, as a second line of defense behind the per-user checks. Null for the worker and system tasks.
+    /// </summary>
+    public Guid? TenantFilter { get; set; }
+
     public DbSet<Tenant> Tenants => Set<Tenant>();
 
     public DbSet<MailAccount> MailAccounts => Set<MailAccount>();
@@ -41,7 +48,22 @@ public abstract class MailnixDbContext(DbContextOptions options)
 
     public DbSet<FolderSnapshot> FolderSnapshots => Set<FolderSnapshot>();
 
+    public DbSet<MailboxLease> MailboxLeases => Set<MailboxLease>();
+
+    public DbSet<WorkerInstance> Workers => Set<WorkerInstance>();
+
+    public DbSet<LiveEventRecord> LiveEvents => Set<LiveEventRecord>();
+
+    public DbSet<Invitation> Invitations => Set<Invitation>();
+
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // Rows that hang off a tenant-filtered entity (stats, action log, leases, ...) are always read by account or
+        // user id, so EF's warning about required navigations to filtered entities does not apply.
+        optionsBuilder.ConfigureWarnings(w => w.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -63,6 +85,7 @@ public abstract class MailnixDbContext(DbContextOptions options)
 
         builder.Entity<MailAccount>(e =>
         {
+            e.HasQueryFilter(a => TenantFilter == null || a.TenantId == TenantFilter);
             e.HasOne(a => a.User).WithMany().HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(a => new { a.TenantId, a.UserId });
             e.Property(a => a.Name).HasMaxLength(200);
@@ -79,6 +102,7 @@ public abstract class MailnixDbContext(DbContextOptions options)
 
         builder.Entity<MailRule>(e =>
         {
+            e.HasQueryFilter(r => TenantFilter == null || r.TenantId == TenantFilter);
             e.HasOne(r => r.Account).WithMany().HasForeignKey(r => r.AccountId).OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(r => new { r.TenantId, r.UserId });
             e.HasIndex(r => new { r.AccountId, r.Priority });
@@ -108,6 +132,7 @@ public abstract class MailnixDbContext(DbContextOptions options)
 
         builder.Entity<NamedListEntity>(e =>
         {
+            e.HasQueryFilter(l => TenantFilter == null || l.TenantId == TenantFilter);
             e.HasIndex(l => new { l.TenantId, l.UserId });
             e.Property(l => l.Name).HasMaxLength(200);
             e.Property(l => l.Description).HasMaxLength(2000);
@@ -117,6 +142,7 @@ public abstract class MailnixDbContext(DbContextOptions options)
 
         builder.Entity<RuleRun>(e =>
         {
+            e.HasQueryFilter(r => TenantFilter == null || r.TenantId == TenantFilter);
             e.HasOne<MailAccount>().WithMany().HasForeignKey(r => r.AccountId).OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(r => new { r.UserId, r.CreatedAt });
             e.HasIndex(r => new { r.AccountId, r.State });
@@ -180,6 +206,35 @@ public abstract class MailnixDbContext(DbContextOptions options)
             e.HasOne<MailAccount>().WithMany().HasForeignKey(s => s.AccountId).OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(s => new { s.UserId, s.Date });
             e.Property(s => s.Folder).HasMaxLength(500);
+        });
+
+        builder.Entity<MailboxLease>(e =>
+        {
+            e.HasKey(l => l.AccountId);
+            e.HasOne<MailAccount>().WithMany().HasForeignKey(l => l.AccountId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(l => l.WorkerId);
+            e.Property(l => l.WorkerId).HasMaxLength(200);
+        });
+
+        builder.Entity<WorkerInstance>(e =>
+        {
+            e.Property(w => w.Id).HasMaxLength(200);
+            e.Property(w => w.Host).HasMaxLength(200);
+        });
+
+        builder.Entity<LiveEventRecord>(e =>
+        {
+            e.Property(l => l.Name).HasMaxLength(50);
+            e.HasIndex(l => l.CreatedAt);
+        });
+
+        builder.Entity<Invitation>(e =>
+        {
+            e.HasIndex(i => i.TokenHash).IsUnique();
+            e.HasIndex(i => i.TenantId);
+            e.HasOne<Tenant>().WithMany().HasForeignKey(i => i.TenantId).OnDelete(DeleteBehavior.Cascade);
+            e.Property(i => i.Email).HasMaxLength(320);
+            e.Property(i => i.TokenHash).HasMaxLength(100);
         });
 
         builder.Entity<TrashObservation>(e =>

@@ -14,6 +14,7 @@ namespace Mailnix.Worker;
 internal sealed partial class RuleScheduler(
     IServiceScopeFactory scopes,
     IWorkerSignals signals,
+    WorkerIdentity me,
     IOptions<WorkerOptions> options,
     TimeProvider time,
     ILogger<RuleScheduler> logger) : BackgroundService
@@ -69,6 +70,7 @@ internal sealed partial class RuleScheduler(
             join account in db.MailAccounts.AsNoTracking() on rule.AccountId equals account.Id
             join user in db.Users.AsNoTracking() on account.UserId equals user.Id
             where rule.Trigger == RuleTrigger.Scheduled && rule.Enabled && account.Enabled
+                && db.MailboxLeases.Any(l => l.AccountId == account.Id && l.WorkerId == me.Id)
             select new { Rule = rule, Account = account, user.TimeZone }).ToListAsync(ct);
 
         var due = scheduled.Where(s => RuleSchedule.NextRun(s.Rule, RuleSchedule.Zone(s.TimeZone)) <= now).ToList();
@@ -104,7 +106,10 @@ internal sealed partial class RuleScheduler(
             }
         }
 
-        var purging = await db.MailAccounts.AsNoTracking().Where(a => a.Enabled && a.PurgeTrashAfterDays != null).ToListAsync(ct);
+        // Only the worker holding a mailbox schedules for it, so several workers never queue the same run twice.
+        var purging = await db.MailAccounts.AsNoTracking()
+            .Where(a => a.Enabled && a.PurgeTrashAfterDays != null && db.MailboxLeases.Any(l => l.AccountId == a.Id && l.WorkerId == me.Id))
+            .ToListAsync(ct);
         foreach (var account in purging.Where(a => a.SpecialFolders.Trash is not null && (a.LastPurgeAt is not { } last || last + Options.PurgeInterval <= now)))
         {
             var busy = await db.Runs.AnyAsync(r => r.AccountId == account.Id && r.Trigger == RunTrigger.Purge && Open.Contains(r.State), ct);

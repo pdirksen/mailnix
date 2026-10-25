@@ -9,10 +9,14 @@ export type RegisterInput = Schemas['RegisterRequest']
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<CurrentUser | null>(null)
   const registrationOpen = ref(false)
+  /** SaaS: every signup founds its own organization. */
+  const multiTenant = ref(false)
   const initialized = ref(false)
 
   const isAuthenticated = computed(() => user.value !== null)
   const isAdmin = computed(() => user.value?.roles.includes('Admin') ?? false)
+  /** Manages the users of their organization (installation admins may too). */
+  const isTenantAdmin = computed(() => isAdmin.value || (user.value?.roles.includes('TenantAdmin') ?? false))
   const displayName = computed(() => user.value?.displayName || user.value?.email || '')
 
   let initializing: Promise<void> | undefined
@@ -24,6 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
         const [me, config] = await Promise.all([api.GET('/api/auth/me'), api.GET('/api/auth/config')])
         user.value = me.response.ok ? (me.data ?? null) : null
         registrationOpen.value = config.data?.registrationOpen ?? false
+        multiTenant.value = config.data?.multiTenant ?? false
       } catch {
         // Backend unreachable: treat as signed out; the login page reports errors on submit.
         user.value = null
@@ -56,5 +61,19 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
   }
 
-  return { user, registrationOpen, initialized, isAuthenticated, isAdmin, displayName, initialize, login, register, logout, clear }
+  return {
+    user,
+    registrationOpen,
+    multiTenant,
+    initialized,
+    isAuthenticated,
+    isAdmin,
+    isTenantAdmin,
+    displayName,
+    initialize,
+    login,
+    register,
+    logout,
+    clear,
+  }
 })

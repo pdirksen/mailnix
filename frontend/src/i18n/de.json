@@ -10,7 +10,9 @@
     "lists": "Listen",
     "rules": "Regeln",
     "activity": "Aktivität",
-    "stats": "Statistik"
+    "stats": "Statistik",
+    "team": "Team",
+    "system": "System"
   },
   "common": {
     "language": "Sprache",
@@ -34,7 +36,8 @@
     "create": "Erstellen",
     "name": "Name",
     "description": "Beschreibung",
-    "optional": "optional"
+    "optional": "optional",
+    "actions": "Aktionen"
   },
   "auth": {
     "email": "E-Mail",
@@ -54,7 +57,17 @@
     "logout": "Abmelden",
     "sessionExpired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
     "loginFailed": "Anmeldung fehlgeschlagen",
-    "registerFailed": "Registrierung fehlgeschlagen"
+    "registerFailed": "Registrierung fehlgeschlagen",
+    "registerSubtitleOrganization": "Lege ein Konto für dich und deine Organisation an.",
+    "organization": "Organisation",
+    "organizationHint": "Optional – sehen die Personen, die du einlädst. Ohne Angabe wird deine E-Mail-Adresse verwendet.",
+    "joinTitle": "{organization} beitreten",
+    "joinSubtitle": "Du wurdest eingeladen, {organization} auf mailnix beizutreten.",
+    "invitationInvalidHint": "Bitte um einen neuen Einladungslink.",
+    "errors": {
+      "InvitationInvalid": "Diese Einladung ist nicht mehr gültig.",
+      "InvitationForOtherEmail": "Diese Einladung gilt für eine andere E-Mail-Adresse."
+    }
   },
   "validation": {
     "required": "Dieses Feld ist erforderlich.",
@@ -216,7 +229,8 @@
     "OAuthNoRefreshToken": "Der Anbieter hat keinen dauerhaften Zugriff erlaubt. Entferne mailnix aus den Apps mit Zugriff auf dein Konto und versuche es erneut.",
     "OAuthNoEmail": "Der Anbieter hat nicht mitgeteilt, bei welchem Postfach du dich angemeldet hast.",
     "OAuthDifferentMailbox": "Du hast dich bei einem anderen Postfach angemeldet als dem dieses Kontos.",
-    "OAuthNotConfigured": "Die Anmeldung mit diesem Anbieter ist auf diesem Server nicht eingerichtet."
+    "OAuthNotConfigured": "Die Anmeldung mit diesem Anbieter ist auf diesem Server nicht eingerichtet.",
+    "AccountLimitReached": "Deine Organisation hat die maximale Anzahl an Postfächern erreicht."
   },
   "lists": {
     "title": "Listen",
@@ -798,5 +812,78 @@
     "neverMatchedYet": "Hat noch auf keine E-Mail reagiert.",
     "ruleMatches": "E-Mails mit Aktionen",
     "last30Days": "Letzte 30 Tage"
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Die Personen in deiner Organisation, wer sie verwaltet, und Einladungen für neue Mitglieder.",
+    "organization": "Organisation",
+    "renamed": "Organisation umbenannt.",
+    "mailboxes": "Keine Postfächer verbunden | 1 Postfach verbunden | {count} Postfächer verbunden",
+    "mailboxesOfLimit": "{count} von {max} Postfächern verbunden",
+    "members": "Mitglieder",
+    "membersHint": "Admins der Organisation verwalten diese Seite. Alle anderen sehen nur ihre eigenen Postfächer und Regeln.",
+    "member": "Mitglied",
+    "mailboxesColumn": "Postfächer",
+    "joined": "Beigetreten",
+    "organizationAdmin": "Admin",
+    "organizationAdminFor": "Admin der Organisation: {email}",
+    "you": "Du",
+    "installationAdmin": "Admin der Installation",
+    "remove": "{email} entfernen",
+    "removeText": "Das Benutzerkonto wird gelöscht. | Das Benutzerkonto wird gelöscht, zusammen mit dem Postfach, seinen Regeln und dem Verlauf. Im Postfach selbst ändert sich nichts. | Das Benutzerkonto wird gelöscht, zusammen mit den {count} Postfächern, ihren Regeln und dem Verlauf. In den Postfächern selbst ändert sich nichts.",
+    "removeConfirm": "Entfernen",
+    "removed": "{email} wurde entfernt.",
+    "invitations": "Einladungen",
+    "invitationsHint": "Ein Einladungslink gilt 7 Tage und kann einmal verwendet werden.",
+    "inviteEmail": "E-Mail-Adresse",
+    "inviteEmailHint": "Optional – leer lassen für einen Link, den jede Person verwenden kann.",
+    "invite": "Einladung erstellen",
+    "linkTitle": "Einladungslink",
+    "linkHint": "Schicke den Link selbst weiter. Er wird nur jetzt angezeigt.",
+    "copy": "Kopieren",
+    "linkCopied": "Link kopiert.",
+    "copyFailed": "Kopieren fehlgeschlagen. Markiere den Link und kopiere ihn von Hand.",
+    "noInvitations": "Keine offenen Einladungen.",
+    "anyone": "Jede Person mit dem Link",
+    "expires": "Gültig bis {time}",
+    "revoke": "Zurückziehen",
+    "errors": {
+      "LastTenantAdmin": "Jemand muss Admin der Organisation bleiben. Mache zuerst ein anderes Mitglied zum Admin.",
+      "CannotRemoveSelf": "Du kannst dich nicht selbst entfernen.",
+      "CannotRemoveAdmin": "Der Admin der Installation kann hier nicht entfernt werden."
+    }
+  },
+  "system": {
+    "title": "System",
+    "subtitle": "Worker, wie die Postfächer auf sie verteilt sind, Warteschlangen und alle Organisationen.",
+    "modes": {
+      "AllInOne": "Alles in einem Prozess",
+      "Api": "API-Prozess",
+      "Worker": "Worker-Prozess"
+    },
+    "multiTenant": "Mehrere Organisationen",
+    "singleTenant": "Eine Organisation",
+    "mailboxes": "Postfächer",
+    "unleased": "Ohne Worker",
+    "queued": "Wartende Läufe",
+    "awaiting": "Warten auf Bestätigung",
+    "workers": "Worker",
+    "workersHint": "Jeder Worker überwacht einen fairen Anteil der Postfächer. Die Postfächer eines ausgefallenen Workers werden nach etwa zwei Minuten übernommen.",
+    "noWorkers": "Noch hat sich kein Worker gemeldet.",
+    "worker": "Worker",
+    "status": "Status",
+    "alive": "Läuft",
+    "gone": "Antwortet nicht",
+    "leases": "Postfächer",
+    "started": "Gestartet",
+    "lastSeen": "Zuletzt gesehen",
+    "organizations": "Organisationen",
+    "organizationsHint": "Die Postfach-Grenze gilt beim Hinzufügen; bestehende Postfächer bleiben.",
+    "users": "Benutzer",
+    "limit": "Postfach-Grenze",
+    "limitFor": "Postfach-Grenze für {name}",
+    "unlimited": "Unbegrenzt",
+    "limitSaved": "Grenze für {name} gespeichert.",
+    "created": "Angelegt"
   }
 }

@@ -6,8 +6,10 @@ declare module 'vue-router' {
   interface RouteMeta {
     /** Only for signed-in users (inherited by child routes). */
     requiresAuth?: boolean
-    /** Only for admins (inherited by child routes). */
+    /** Only for admins of the installation (inherited by child routes). */
     requiresAdmin?: boolean
+    /** Only for admins of the user's organization (or of the installation). */
+    requiresTenantAdmin?: boolean
     /** Only for signed-out users, e.g. login. */
     guestOnly?: boolean
     /** i18n key of the page title. */
@@ -106,6 +108,18 @@ export const routes: RouteRecordRaw[] = [
         props: true,
         meta: { titleKey: 'activity.reviewTitle' },
       },
+      {
+        path: 'admin/team',
+        name: 'admin-team',
+        component: () => import('@/pages/admin/TeamPage.vue'),
+        meta: { titleKey: 'nav.team', requiresTenantAdmin: true },
+      },
+      {
+        path: 'admin/system',
+        name: 'admin-system',
+        component: () => import('@/pages/admin/SystemPage.vue'),
+        meta: { titleKey: 'nav.system', requiresAdmin: true },
+      },
     ],
   },
   {
@@ -153,7 +167,11 @@ router.beforeEach(async (to) => {
   if (to.matched.some((r) => r.meta.requiresAdmin) && !auth.isAdmin) {
     return { name: 'dashboard' }
   }
-  if (to.name === 'register' && !auth.registrationOpen) {
+  if (to.matched.some((r) => r.meta.requiresTenantAdmin) && !auth.isTenantAdmin) {
+    return { name: 'dashboard' }
+  }
+  // Invitations work even when signup is closed.
+  if (to.name === 'register' && !auth.registrationOpen && !to.query.invite) {
     return { name: 'login' }
   }
   return true

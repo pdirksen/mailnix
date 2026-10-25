@@ -24,6 +24,38 @@
         }
       }
     },
+    "/api/auth/invitations/{token}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/api/auth/register": {
       "post": {
         "tags": [
@@ -1965,6 +1997,217 @@
           }
         }
       }
+    },
+    "/api/team": {
+      "get": {
+        "tags": [
+          "Team"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Team"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameTenantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/team/invitations": {
+      "post": {
+        "tags": [
+          "Team"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvitationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedInvitation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/team/invitations/{id}": {
+      "delete": {
+        "tags": [
+          "Team"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/team/users/{id}/admin": {
+      "put": {
+        "tags": [
+          "Team"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTenantAdminRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/team/users/{id}": {
+      "delete": {
+        "tags": [
+          "Team"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/system": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/system/tenants/{id}": {
+      "put": {
+        "tags": [
+          "System"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantLimitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2381,11 +2624,15 @@
       },
       "AuthConfigResponse": {
         "required": [
-          "registrationOpen"
+          "registrationOpen",
+          "multiTenant"
         ],
         "type": "object",
         "properties": {
           "registrationOpen": {
+            "type": "boolean"
+          },
+          "multiTenant": {
             "type": "boolean"
           }
         }
@@ -2711,6 +2958,32 @@
               "integer"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "CreatedInvitation": {
+        "required": [
+          "invitation",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "invitation": {
+            "$ref": "#/components/schemas/InvitationItem"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateInvitationRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -3119,6 +3392,53 @@
           }
         }
       },
+      "InvitationInfo": {
+        "required": [
+          "tenantName",
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "tenantName": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "InvitationItem": {
+        "required": [
+          "id",
+          "email",
+          "createdAt",
+          "expiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "KpiSet": {
         "required": [
           "processed",
@@ -3439,6 +3759,13 @@
             "format": "int32"
           }
         }
+      },
+      "MailnixMode": {
+        "enum": [
+          "AllInOne",
+          "Api",
+          "Worker"
+        ]
       },
       "MailProvider": {
         "enum": [
@@ -3909,6 +4236,18 @@
               "null",
               "string"
             ]
+          },
+          "organizationName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "inviteToken": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -3946,6 +4285,17 @@
             "items": {
               "$ref": "#/components/schemas/AccountHealth"
             }
+          }
+        }
+      },
+      "RenameTenantRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
           }
         }
       },
@@ -4860,6 +5210,17 @@
           }
         }
       },
+      "SetTenantAdminRequest": {
+        "required": [
+          "isTenantAdmin"
+        ],
+        "type": "object",
+        "properties": {
+          "isTenantAdmin": {
+            "type": "boolean"
+          }
+        }
+      },
       "SkipReason": {
         "enum": [
           "TerminalActionAlreadyPlanned",
@@ -4980,6 +5341,121 @@
           }
         }
       },
+      "SystemResponse": {
+        "required": [
+          "mode",
+          "multiTenant",
+          "workers",
+          "accounts",
+          "unleasedAccounts",
+          "queuedRuns",
+          "awaitingConfirmation",
+          "tenants"
+        ],
+        "type": "object",
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/MailnixMode"
+          },
+          "multiTenant": {
+            "type": "boolean"
+          },
+          "workers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkerInfo"
+            }
+          },
+          "accounts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unleasedAccounts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "queuedRuns": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "awaitingConfirmation": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tenants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TenantRow"
+            }
+          }
+        }
+      },
+      "TeamMember": {
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "isTenantAdmin",
+          "isAdmin",
+          "accounts",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isTenantAdmin": {
+            "type": "boolean"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "accounts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TeamResponse": {
+        "required": [
+          "tenant",
+          "users",
+          "invitations"
+        ],
+        "type": "object",
+        "properties": {
+          "tenant": {
+            "$ref": "#/components/schemas/TenantInfo"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamMember"
+            }
+          },
+          "invitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvitationItem"
+            }
+          }
+        }
+      },
       "TemplateParameterInfo": {
         "required": [
           "name",
@@ -5009,6 +5485,89 @@
           "Megabytes",
           "DomainList"
         ]
+      },
+      "TenantInfo": {
+        "required": [
+          "id",
+          "name",
+          "maxAccounts",
+          "accounts"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "maxAccounts": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "accounts": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TenantLimitRequest": {
+        "required": [
+          "maxAccounts"
+        ],
+        "type": "object",
+        "properties": {
+          "maxAccounts": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "TenantRow": {
+        "required": [
+          "id",
+          "name",
+          "users",
+          "accounts",
+          "maxAccounts",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "users": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accounts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxAccounts": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "TestConnectionRequest": {
         "required": [
@@ -5368,6 +5927,40 @@
             ]
           }
         }
+      },
+      "WorkerInfo": {
+        "required": [
+          "id",
+          "host",
+          "startedAt",
+          "lastSeenAt",
+          "leases",
+          "alive"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSeenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "leases": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "alive": {
+            "type": "boolean"
+          }
+        }
       }
     }
   },
@@ -5395,6 +5988,12 @@
     },
     {
       "name": "Stats"
+    },
+    {
+      "name": "Team"
+    },
+    {
+      "name": "System"
     }
   ]
 }

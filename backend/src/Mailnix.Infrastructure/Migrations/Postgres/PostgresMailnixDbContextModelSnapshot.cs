@@ -172,6 +172,79 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.ToTable("FolderStates");
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.Invitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("AcceptedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("Invitations");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.LiveEventRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("LiveEvents");
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.MailAccount", b =>
                 {
                     b.Property<Guid>("Id")
@@ -365,6 +438,28 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("Rules");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.MailboxLease", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("AcquiredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("WorkerId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("AccountId");
+
+                    b.HasIndex("WorkerId");
+
+                    b.ToTable("MailboxLeases");
                 });
 
             modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntity", b =>
@@ -666,6 +761,9 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("MaxAccounts")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -697,6 +795,28 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.HasKey("AccountId", "Folder", "Uid");
 
                     b.ToTable("TrashObservations");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.WorkerInstance", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset>("LastSeenAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Workers");
                 });
 
             modelBuilder.Entity("Mailnix.Infrastructure.Identity.AppRole", b =>
@@ -962,6 +1082,15 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.Invitation", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Mailnix.Infrastructure.Data.MailAccount", b =>
                 {
                     b.HasOne("Mailnix.Infrastructure.Identity.AppUser", "User")
@@ -982,6 +1111,15 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                         .IsRequired();
 
                     b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("Mailnix.Infrastructure.Data.MailboxLease", b =>
+                {
+                    b.HasOne("Mailnix.Infrastructure.Data.MailAccount", null)
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Mailnix.Infrastructure.Data.NamedListEntryEntity", b =>

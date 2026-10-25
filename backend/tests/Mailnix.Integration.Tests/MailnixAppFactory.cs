@@ -11,6 +11,7 @@ namespace Mailnix.Integration.Tests;
 public sealed class MailnixAppFactory : WebApplicationFactory<Program>
 {
     private readonly string _databasePath = Path.Combine(Path.GetTempPath(), $"mailnix-test-{Guid.NewGuid():N}.db");
+    private bool _ownsDatabase = true;
     private readonly Dictionary<string, string?> _settings = [];
     private readonly List<Action<IServiceCollection>> _services = [];
 
@@ -18,6 +19,13 @@ public sealed class MailnixAppFactory : WebApplicationFactory<Program>
     {
         _settings[key] = value;
         return this;
+    }
+
+    /// <summary>Uses the database of another app, like a second process of a split (SaaS) deployment.</summary>
+    public MailnixAppFactory SharingDatabaseWith(MailnixAppFactory other)
+    {
+        _ownsDatabase = false;
+        return WithSetting("Mailnix:Database:ConnectionString", $"Data Source={other._databasePath};Pooling=False");
     }
 
     /// <summary>Replaces or adds services, e.g. fakes for the mail server.</summary>
@@ -43,6 +51,10 @@ public sealed class MailnixAppFactory : WebApplicationFactory<Program>
 
         // Mailbox watchers only run in tests that ask for them (WithSetting("Mailnix:Worker:Enabled", "true")).
         builder.UseSetting("Mailnix:Worker:Enabled", "false");
+
+        // Tests poll the API quickly; the limits themselves are tested with lower values.
+        builder.UseSetting("Mailnix:RateLimits:ApiRequestsPerMinute", "100000");
+        builder.UseSetting("Mailnix:RateLimits:AuthPerMinute", "1000");
         foreach (var (key, value) in _settings)
         {
             builder.UseSetting(key, value);
@@ -54,7 +66,10 @@ public sealed class MailnixAppFactory : WebApplicationFactory<Program>
     public override async ValueTask DisposeAsync()
     {
         await base.DisposeAsync();
-        File.Delete(_databasePath);
+        if (_ownsDatabase)
+        {
+            File.Delete(_databasePath);
+        }
     }
 }
 

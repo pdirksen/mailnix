@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Mailnix.Api.Hosting;
+using Mailnix.Api.Team;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Infrastructure.OAuth;
 using Mailnix.Mail;
@@ -109,6 +110,12 @@ internal static class OAuthEndpoints
             return Problem(StatusCodes.Status400BadRequest, "OAuthStateInvalid", "The sign-in took too long or was started elsewhere. Please start it again.");
         }
 
+        var tenantId = await db.Users.Where(u => u.Id == userId).Select(u => u.TenantId).SingleAsync(ct);
+        if (state.AccountId is null && await TenantLimits.CheckAccountLimitAsync(db, tenantId, ct) is { } limitReached)
+        {
+            return limitReached;
+        }
+
         OAuthTokens tokens;
         try
         {
@@ -178,7 +185,7 @@ internal static class OAuthEndpoints
             account = new MailAccount
             {
                 Id = Guid.CreateVersion7(),
-                TenantId = await db.Users.Where(u => u.Id == userId).Select(u => u.TenantId).SingleAsync(ct),
+                TenantId = tenantId,
                 UserId = userId,
                 Name = string.IsNullOrWhiteSpace(state.Name) ? email : state.Name,
                 Provider = state.Provider,

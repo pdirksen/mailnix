@@ -1,4 +1,13 @@
-import { ChartColumnIcon, HistoryIcon, LayoutDashboardIcon, ListChecksIcon, MailIcon, WorkflowIcon } from '@lucide/vue'
+import {
+  ChartColumnIcon,
+  HistoryIcon,
+  LayoutDashboardIcon,
+  ListChecksIcon,
+  MailIcon,
+  ServerIcon,
+  UsersIcon,
+  WorkflowIcon,
+} from '@lucide/vue'
 import type { Component } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
@@ -7,7 +16,10 @@ export interface NavigationItem {
   /** i18n key */
   labelKey: string
   icon: Component
+  /** Only for admins of the installation. */
   adminOnly?: boolean
+  /** Only for admins of the user's organization (or of the installation). */
+  tenantAdminOnly?: boolean
   /** Other route names that highlight this entry (e.g. detail pages). */
   matches?: string[]
 }
@@ -20,4 +32,6 @@ export const navigation: NavigationItem[] = [
   { to: { name: 'lists' }, labelKey: 'nav.lists', icon: ListChecksIcon, matches: ['list-detail'] },
   { to: { name: 'activity' }, labelKey: 'nav.activity', icon: HistoryIcon, matches: ['run-review'] },
   { to: { name: 'stats' }, labelKey: 'nav.stats', icon: ChartColumnIcon },
+  { to: { name: 'admin-team' }, labelKey: 'nav.team', icon: UsersIcon, tenantAdminOnly: true },
+  { to: { name: 'admin-system' }, labelKey: 'nav.system', icon: ServerIcon, adminOnly: true },
 ]

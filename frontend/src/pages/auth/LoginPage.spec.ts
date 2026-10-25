@@ -47,7 +47,7 @@ describe('LoginPage', () => {
   it('signs in and follows a safe redirect', async () => {
     apiMock.POST.mockResolvedValue(apiResult(200, testUser))
     const { wrapper, router } = await mountLogin('?redirect=/not-there-yet')
-    const replace = vi.spyOn(router, 'replace')
+    const replace = vi.spyOn(router, 'replace').mockResolvedValue(undefined)
 
     await fillAndSubmit(wrapper, testUser.email, 'secret password')
 
@@ -61,7 +61,7 @@ describe('LoginPage', () => {
   it('ignores an external redirect target', async () => {
     apiMock.POST.mockResolvedValue(apiResult(200, testUser))
     const { wrapper, router } = await mountLogin('?redirect=//evil.example')
-    const replace = vi.spyOn(router, 'replace')
+    const replace = vi.spyOn(router, 'replace').mockResolvedValue(undefined)
 
     await fillAndSubmit(wrapper, testUser.email, 'secret password')
 

@@ -21,7 +21,7 @@ public sealed class AuthEndpointsTests
         me.ShouldNotBeNull();
         me.Email.ShouldBe("first@example.com");
         me.DisplayName.ShouldBe("Test User");
-        me.Roles.ShouldBe(["Admin", "User"], ignoreOrder: true);
+        me.Roles.ShouldBe(["Admin", "TenantAdmin", "User"], ignoreOrder: true);
     }
 
     [Fact]

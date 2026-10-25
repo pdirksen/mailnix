@@ -12,5 +12,8 @@ public class Tenant
 
     public required string Name { get; set; }
 
+    /// <summary>Most mail accounts the tenant's users may add together; null = no limit.</summary>
+    public int? MaxAccounts { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; }
 }

@@ -10,7 +10,9 @@
     "lists": "Lists",
     "rules": "Rules",
     "activity": "Activity",
-    "stats": "Stats"
+    "stats": "Stats",
+    "team": "Team",
+    "system": "System"
   },
   "common": {
     "language": "Language",
@@ -34,7 +36,8 @@
     "create": "Create",
     "name": "Name",
     "description": "Description",
-    "optional": "optional"
+    "optional": "optional",
+    "actions": "Actions"
   },
   "auth": {
     "email": "Email",
@@ -54,7 +57,17 @@
     "logout": "Sign out",
     "sessionExpired": "Your session has expired. Please sign in again.",
     "loginFailed": "Sign-in failed",
-    "registerFailed": "Registration failed"
+    "registerFailed": "Registration failed",
+    "registerSubtitleOrganization": "Create an account for you and your organization.",
+    "organization": "Organization",
+    "organizationHint": "Optional – shown to the people you invite. Defaults to your email address.",
+    "joinTitle": "Join {organization}",
+    "joinSubtitle": "You were invited to join {organization} on mailnix.",
+    "invitationInvalidHint": "Ask for a new invitation link.",
+    "errors": {
+      "InvitationInvalid": "This invitation is no longer valid.",
+      "InvitationForOtherEmail": "This invitation is for a different email address."
+    }
   },
   "validation": {
     "required": "This field is required.",
@@ -216,7 +229,8 @@
     "OAuthNoRefreshToken": "The provider did not grant lasting access. Remove mailnix from the apps with access to your account and try again.",
     "OAuthNoEmail": "The provider did not tell which mailbox you signed in to.",
     "OAuthDifferentMailbox": "You signed in to a different mailbox than this account's.",
-    "OAuthNotConfigured": "Signing in with this provider is not set up on this server."
+    "OAuthNotConfigured": "Signing in with this provider is not set up on this server.",
+    "AccountLimitReached": "Your organization has reached its mailbox limit."
   },
   "lists": {
     "title": "Named lists",
@@ -798,5 +812,78 @@
     "neverMatchedYet": "Has not acted on any mail yet.",
     "ruleMatches": "Messages acted on",
     "last30Days": "Last 30 days"
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "The people in your organization, who administers it, and invitations for new members.",
+    "organization": "Organization",
+    "renamed": "Organization renamed.",
+    "mailboxes": "No mailboxes connected | 1 mailbox connected | {count} mailboxes connected",
+    "mailboxesOfLimit": "{count} of {max} mailboxes connected",
+    "members": "Members",
+    "membersHint": "Organization admins manage this page. Everybody else only sees their own mailboxes and rules.",
+    "member": "Member",
+    "mailboxesColumn": "Mailboxes",
+    "joined": "Joined",
+    "organizationAdmin": "Admin",
+    "organizationAdminFor": "Organization admin: {email}",
+    "you": "You",
+    "installationAdmin": "Installation admin",
+    "remove": "Remove {email}",
+    "removeText": "Their account is deleted. | Their account is deleted, together with their mailbox, its rules and history. Nothing in the mailbox itself changes. | Their account is deleted, together with their {count} mailboxes, their rules and history. Nothing in the mailboxes themselves changes.",
+    "removeConfirm": "Remove",
+    "removed": "{email} was removed.",
+    "invitations": "Invitations",
+    "invitationsHint": "An invitation link is valid for 7 days and can be used once.",
+    "inviteEmail": "Email address",
+    "inviteEmailHint": "Optional – leave empty for a link anyone can use.",
+    "invite": "Create invitation",
+    "linkTitle": "Invitation link",
+    "linkHint": "Send this link yourself. It is shown only now.",
+    "copy": "Copy",
+    "linkCopied": "Link copied.",
+    "copyFailed": "Could not copy. Select the link and copy it manually.",
+    "noInvitations": "No open invitations.",
+    "anyone": "Anyone with the link",
+    "expires": "Valid until {time}",
+    "revoke": "Revoke",
+    "errors": {
+      "LastTenantAdmin": "Someone has to stay admin of the organization. Make another member admin first.",
+      "CannotRemoveSelf": "You cannot remove yourself.",
+      "CannotRemoveAdmin": "The administrator of the installation cannot be removed here."
+    }
+  },
+  "system": {
+    "title": "System",
+    "subtitle": "Workers, how the mailboxes are distributed among them, queues and all organizations.",
+    "modes": {
+      "AllInOne": "All in one process",
+      "Api": "API process",
+      "Worker": "Worker process"
+    },
+    "multiTenant": "Multiple organizations",
+    "singleTenant": "One organization",
+    "mailboxes": "Mailboxes",
+    "unleased": "Without worker",
+    "queued": "Queued runs",
+    "awaiting": "Awaiting confirmation",
+    "workers": "Workers",
+    "workersHint": "Each worker watches a fair share of the mailboxes. Mailboxes of a worker that stops are taken over within about two minutes.",
+    "noWorkers": "No worker has reported yet.",
+    "worker": "Worker",
+    "status": "Status",
+    "alive": "Running",
+    "gone": "Not responding",
+    "leases": "Mailboxes",
+    "started": "Started",
+    "lastSeen": "Last seen",
+    "organizations": "Organizations",
+    "organizationsHint": "The mailbox limit applies when a mailbox is added; existing mailboxes stay.",
+    "users": "Users",
+    "limit": "Mailbox limit",
+    "limitFor": "Mailbox limit for {name}",
+    "unlimited": "Unlimited",
+    "limitSaved": "Limit for {name} saved.",
+    "created": "Created"
   }
 }

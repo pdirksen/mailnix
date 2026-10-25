@@ -22,6 +22,7 @@ public static class InfrastructureServiceCollectionExtensions
     {
         services.AddOptions<DatabaseOptions>().Bind(configuration.GetSection(DatabaseOptions.Section));
         services.AddOptions<BootstrapOptions>().Bind(configuration.GetSection(BootstrapOptions.Section));
+        services.AddOptions<TenancyOptions>().Bind(configuration.GetSection(TenancyOptions.Section));
         services.AddOptions<KeyProtectionOptions>().Bind(configuration.GetSection(KeyProtectionOptions.Section));
 
         var database = configuration.GetSection(DatabaseOptions.Section).Get<DatabaseOptions>() ?? new DatabaseOptions();

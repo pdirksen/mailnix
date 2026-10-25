@@ -66,7 +66,7 @@ public sealed partial class DatabaseInitializer(
             CreatedAt = timeProvider.GetUtcNow(),
         };
         ThrowOnFailure(await userManager.CreateAsync(admin, password), "create bootstrap admin");
-        ThrowOnFailure(await userManager.AddToRolesAsync(admin, [Roles.Admin, Roles.User]), "assign bootstrap admin roles");
+        ThrowOnFailure(await userManager.AddToRolesAsync(admin, [Roles.Admin, Roles.TenantAdmin, Roles.User]), "assign bootstrap admin roles");
         LogBootstrapAdminCreated(email);
     }
 

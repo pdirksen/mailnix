@@ -33,8 +33,13 @@ public class AppRole : IdentityRole<Guid>
 
 public static class Roles
 {
+    /// <summary>Runs the installation: system overview, all tenants.</summary>
     public const string Admin = "Admin";
+
+    /// <summary>Manages the users of their own tenant (invitations).</summary>
+    public const string TenantAdmin = "TenantAdmin";
+
     public const string User = "User";
 
-    public static readonly IReadOnlyList<string> All = [Admin, User];
+    public static readonly IReadOnlyList<string> All = [Admin, TenantAdmin, User];
 }

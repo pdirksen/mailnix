@@ -14,7 +14,7 @@ public sealed class LiveEventsTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    private static async Task<(HttpClient Client, string Cookie)> SignInAsync(MailnixAppFactory app, string email)
+    internal static async Task<(HttpClient Client, string Cookie)> SignInAsync(MailnixAppFactory app, string email)
     {
         var client = app.CreateApiClient();
         var response = await client.RegisterAsync(email);
@@ -23,7 +23,7 @@ public sealed class LiveEventsTests
         return (client, cookie);
     }
 
-    private static HubConnection Connect(MailnixAppFactory app, string cookie) =>
+    internal static HubConnection Connect(MailnixAppFactory app, string cookie) =>
         new HubConnectionBuilder()
             .WithUrl(new Uri(app.Server.BaseAddress, "/hubs/live"), options =>
             {

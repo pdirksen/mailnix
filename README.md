@@ -109,6 +109,33 @@ is mounted as a Docker secret from `docker/secrets/` (git-ignored; the file must
 not part of the volume, so a copy of the volume alone cannot decrypt the stored mailbox passwords. Back up the master
 key separately; without it, the mailbox passwords have to be entered again.
 
+## Running as a service (SaaS)
+
+`docker/compose.saas.yml` runs mailnix for several organizations: PostgreSQL, two API containers, two mailbox workers
+and Caddy in front (automatic HTTPS certificates for your domain).
+
+```bash
+mkdir -p docker/secrets
+openssl rand -base64 32 > docker/secrets/mailnix_master_key   # once; back it up
+export MAILNIX_DOMAIN=mail.example.com MAILNIX_DB_PASSWORD=$(openssl rand -hex 24)   # or in docker/.env
+docker compose -f docker/compose.saas.yml up -d --build
+docker compose -f docker/compose.saas.yml up -d --scale api=3 --scale worker=4   # more of either, any time
+```
+
+- **Organizations**: with `Mailnix__Tenancy__Mode=MultiTenant`, every signup founds its own organization and
+  administers it (page *Team*): invite colleagues by link (optionally for one email address, valid for 7 days), make
+  them admins, remove them. Nobody sees mailboxes, rules or users of another organization. The first account
+  registered (or the bootstrap admin) runs the installation (page *System*: workers, mailbox distribution, queues,
+  all organizations and their mailbox limits).
+- **Workers** share the mailboxes through leases in the database: each takes about an equal share, a worker that
+  shuts down frees its mailboxes for the others right away, and a crashed worker's mailboxes are taken over after the lease expires
+  (`Mailnix__Worker__LeaseDuration`, 90 seconds). Runs started in the browser are queued in the database and picked
+  up by the worker that holds the mailbox; live updates travel back through the database to every API container.
+- **Startup**: the `init` container (`mailnix --initialize-only`) migrates the database, creates the seed data and the
+  shared data protection keys, then exits; API and workers start after it and do not migrate themselves.
+- **Self-hosted** installations need none of this: `AllInOne` mode with one organization is the default, and invitations
+  (page *Team*) work there too, even with signup switched off.
+
 ## Configuration
 
 All settings can be given as environment variables (`__` separates sections).
@@ -119,7 +146,9 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Database__Provider` | `Sqlite` | `Sqlite` or `Postgres` |
 | `Mailnix__Database__ConnectionString` | `Data Source=data/mailnix.db` | |
 | `Mailnix__Database__AutoMigrate` | `true` | Apply database migrations on startup |
-| `Mailnix__Auth__AllowRegistration` | `true` | Self-service signup (the first user can always register) |
+| `Mailnix__Auth__AllowRegistration` | `true` | Self-service signup (the first user can always register; invited users always can) |
+| `Mailnix__Tenancy__Mode` | `SingleTenant` | `SingleTenant` (everybody in one organization, self-hosted) or `MultiTenant` (every signup founds its own organization, SaaS) |
+| `Mailnix__Tenancy__DefaultMaxAccounts` | – | Mailbox limit for new organizations (unlimited without); the operator can change it per organization on the System page |
 | `Mailnix__OAuth__Google__ClientId` / `ClientSecret` | – | OAuth app for Gmail and Google Workspace mailboxes (see [docs/oauth-setup.md](docs/oauth-setup.md)) |
 | `Mailnix__OAuth__Microsoft__ClientId` / `ClientSecret` | – | OAuth app for Microsoft 365 and Outlook.com mailboxes |
 | `Mailnix__OAuth__Microsoft__Tenant` | `common` | `common`, `organizations`, `consumers` or a tenant ID |
@@ -132,6 +161,9 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Mail__BlockPrivateNetworks` | `false` | Refuse mail servers on private/local addresses (recommended for SaaS) |
 | `Mailnix__Mail__ConnectTimeout` | `00:00:30` | Timeout for connecting and logging in |
 | `Mailnix__RateLimits__MailConnectionsPerMinute` | `20` | Per-user limit for requests that open IMAP connections |
+| `Mailnix__RateLimits__PreviewsPerMinute` | `60` | Per-user limit for rule previews |
+| `Mailnix__RateLimits__AuthPerMinute` | `30` | Sign-in and signup attempts per IP address (behind a proxy, set `ASPNETCORE_FORWARDEDHEADERS_ENABLED` so the client's address is used) |
+| `Mailnix__RateLimits__ApiRequestsPerMinute` | `600` | All API requests per user (or IP address when signed out) |
 | `Mailnix__Worker__Enabled` | `true` | Watch mailboxes and execute rules (modes `AllInOne` and `Worker`) |
 | `Mailnix__Worker__IdleTimeout` | `00:09:00` | Re-issue IMAP IDLE after this time |
 | `Mailnix__Worker__PollInterval` | `00:02:00` | Check interval for servers without IDLE |
@@ -141,6 +173,10 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Worker__MaxScheduledRunMessages` | `5000` | Candidates a scheduled run checks at most (newest first) |
 | `Mailnix__Worker__ActionLogRetention` | `90.00:00:00` | Runs and their action log are kept this long (older ones can no longer be undone); the stats keep their daily counters |
 | `Mailnix__Worker__PurgeInterval` | `1.00:00:00` | How often Trash is checked when purging is switched on for an account |
+| `Mailnix__Worker__ReconcileInterval` | `00:00:30` | How often a worker renews its leases and picks up new, changed or freed mailboxes |
+| `Mailnix__Worker__LeaseDuration` | `00:01:30` | A worker that stops renewing loses its mailboxes after this time |
+| `Mailnix__Worker__MaxAccountsPerWorker` | `500` | Mailboxes one worker watches at most |
+| `Mailnix__Worker__QueuePollInterval` | `00:00:02` | How often a worker looks for runs queued by an API process |
 | `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | `false` | Set to `true` behind a TLS-terminating reverse proxy |
 
 ## Licensing

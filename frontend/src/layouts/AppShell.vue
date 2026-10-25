@@ -38,7 +38,9 @@ onMounted(() => {
 })
 onUnmounted(() => void disconnectLive())
 
-const items = computed(() => navigation.filter((item) => !item.adminOnly || auth.isAdmin))
+const items = computed(() =>
+  navigation.filter((item) => (!item.adminOnly || auth.isAdmin) && (!item.tenantAdminOnly || auth.isTenantAdmin)),
+)
 
 function isActive(item: NavigationItem) {
   const name = String(route.name)

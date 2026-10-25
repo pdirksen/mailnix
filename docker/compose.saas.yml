@@ -1,0 +1,110 @@
+# mailnix as a service: several organizations, API and mailbox workers in separate, scalable containers on PostgreSQL,
+# with Caddy in front (automatic HTTPS).
+#
+#   mkdir -p docker/secrets && openssl rand -base64 32 > docker/secrets/mailnix_master_key   # once; back it up
+#   export MAILNIX_DOMAIN=mail.example.com MAILNIX_DB_PASSWORD=$(openssl rand -hex 24)        # or put them in docker/.env
+#   docker compose -f docker/compose.saas.yml up -d --build
+#
+# Scale with e.g. `--scale api=3 --scale worker=4`: workers share the mailboxes among themselves (leases in the
+# database) and take over the mailboxes of a worker that stops within about two minutes. Every signup founds its own
+# organization; the first account registered (or the bootstrap admin) administers the installation.
+
+x-mailnix: &mailnix
+  image: mailnix:latest
+  restart: unless-stopped
+  secrets:
+    - mailnix_master_key
+  depends_on:
+    init:
+      condition: service_completed_successfully
+  environment: &mailnix-environment
+    Mailnix__Database__Provider: Postgres
+    Mailnix__Database__ConnectionString: Host=postgres;Database=mailnix;Username=mailnix;Password=${MAILNIX_DB_PASSWORD:?set MAILNIX_DB_PASSWORD}
+    # The init container migrates the database; the others only use it.
+    Mailnix__Database__AutoMigrate: "false"
+    Mailnix__DataProtection__MasterKeyFile: /run/secrets/mailnix_master_key
+    Mailnix__Tenancy__Mode: MultiTenant
+    # Optional limit of mailboxes per new organization (the operator can change it per organization):
+    # Mailnix__Tenancy__DefaultMaxAccounts: "5"
+    Mailnix__Auth__AllowRegistration: ${MAILNIX_ALLOW_REGISTRATION:-true}
+    # Customers' mail servers only: no connections into the hosting network.
+    Mailnix__Mail__BlockPrivateNetworks: "true"
+    Mailnix__OAuth__RedirectBaseUrl: https://${MAILNIX_DOMAIN:-localhost}
+    # Mailnix__OAuth__Google__ClientId / ClientSecret, Mailnix__OAuth__Microsoft__ClientId / ClientSecret: see README
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mailnix
+      POSTGRES_USER: mailnix
+      POSTGRES_PASSWORD: ${MAILNIX_DB_PASSWORD:?set MAILNIX_DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mailnix -d mailnix"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Runs once per `up`: migrations, seed data and the shared data protection keys, before API and workers start.
+  init:
+    <<: *mailnix
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: "no"
+    command: ["--initialize-only"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *mailnix-environment
+      Mailnix__Database__AutoMigrate: "true"
+      Mailnix__Bootstrap__AdminEmail: ${MAILNIX_ADMIN_EMAIL:-}
+      Mailnix__Bootstrap__AdminPassword: ${MAILNIX_ADMIN_PASSWORD:-}
+
+  # Web UI and API; live updates from the workers are relayed through the database.
+  api:
+    <<: *mailnix
+    deploy:
+      replicas: 2
+    environment:
+      <<: *mailnix-environment
+      Mailnix__Mode: Api
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+
+  # Watch the mailboxes and run the rules. Not reachable from outside.
+  worker:
+    <<: *mailnix
+    deploy:
+      replicas: 2
+    environment:
+      <<: *mailnix-environment
+      Mailnix__Mode: Worker
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      MAILNIX_DOMAIN: ${MAILNIX_DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  postgres-data:
+  caddy-data:
+  caddy-config:
+
+secrets:
+  mailnix_master_key:
+    # Create it once: openssl rand -base64 32 > docker/secrets/mailnix_master_key
+    file: ./secrets/mailnix_master_key
