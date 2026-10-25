@@ -855,6 +855,10 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.PrimitiveCollection<List<string>>("Addresses")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -874,7 +878,6 @@ namespace Mailnix.Infrastructure.Migrations.Postgres
                         .HasColumnType("boolean");
 
                     b.Property<string>("Language")
-                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 

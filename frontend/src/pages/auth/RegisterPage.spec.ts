@@ -1,6 +1,7 @@
 import { i18n } from '@/i18n'
 import { routes } from '@/router'
 import { useAuthStore } from '@/stores/auth'
+import { useUiStore } from '@/stores/ui'
 import { apiMock, apiResult, testUser } from '@/test/apiMock'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
@@ -52,7 +53,7 @@ describe('RegisterPage', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.resetAllMocks()
-    i18n.global.locale.value = 'en'
+    useUiStore().setLocale('en')
   })
 
   it('asks for the organization name when every signup founds an organization', async () => {
@@ -65,7 +66,7 @@ describe('RegisterPage', () => {
 
     await vi.waitFor(() =>
       expect(apiMock.POST).toHaveBeenCalledWith('/api/auth/register', {
-        body: { email: 'founder@acme.test', password: 'correct horse battery', displayName: null, organizationName: 'Acme', inviteToken: null },
+        body: { email: 'founder@acme.test', password: 'correct horse battery', displayName: null, organizationName: 'Acme', inviteToken: null, timeZone: expect.any(String), language: 'en' },
       }),
     )
   })
@@ -93,7 +94,7 @@ describe('RegisterPage', () => {
 
     await vi.waitFor(() =>
       expect(apiMock.POST).toHaveBeenCalledWith('/api/auth/register', {
-        body: { email: 'carol@acme.test', password: 'correct horse battery', displayName: null, organizationName: null, inviteToken: 'tok3n' },
+        body: { email: 'carol@acme.test', password: 'correct horse battery', displayName: null, organizationName: null, inviteToken: 'tok3n', timeZone: expect.any(String), language: 'en' },
       }),
     )
   })
@@ -101,7 +102,7 @@ describe('RegisterPage', () => {
   it('explains invalid invitations and translates the server error', async () => {
     serve({ invitation: null })
     apiMock.POST.mockResolvedValue(apiResult(400, { title: 'This invitation is no longer valid.', errorCode: 'InvitationInvalid' }))
-    i18n.global.locale.value = 'de'
+    useUiStore().setLocale('de')
     const { wrapper } = await mountRegister('?invite=old')
 
     expect(wrapper.find('[data-testid="invitation-invalid"]').text()).toContain('Diese Einladung ist nicht mehr gültig.')

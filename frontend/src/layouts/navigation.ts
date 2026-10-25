@@ -5,6 +5,7 @@ import {
   ListChecksIcon,
   MailIcon,
   ServerIcon,
+  SettingsIcon,
   UsersIcon,
   WorkflowIcon,
 } from '@lucide/vue'
@@ -32,6 +33,12 @@ export const navigation: NavigationItem[] = [
   { to: { name: 'lists' }, labelKey: 'nav.lists', icon: ListChecksIcon, matches: ['list-detail'] },
   { to: { name: 'activity' }, labelKey: 'nav.activity', icon: HistoryIcon, matches: ['run-review'] },
   { to: { name: 'stats' }, labelKey: 'nav.stats', icon: ChartColumnIcon },
+  {
+    to: { name: 'settings-profile' },
+    labelKey: 'nav.settings',
+    icon: SettingsIcon,
+    matches: ['settings-preferences', 'settings-addresses', 'settings-security'],
+  },
   { to: { name: 'admin-team' }, labelKey: 'nav.team', icon: UsersIcon, tenantAdminOnly: true },
   { to: { name: 'admin-system' }, labelKey: 'nav.system', icon: ServerIcon, adminOnly: true },
 ]

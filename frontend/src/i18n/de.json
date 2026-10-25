@@ -12,7 +12,8 @@
     "activity": "Aktivität",
     "stats": "Statistik",
     "team": "Team",
-    "system": "System"
+    "system": "System",
+    "settings": "Einstellungen"
   },
   "common": {
     "language": "Sprache",
@@ -66,8 +67,19 @@
     "invitationInvalidHint": "Bitte um einen neuen Einladungslink.",
     "errors": {
       "InvitationInvalid": "Diese Einladung ist nicht mehr gültig.",
-      "InvitationForOtherEmail": "Diese Einladung gilt für eine andere E-Mail-Adresse."
-    }
+      "InvitationForOtherEmail": "Diese Einladung gilt für eine andere E-Mail-Adresse.",
+      "InvalidCode": "Dieser Code ist nicht gültig. Prüfe die Uhrzeit auf deinem Handy oder warte auf den nächsten Code.",
+      "TwoFactorExpired": "Das hat zu lange gedauert. Bitte melde dich erneut mit deinem Passwort an."
+    },
+    "twoFactorTitle": "Anmeldung in zwei Schritten",
+    "twoFactorHint": "Gib den 6-stelligen Code aus deiner Authenticator-App ein.",
+    "recoveryCodeHint": "Gib einen der Wiederherstellungscodes ein, die du beim Einschalten gespeichert hast. Jeder Code funktioniert einmal.",
+    "authenticatorCode": "Code aus der App",
+    "recoveryCode": "Wiederherstellungscode",
+    "useRecoveryCode": "Stattdessen einen Wiederherstellungscode verwenden",
+    "useAuthenticator": "Stattdessen die Authenticator-App verwenden",
+    "verify": "Bestätigen",
+    "backToPassword": "Zurück"
   },
   "validation": {
     "required": "Dieses Feld ist erforderlich.",
@@ -885,5 +897,143 @@
     "unlimited": "Unbegrenzt",
     "limitSaved": "Grenze für {name} gespeichert.",
     "created": "Angelegt"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Dein Profil, deine Vorlieben und wie du dich anmeldest.",
+    "sections": "Bereiche der Einstellungen",
+    "saved": "Gespeichert.",
+    "profile": {
+      "nav": "Profil",
+      "title": "Profil",
+      "description": "Wie du in mailnix erscheinst.",
+      "displayNameHint": "Wird im Menü und deinem Team statt deiner E-Mail-Adresse angezeigt.",
+      "emailHint": "Mit dieser Adresse meldest du dich an. Sie lässt sich hier nicht ändern.",
+      "memberSince": "Dabei seit {date}",
+      "roles": {
+        "installationAdmin": "Administrator",
+        "organizationAdmin": "Admin der Organisation",
+        "member": "Mitglied"
+      }
+    },
+    "preferences": {
+      "nav": "Darstellung",
+      "language": "Sprache",
+      "languageHint": "Gilt sofort und in jedem Browser, mit dem du dich anmeldest.",
+      "themeHint": "Nur in diesem Browser gespeichert."
+    },
+    "timeZone": {
+      "title": "Zeitzone",
+      "description": "Bestimmt das Datum in Ordnernamen (etwa Archive/2026/10), wann geplante Regeln laufen und wo ein Tag in der Statistik beginnt und endet.",
+      "search": "Stadt oder Abweichung suchen…",
+      "showAll": "Alle Zeitzonen anzeigen",
+      "noMatch": "Keine Zeitzone gefunden.",
+      "more": "{count} weitere – tippen zum Eingrenzen",
+      "saved": "Zeitzone auf {zone} gesetzt.",
+      "browserDiffers": "Dieser Browser ist auf {zone} eingestellt.",
+      "useBrowser": "Übernehmen",
+      "localTime": "Uhrzeit dort",
+      "exampleFolder": "Jetzt eintreffende Mail landet in"
+    },
+    "addresses": {
+      "nav": "Adressen",
+      "title": "Deine Adressen",
+      "description": "Adressen, über die dich Mail erreicht, zusätzlich zu denen, die mailnix schon kennt. Regeln erkennen daran Mail an dich:",
+      "uses": {
+        "onlyCc": "„Ich stehe nur in Cc oder Bcc\": keine deiner Adressen steht in An",
+        "alias": "„An meinen Alias gesendet\": an welche deiner Adressen die Mail ging",
+        "plusTag": "„Plus-Tag\": shop aus du+shop{'@'}example.com",
+        "reply": "„Antwort auf meine Mail\": Antworten auf Mail, die du geschickt hast"
+      },
+      "add": "Adresse hinzufügen",
+      "addButton": "Hinzufügen",
+      "duplicate": "Diese Adresse steht schon in der Liste.",
+      "tooMany": "Du kannst höchstens {max} Adressen hinzufügen.",
+      "added": "{address} hinzugefügt.",
+      "removed": "{address} entfernt.",
+      "yours": "Alle Adressen, die als deine zählen",
+      "automatic": "Automatisch",
+      "automaticHint": "Deine Anmeldeadresse und die Benutzernamen deiner Postfächer zählen immer.",
+      "remove": "{address} entfernen",
+      "none": "Noch keine weiteren Adressen."
+    },
+    "security": {
+      "nav": "Sicherheit",
+      "passwordTitle": "Passwort",
+      "passwordHint": "Mindestens 10 Zeichen; ein paar unzusammenhängende Wörter ergeben ein starkes Passwort. Nach der Änderung wirst du auf anderen Geräten abgemeldet.",
+      "currentPassword": "Aktuelles Passwort",
+      "newPassword": "Neues Passwort",
+      "samePassword": "Wähle ein anderes Passwort als das aktuelle.",
+      "passwordChanged": "Passwort geändert. Andere Geräte werden innerhalb einer Minute abgemeldet.",
+      "changePassword": "Passwort ändern",
+      "strength": {
+        "weak": "Schwach – mach es länger",
+        "fair": "In Ordnung – länger ist besser",
+        "strong": "Stark"
+      },
+      "sessionsTitle": "Andere Geräte",
+      "sessionsHint": "Noch an einem Computer angemeldet, den du nicht mehr nutzt? Melde dich überall außer hier ab.",
+      "signOutOthers": "Andere Geräte abmelden",
+      "signOutOthersConfirm": "Alle anderen Browser und Geräte, die bei deinem Konto angemeldet sind, werden innerhalb einer Minute abgemeldet. Dieser bleibt angemeldet.",
+      "othersSignedOut": "Andere Geräte werden innerhalb einer Minute abgemeldet."
+    },
+    "twoFactor": {
+      "title": "Anmeldung in zwei Schritten",
+      "description": "Zusätzlich zum Passwort fragt die Anmeldung nach einem Code aus einer Authenticator-App auf deinem Handy (z. B. Google Authenticator, Microsoft Authenticator, 1Password oder Aegis).",
+      "on": "An",
+      "off": "Aus",
+      "setUp": "Einrichten",
+      "setupTitle": "Anmeldung in zwei Schritten einrichten",
+      "progress": "Fortschritt",
+      "steps": {
+        "scan": "Scannen",
+        "verify": "Bestätigen",
+        "codes": "Wiederherstellungscodes",
+        "scanHint": "Scanne diesen QR-Code mit deiner Authenticator-App.",
+        "verifyHint": "Gib den 6-stelligen Code ein, den die App gerade anzeigt.",
+        "codesHint": "Bewahre diese Wiederherstellungscodes sicher auf, z. B. in deinem Passwort-Manager. Jeder meldet dich einmal an, falls du dein Handy verlierst. Sie werden nur jetzt angezeigt."
+      },
+      "qrLabel": "QR-Code für die Authenticator-App",
+      "cannotScan": "Scannen klappt nicht? Schlüssel von Hand eingeben",
+      "keyHint": "Schlüssel (zeitbasiert, 6 Ziffern)",
+      "code": "Code aus der App",
+      "codeFormat": "Gib die 6 Ziffern ein, die die App anzeigt.",
+      "invalidCode": "Dieser Code ist nicht gültig. Prüfe die Uhrzeit auf deinem Handy oder warte auf den nächsten Code.",
+      "turnOn": "Einschalten",
+      "savedCodes": "Ich habe die Codes gespeichert",
+      "codesFileHeader": "mailnix-Wiederherstellungscodes – jeder Code funktioniert einmal",
+      "copyCodes": "Kopieren",
+      "copied": "Kopiert",
+      "downloadCodes": "Herunterladen",
+      "codesLeft": "Keine Wiederherstellungscodes mehr. | Noch 1 Wiederherstellungscode. | Noch {count} Wiederherstellungscodes.",
+      "codesLow": "Erstelle neue, damit du dich nicht aussperrst.",
+      "newCodes": "Neue Wiederherstellungscodes",
+      "newCodesHint": "Die alten Wiederherstellungscodes funktionieren dann nicht mehr.",
+      "createCodes": "Codes erstellen",
+      "turnOff": "Ausschalten",
+      "turnOffTitle": "Anmeldung in zwei Schritten ausschalten?",
+      "turnOffHint": "Zur Anmeldung genügt dann wieder dein Passwort. Der Eintrag in der App und die Wiederherstellungscodes funktionieren nicht mehr.",
+      "turnedOff": "Die Anmeldung in zwei Schritten ist aus."
+    },
+    "danger": {
+      "title": "Konto löschen",
+      "description": "Löscht dein Konto mit den Postfach-Verbindungen, Regeln, Listen und dem Verlauf. Die Postfächer selbst und deine Mail bleiben, wie sie sind.",
+      "adminCannot": "Du verwaltest diese Installation, daher kann dein Konto nicht gelöscht werden.",
+      "delete": "Mein Konto löschen",
+      "deleteTitle": "Konto löschen?",
+      "deleteHint": "Das lässt sich nicht rückgängig machen. Deine Mail bleibt in deinen Postfächern.",
+      "deleteConfirm": "Konto löschen",
+      "confirmWord": "LÖSCHEN",
+      "typeToConfirm": "Gib {word} zur Bestätigung ein",
+      "deleted": "Dein Konto wurde gelöscht."
+    },
+    "errors": {
+      "WrongPassword": "Das Passwort ist nicht korrekt.",
+      "CannotDeleteAdmin": "Der Administrator der Installation kann sein Konto nicht löschen.",
+      "LastTenantAdmin": "Du bist der einzige Admin deiner Organisation. Mache zuerst ein anderes Mitglied zum Admin (Seite Team).",
+      "TwoFactorAlreadyEnabled": "Die Anmeldung in zwei Schritten ist schon an.",
+      "TwoFactorSetupMissing": "Bitte starte die Einrichtung erneut.",
+      "TwoFactorNotEnabled": "Die Anmeldung in zwei Schritten ist aus."
+    }
   }
 }

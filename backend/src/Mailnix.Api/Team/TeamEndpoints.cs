@@ -129,7 +129,7 @@ internal static class TeamEndpoints
         }
         else
         {
-            if (await IsLastTenantAdminAsync(db, users, tenantId, member))
+            if (await UserRemoval.IsLastTenantAdminAsync(member, db, users, othersMustRemain: false))
             {
                 return Problem("LastTenantAdmin", "Someone has to stay administrator of the organization.");
             }
@@ -160,22 +160,8 @@ internal static class TeamEndpoints
             return Problem("CannotRemoveAdmin", "The administrator of the installation cannot be removed here.");
         }
 
-        // Lists are not tied to the user by a foreign key; accounts take their rules, runs and stats along.
-        await db.NamedLists.Where(l => l.UserId == id).ExecuteDeleteAsync(ct);
-        await users.DeleteAsync(member);
-        signals.AccountsChanged();
+        await UserRemoval.DeleteAsync(member, db, users, signals, ct);
         return TypedResults.NoContent();
-    }
-
-    private static async Task<bool> IsLastTenantAdminAsync(MailnixDbContext db, UserManager<AppUser> users, Guid tenantId, AppUser member)
-    {
-        if (!await users.IsInRoleAsync(member, Roles.TenantAdmin))
-        {
-            return false;
-        }
-
-        var admins = await users.GetUsersInRoleAsync(Roles.TenantAdmin);
-        return admins.Count(a => a.TenantId == tenantId) <= 1;
     }
 
     private static ProblemHttpResult Problem(string errorCode, string title) =>

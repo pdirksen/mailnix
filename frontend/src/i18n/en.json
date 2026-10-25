@@ -12,7 +12,8 @@
     "activity": "Activity",
     "stats": "Stats",
     "team": "Team",
-    "system": "System"
+    "system": "System",
+    "settings": "Settings"
   },
   "common": {
     "language": "Language",
@@ -66,8 +67,19 @@
     "invitationInvalidHint": "Ask for a new invitation link.",
     "errors": {
       "InvitationInvalid": "This invitation is no longer valid.",
-      "InvitationForOtherEmail": "This invitation is for a different email address."
-    }
+      "InvitationForOtherEmail": "This invitation is for a different email address.",
+      "InvalidCode": "This code is not valid. Check that the time on your phone is correct, or wait for the next code.",
+      "TwoFactorExpired": "That took too long. Please sign in again with your password."
+    },
+    "twoFactorTitle": "Two-factor sign-in",
+    "twoFactorHint": "Enter the 6-digit code from your authenticator app.",
+    "recoveryCodeHint": "Enter one of the recovery codes you saved when you turned on two-factor sign-in. Each code works once.",
+    "authenticatorCode": "Code from the app",
+    "recoveryCode": "Recovery code",
+    "useRecoveryCode": "Use a recovery code instead",
+    "useAuthenticator": "Use the authenticator app instead",
+    "verify": "Verify",
+    "backToPassword": "Back"
   },
   "validation": {
     "required": "This field is required.",
@@ -885,5 +897,143 @@
     "unlimited": "Unlimited",
     "limitSaved": "Limit for {name} saved.",
     "created": "Created"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Your profile, preferences and how you sign in.",
+    "sections": "Settings sections",
+    "saved": "Saved.",
+    "profile": {
+      "nav": "Profile",
+      "title": "Profile",
+      "description": "How you appear in mailnix.",
+      "displayNameHint": "Shown in the menu and to your team instead of your email address.",
+      "emailHint": "You sign in with this address. It cannot be changed here.",
+      "memberSince": "Member since {date}",
+      "roles": {
+        "installationAdmin": "Administrator",
+        "organizationAdmin": "Organization admin",
+        "member": "Member"
+      }
+    },
+    "preferences": {
+      "nav": "Preferences",
+      "language": "Language",
+      "languageHint": "Applies right away and in every browser you sign in with.",
+      "themeHint": "Saved in this browser only."
+    },
+    "timeZone": {
+      "title": "Time zone",
+      "description": "Decides the dates in folder names (such as Archive/2026/10), when scheduled rules run, and where a day starts and ends in the stats.",
+      "search": "Search city or offset…",
+      "showAll": "Show all time zones",
+      "noMatch": "No time zone found.",
+      "more": "{count} more – type to narrow down",
+      "saved": "Time zone set to {zone}.",
+      "browserDiffers": "This browser is set to {zone}.",
+      "useBrowser": "Use it",
+      "localTime": "Time there now",
+      "exampleFolder": "Mail arriving now goes to"
+    },
+    "addresses": {
+      "nav": "Addresses",
+      "title": "Your addresses",
+      "description": "Addresses that reach you, besides the ones mailnix already knows. Rules use them to tell mail to you from other mail:",
+      "uses": {
+        "onlyCc": "\"I am only in Cc or Bcc\": none of your addresses is in To",
+        "alias": "\"Sent to my alias\": which of your addresses the mail went to",
+        "plusTag": "\"Plus tag\": shop from you+shop{'@'}example.com",
+        "reply": "\"Reply to my mail\": answers to mail you sent"
+      },
+      "add": "Add an address",
+      "addButton": "Add",
+      "duplicate": "This address is already in the list.",
+      "tooMany": "You can add at most {max} addresses.",
+      "added": "{address} added.",
+      "removed": "{address} removed.",
+      "yours": "All addresses that count as yours",
+      "automatic": "Automatic",
+      "automaticHint": "Your sign-in address and the user names of your mailboxes always count.",
+      "remove": "Remove {address}",
+      "none": "No further addresses yet."
+    },
+    "security": {
+      "nav": "Security",
+      "passwordTitle": "Password",
+      "passwordHint": "Use at least 10 characters; a few unrelated words make a strong password. Changing it signs you out on other devices.",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "samePassword": "Choose a password different from the current one.",
+      "passwordChanged": "Password changed. Other devices are signed out within a minute.",
+      "changePassword": "Change password",
+      "strength": {
+        "weak": "Weak – make it longer",
+        "fair": "Okay – longer is better",
+        "strong": "Strong"
+      },
+      "sessionsTitle": "Other devices",
+      "sessionsHint": "Signed in on a computer you no longer use? Sign out everywhere except here.",
+      "signOutOthers": "Sign out other devices",
+      "signOutOthersConfirm": "Every other browser and device that is signed in to your account is signed out within a minute. This one stays signed in.",
+      "othersSignedOut": "Other devices are signed out within a minute."
+    },
+    "twoFactor": {
+      "title": "Two-factor sign-in",
+      "description": "Besides your password, signing in asks for a code from an authenticator app on your phone (for example Google Authenticator, Microsoft Authenticator, 1Password or Aegis).",
+      "on": "On",
+      "off": "Off",
+      "setUp": "Set up",
+      "setupTitle": "Set up two-factor sign-in",
+      "progress": "Progress",
+      "steps": {
+        "scan": "Scan",
+        "verify": "Confirm",
+        "codes": "Recovery codes",
+        "scanHint": "Scan this QR code with your authenticator app.",
+        "verifyHint": "Enter the 6-digit code the app shows now.",
+        "codesHint": "Keep these recovery codes somewhere safe, e.g. in your password manager. Each one signs you in once if you lose your phone. They are shown only now."
+      },
+      "qrLabel": "QR code for the authenticator app",
+      "cannotScan": "Cannot scan? Enter the key by hand",
+      "keyHint": "Key (time-based, 6 digits)",
+      "code": "Code from the app",
+      "codeFormat": "Enter the 6 digits the app shows.",
+      "invalidCode": "This code is not valid. Check that the time on your phone is correct, or wait for the next code.",
+      "turnOn": "Turn on",
+      "savedCodes": "I have saved the codes",
+      "codesFileHeader": "mailnix recovery codes – each code works once",
+      "copyCodes": "Copy",
+      "copied": "Copied",
+      "downloadCodes": "Download",
+      "codesLeft": "No recovery codes left. | 1 recovery code left. | {count} recovery codes left.",
+      "codesLow": "Create new ones so you do not get locked out.",
+      "newCodes": "New recovery codes",
+      "newCodesHint": "The old recovery codes stop working.",
+      "createCodes": "Create codes",
+      "turnOff": "Turn off",
+      "turnOffTitle": "Turn off two-factor sign-in?",
+      "turnOffHint": "Signing in will only need your password again. The app entry and the recovery codes stop working.",
+      "turnedOff": "Two-factor sign-in is off."
+    },
+    "danger": {
+      "title": "Delete account",
+      "description": "Deletes your account with its mailbox connections, rules, lists and history. The mailboxes themselves and their mail stay as they are.",
+      "adminCannot": "You administer this installation, so your account cannot be deleted.",
+      "delete": "Delete my account",
+      "deleteTitle": "Delete your account?",
+      "deleteHint": "This cannot be undone. Your mail stays in your mailboxes.",
+      "deleteConfirm": "Delete account",
+      "confirmWord": "DELETE",
+      "typeToConfirm": "Type {word} to confirm",
+      "deleted": "Your account was deleted."
+    },
+    "errors": {
+      "WrongPassword": "The password is not correct.",
+      "CannotDeleteAdmin": "The administrator of the installation cannot delete their account.",
+      "LastTenantAdmin": "You are the only admin of your organization. Make another member admin first (page Team).",
+      "TwoFactorAlreadyEnabled": "Two-factor sign-in is already on.",
+      "TwoFactorSetupMissing": "Please start the setup again.",
+      "TwoFactorNotEnabled": "Two-factor sign-in is off."
+    }
   }
 }

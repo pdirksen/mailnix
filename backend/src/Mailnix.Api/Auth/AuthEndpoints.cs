@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Mailnix.Api.Hosting;
+using Mailnix.Api.Profile;
 using Mailnix.Api.Team;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Infrastructure.Identity;
@@ -21,6 +22,7 @@ internal static class AuthEndpoints
         group.MapGet("/invitations/{token}", GetInvitation).AllowAnonymous().RequireRateLimiting(RateLimiting.Auth);
         group.MapPost("/register", Register).AllowAnonymous().RequireRateLimiting(RateLimiting.Auth);
         group.MapPost("/login", Login).AllowAnonymous().RequireRateLimiting(RateLimiting.Auth);
+        group.MapPost("/login/two-factor", LoginTwoFactor).AllowAnonymous().RequireRateLimiting(RateLimiting.Auth);
         group.MapPost("/logout", Logout);
         group.MapGet("/me", Me);
 
@@ -102,6 +104,10 @@ internal static class AuthEndpoints
             DisplayName = string.IsNullOrWhiteSpace(request.DisplayName) ? null : request.DisplayName.Trim(),
             TenantId = tenantId,
             CreatedAt = now,
+
+            // From the browser, so date folders and schedules match the user's day from the start.
+            TimeZone = UserPreferences.IsTimeZone(request.TimeZone) ? request.TimeZone! : "UTC",
+            Language = UserPreferences.IsLanguage(request.Language) ? request.Language : null,
         };
 
         // The tenant is saved together with the user (UserManager saves the context).
@@ -149,13 +155,44 @@ internal static class AuthEndpoints
             return TypedResults.Ok(await ToMeResponseAsync(user, userManager));
         }
 
-        var title = result switch
+        if (result.RequiresTwoFactor)
         {
-            { IsLockedOut: true } => "Account is temporarily locked. Try again later.",
-            { RequiresTwoFactor: true } => "Two-factor authentication required.",
-            _ => "Invalid email or password.",
-        };
+            // Password accepted; a short-lived cookie remembers that for the second step.
+            return Problem(StatusCodes.Status401Unauthorized, "TwoFactorRequired", "Enter the code from your authenticator app.");
+        }
+
+        var title = result.IsLockedOut ? "Account is temporarily locked. Try again later." : "Invalid email or password.";
         return TypedResults.Problem(statusCode: StatusCodes.Status401Unauthorized, title: title);
+    }
+
+    private static async Task<Results<Ok<MeResponse>, ProblemHttpResult>> LoginTwoFactor(
+        TwoFactorLoginRequest request,
+        UserManager<AppUser> userManager,
+        SignInManager<AppUser> signInManager)
+    {
+        if (await signInManager.GetTwoFactorAuthenticationUserAsync() is not { } user)
+        {
+            return Problem(StatusCodes.Status401Unauthorized, "TwoFactorExpired", "Sign in again with your password.");
+        }
+
+        var result = request.IsRecoveryCode
+            ? await signInManager.TwoFactorRecoveryCodeSignInAsync(NormalizeRecoveryCode(request.Code))
+            : await signInManager.TwoFactorAuthenticatorSignInAsync(ProfileEndpoints.NormalizeCode(request.Code), request.RememberMe, rememberClient: false);
+        if (result.Succeeded)
+        {
+            return TypedResults.Ok(await ToMeResponseAsync(user, userManager));
+        }
+
+        return result.IsLockedOut
+            ? TypedResults.Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Account is temporarily locked. Try again later.")
+            : Problem(StatusCodes.Status401Unauthorized, "InvalidCode", "The code is not valid.");
+    }
+
+    /// <summary>Recovery codes are stored as "ABCDE-FGHIJ"; accept them typed without the dash or in lowercase.</summary>
+    private static string NormalizeRecoveryCode(string code)
+    {
+        var compact = code.Replace(" ", "", StringComparison.Ordinal).Replace("-", "", StringComparison.Ordinal).Trim().ToUpperInvariant();
+        return compact.Length == 10 ? $"{compact[..5]}-{compact[5..]}" : compact;
     }
 
     private static async Task<NoContent> Logout(SignInManager<AppUser> signInManager)

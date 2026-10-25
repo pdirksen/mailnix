@@ -87,4 +87,53 @@ describe('LoginPage', () => {
     await flushPromises()
     expect(closed.wrapper.text()).toContain('Create account')
   })
+
+  it('asks for the authenticator code when two-factor sign-in is on', async () => {
+    apiMock.POST.mockImplementation((path: string) =>
+      Promise.resolve(
+        path === '/api/auth/login'
+          ? apiResult(401, { title: 'Enter the code', errorCode: 'TwoFactorRequired' })
+          : apiResult(200, testUser),
+      ),
+    )
+    const { wrapper, router } = await mountLogin()
+    const replace = vi.spyOn(router, 'replace').mockResolvedValue(undefined)
+
+    await fillAndSubmit(wrapper, testUser.email, 'secret password')
+    await vi.waitFor(() => expect(wrapper.find('#login-code').exists()).toBe(true))
+    expect(useAuthStore().isAuthenticated).toBe(false)
+
+    await wrapper.find('#login-code').setValue('123 456')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(apiMock.POST).toHaveBeenLastCalledWith('/api/auth/login/two-factor', {
+      body: { code: '123 456', isRecoveryCode: false, rememberMe: false },
+    })
+    expect(replace).toHaveBeenCalledWith('/')
+    expect(useAuthStore().isAuthenticated).toBe(true)
+  })
+
+  it('accepts a recovery code and explains a wrong code', async () => {
+    apiMock.POST.mockImplementation((path: string) =>
+      Promise.resolve(
+        path === '/api/auth/login'
+          ? apiResult(401, { errorCode: 'TwoFactorRequired' })
+          : apiResult(401, { title: 'The code is not valid.', errorCode: 'InvalidCode' }),
+      ),
+    )
+    const { wrapper } = await mountLogin()
+    await fillAndSubmit(wrapper, testUser.email, 'secret password')
+    await vi.waitFor(() => expect(wrapper.find('#login-code').exists()).toBe(true))
+
+    await wrapper.findAll('button').find((b) => b.text() === 'Use a recovery code instead')!.trigger('click')
+    await wrapper.find('#login-code').setValue('abcde-12345')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(apiMock.POST).toHaveBeenLastCalledWith('/api/auth/login/two-factor', {
+      body: { code: 'abcde-12345', isRecoveryCode: true, rememberMe: false },
+    })
+    expect(wrapper.find('[data-testid="login-error"]').text()).toContain('This code is not valid.')
+  })
 })

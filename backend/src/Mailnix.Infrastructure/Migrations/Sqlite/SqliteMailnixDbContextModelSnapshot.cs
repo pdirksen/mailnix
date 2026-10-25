@@ -848,6 +848,10 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("INTEGER");
 
+                    b.PrimitiveCollection<string>("Addresses")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("TEXT");
@@ -867,7 +871,6 @@ namespace Mailnix.Infrastructure.Migrations.Sqlite
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Language")
-                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
 

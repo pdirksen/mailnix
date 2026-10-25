@@ -81,6 +81,7 @@ public abstract class MailnixDbContext(DbContextOptions options)
             e.Property(u => u.DisplayName).HasMaxLength(200);
             e.Property(u => u.TimeZone).HasMaxLength(100);
             e.Property(u => u.Language).HasMaxLength(10);
+            e.PrimitiveCollection(u => u.Addresses);
         });
 
         builder.Entity<MailAccount>(e =>

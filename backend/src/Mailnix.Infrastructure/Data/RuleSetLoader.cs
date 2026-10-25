@@ -32,7 +32,7 @@ public sealed class RuleSetLoader(MailnixDbContext db, TimeProvider time)
             .Select(r => definitions[r.Id])
             .ToList();
 
-        var myAddresses = new[] { account.Username, user.Email }
+        var myAddresses = new[] { account.Username, user.Email }.Concat(user.Addresses)
             .Where(a => a is not null && a.Contains('@', StringComparison.Ordinal))
             .Select(a => new EmailAddress(a!).Address)
             .ToHashSet(StringComparer.Ordinal);

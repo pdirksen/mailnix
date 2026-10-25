@@ -14,11 +14,19 @@ public sealed record RegisterRequest(
     [Required, MinLength(10), MaxLength(256)] string Password,
     [MaxLength(200)] string? DisplayName = null,
     [MaxLength(200)] string? OrganizationName = null,
-    [MaxLength(200)] string? InviteToken = null);
+    [MaxLength(200)] string? InviteToken = null,
+    [MaxLength(100)] string? TimeZone = null,
+    [MaxLength(10)] string? Language = null);
 
 public sealed record LoginRequest(
     [Required, EmailAddress, MaxLength(256)] string Email,
     [Required, MaxLength(256)] string Password,
+    bool RememberMe);
+
+/// <summary>Second step of signing in with two-factor sign-in: a code from the authenticator app or a recovery code.</summary>
+public sealed record TwoFactorLoginRequest(
+    [Required, MaxLength(30)] string Code,
+    bool IsRecoveryCode,
     bool RememberMe);
 
 public sealed record MeResponse(
@@ -27,4 +35,4 @@ public sealed record MeResponse(
     string? DisplayName,
     IReadOnlyList<string> Roles,
     string TimeZone,
-    string Language);
+    string? Language);

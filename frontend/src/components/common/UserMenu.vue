@@ -10,9 +10,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { useAuthStore } from '@/stores/auth'
-import { ChevronsUpDownIcon, LogOutIcon } from '@lucide/vue'
+import { ChevronsUpDownIcon, LogOutIcon, SettingsIcon, ShieldCheckIcon } from '@lucide/vue'
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -55,6 +55,19 @@ async function logout() {
           align="end"
         >
           <DropdownMenuLabel class="truncate font-normal">{{ auth.user?.email }}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem as-child>
+            <RouterLink :to="{ name: 'settings-profile' }">
+              <SettingsIcon class="size-4" />
+              {{ $t('nav.settings') }}
+            </RouterLink>
+          </DropdownMenuItem>
+          <DropdownMenuItem as-child>
+            <RouterLink :to="{ name: 'settings-security' }">
+              <ShieldCheckIcon class="size-4" />
+              {{ $t('settings.security.nav') }}
+            </RouterLink>
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem @select="logout">
             <LogOutIcon class="size-4" />

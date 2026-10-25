@@ -109,6 +109,17 @@ export const routes: RouteRecordRaw[] = [
         meta: { titleKey: 'activity.reviewTitle' },
       },
       {
+        path: 'settings',
+        component: () => import('@/pages/settings/SettingsLayout.vue'),
+        meta: { titleKey: 'nav.settings' },
+        children: [
+          { path: '', name: 'settings-profile', component: () => import('@/pages/settings/ProfileSettings.vue') },
+          { path: 'preferences', name: 'settings-preferences', component: () => import('@/pages/settings/PreferencesSettings.vue') },
+          { path: 'addresses', name: 'settings-addresses', component: () => import('@/pages/settings/AddressesSettings.vue') },
+          { path: 'security', name: 'settings-security', component: () => import('@/pages/settings/SecuritySettings.vue') },
+        ],
+      },
+      {
         path: 'admin/team',
         name: 'admin-team',
         component: () => import('@/pages/admin/TeamPage.vue'),

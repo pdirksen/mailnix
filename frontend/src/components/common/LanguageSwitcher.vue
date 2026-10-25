@@ -10,13 +10,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { isLocale, LOCALE_NAMES, SUPPORTED_LOCALES } from '@/i18n'
+import { useAuthStore } from '@/stores/auth'
+import { useProfileStore } from '@/stores/profile'
 import { useUiStore } from '@/stores/ui'
 import { LanguagesIcon } from '@lucide/vue'
 
 const ui = useUiStore()
+const auth = useAuthStore()
 
 function onSelect(value: unknown) {
-  if (isLocale(value)) ui.setLocale(value)
+  if (!isLocale(value)) return
+  ui.setLocale(value)
+  // Signed in: the choice follows the user to other browsers (best effort; the switch itself already happened).
+  if (auth.isAuthenticated) void useProfileStore().update({ language: value }).catch(() => {})
 }
 </script>
 

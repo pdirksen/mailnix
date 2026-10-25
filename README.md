@@ -6,8 +6,8 @@ mailboxes, build rules visually, preview what they would do, and let mailnix mov
 > Status: early development. Auth, IMAP accounts, the rule engine, named lists, the visual rule builder with a
 > preview against real mail, rule execution (new mail via IDLE, "run now", confirmation of large runs, undo,
 > live status), scheduled rules with server-side preselection, the optional Trash purge, OAuth sign-in for Gmail
-> and Microsoft 365, the dashboard and stats, and the SaaS mode (organizations, separate API and worker processes)
-> are in place. Not yet verified against real systems: Google/Microsoft OAuth, PostgreSQL and the SaaS Docker setup.
+> and Microsoft 365, the dashboard and stats, the SaaS mode (organizations, separate API and worker processes) and
+> personal settings (time zone, own addresses, password, two-factor sign-in) are in place. Not yet verified against real systems: Google/Microsoft OAuth, PostgreSQL and the SaaS Docker setup.
 
 ## Repository layout
 

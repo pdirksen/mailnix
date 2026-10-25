@@ -176,6 +176,24 @@ public sealed class TenancyTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Founders_hand_over_before_leaving_and_empty_organizations_disappear()
+    {
+        var carol = _app.CreateApiClient();
+        (await AcceptAsync(carol, "carol@acme.test", TokenOf(await InviteAsync(_alice)))).EnsureSuccessStatusCode();
+        var acme = await TenantOfAsync("alice@acme.test");
+        var password = new { password = HttpClientAuthExtensions.DefaultPassword };
+
+        (await ErrorCodeAsync(await _alice.PostAsJsonAsync("/api/profile/delete", password, Ct))).ShouldBe("LastTenantAdmin");
+
+        // Members leave freely; the founder, once alone, takes the organization along.
+        (await carol.PostAsJsonAsync("/api/profile/delete", password, Ct)).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        (await _alice.PostAsJsonAsync("/api/profile/delete", password, Ct)).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+
+        await using var scope = _app.Services.CreateAsyncScope();
+        (await scope.ServiceProvider.GetRequiredService<MailnixDbContext>().Tenants.AnyAsync(t => t.Id == acme, Ct)).ShouldBeFalse();
+    }
+
+    [Fact]
     public async Task Organizations_can_be_renamed_by_their_admins()
     {
         (await _alice.PutAsJsonAsync("/api/team", new { name = "  Acme Corp " }, Ct)).StatusCode.ShouldBe(HttpStatusCode.NoContent);
