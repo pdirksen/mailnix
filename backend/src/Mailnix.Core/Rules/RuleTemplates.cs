@@ -51,8 +51,10 @@ public static class RuleTemplates
     // Keyword patterns cover English and German (the UI languages). Only the start of a word is anchored, so German
     // compounds like "Versandbestätigung" match too.
     private const string NotificationSenders = @"^(no-?reply|do-?not-?reply|notifications?|notify|alerts?|mailer-daemon|postmaster)@";
-    private const string OrderSubjects = @"\b(order|bestell|shipped|shipping|shipment|versand|versendet|liefer|delivery|delivered|tracking|sendung|paket|parcel)";
-    private const string InvoiceSubjects = @"\b(invoice|receipt|rechnung|quittung|zahlungsbeleg|kassenbeleg|kontoauszug|zahlungsbest|payment confirmation)";
+    private const string OrderSubjects = @"\b(order|bestell|shipped|shipping|shipment|versand|versendet|liefer|zustell|zugestellt|delivery|delivered|tracking|sendung|paket|parcel)";
+
+    // Also payment notices like PayPal's "Telekom Deutschland GmbH: 12,34 EUR" (an amount at the end).
+    private const string InvoiceSubjects = @"\b(invoice|receipt|rechnung|quittung|beleg|zahlungsbeleg|kassenbeleg|kontoauszug|zahlungsbest|payment confirmation)|:\s*\d[\d.,]*\s*(eur|€|usd|\$)\s*$";
     private const string InvoiceAttachments = @"\b(invoice|receipt|rechnung|quittung)";
     private const string TravelSubjects = @"\b(booking|buchung|reservation|reservierung|itinerary|reiseplan|boarding|check-in|flight|flug|e-ticket|hotel)";
 

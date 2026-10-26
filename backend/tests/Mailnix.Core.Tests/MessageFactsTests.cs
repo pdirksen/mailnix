@@ -60,8 +60,20 @@ public sealed class MessageFactsTests
         };
 
         new MessageFacts(tnef, Context()).IsCalendarMessage.ShouldBeTrue();
+        new MessageFacts(Simple() with { CalendarMethod = "CANCEL", Headers = [] }, Context()).IsCalendarMessage.ShouldBeTrue();
         Fixture("cc-only.eml").CalendarMethod.ShouldBeNull();
         Facts("cc-only.eml").IsCalendarMessage.ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData("PUBLISH")]
+    [InlineData("")]
+    public void Appointment_files_on_booking_confirmations_are_not_calendar_messages(string method)
+    {
+        // E.g. a train ticket with an .ics to add the journey to the calendar: it belongs to travel, not to invitations.
+        var booking = Simple() with { CalendarMethod = method, Headers = [], Attachments = [new AttachmentInfo("ticket.ics", "text/calendar", 900)] };
+
+        new MessageFacts(booking, Context()).IsCalendarMessage.ShouldBeFalse();
     }
 
     [Fact]

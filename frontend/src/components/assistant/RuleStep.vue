@@ -28,8 +28,16 @@ const lists = useListsStore()
 
 const results = computed(() => new Map((props.analysis?.rules ?? []).map((r) => [r.key, r])))
 const neededLists = computed(() => activeLists(state.value, props.blueprint))
-/** New domain lists that unsorted sender domains can be added to (e.g. Clients). */
+/**
+ * New domain lists that unsorted sender domains can be added to (Clients, Senders). Not the social networks: most
+ * frequent senders are not one, so offering it on every row would only mislead.
+ */
 const domainTargets = computed(() => neededLists.value.filter((l) => l.kind === 'Domain' && l.listId === null && l.key !== 'social'))
+
+/** Rules for older mail (e.g. the archive) find nothing when every sampled message is younger. */
+function onlyOlderMail(rule: BlueprintRule) {
+  return rule.parameters.some((p) => p.type === 'Days') && results.value.get(rule.key)?.matched === 0
+}
 
 function choice(rule: BlueprintRule) {
   return state.value.rules.find((r) => r.key === rule.key)!
@@ -120,6 +128,9 @@ function inList(listKey: string, domain: string) {
           <div v-if="rule.parameters.length" class="grid gap-3 pl-7 sm:grid-cols-2">
             <TemplateParameterFields v-model="choice(rule).parameters" :parameters="rule.parameters" :id-prefix="`rule-${rule.key}`" />
           </div>
+          <p v-if="onlyOlderMail(rule)" class="text-muted-foreground pl-7 text-xs" :data-testid="`rule-older-${rule.key}`">
+            {{ $t('assistant.ruleStep.olderOnly') }}
+          </p>
           <ul v-if="results.get(rule.key)?.examples.length" class="text-muted-foreground grid gap-1 pl-7 text-xs">
             <li v-for="(example, i) in results.get(rule.key)!.examples" :key="i" class="truncate">
               <span class="text-foreground">{{ example.subject || $t('assistant.ruleStep.noSubject') }}</span>
@@ -164,7 +175,9 @@ function inList(listKey: string, domain: string) {
     <div v-if="analysis?.unsortedDomains.length" class="grid gap-3" data-testid="assistant-domains">
       <div>
         <h3 class="font-medium">{{ $t('assistant.ruleStep.unsortedTitle') }}</h3>
-        <p class="text-muted-foreground text-sm">{{ $t('assistant.ruleStep.unsortedHint') }}</p>
+        <p class="text-muted-foreground text-sm">
+          {{ $t(domainTargets.length ? 'assistant.ruleStep.unsortedHint' : 'assistant.ruleStep.unsortedHintNoList') }}
+        </p>
       </div>
       <ul class="grid gap-1">
         <li v-for="domain in analysis.unsortedDomains" :key="domain.domain" class="flex flex-wrap items-center gap-2 rounded-md border px-3 py-1.5">

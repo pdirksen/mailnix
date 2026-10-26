@@ -1168,7 +1168,9 @@
       "domains": "Domains (eine pro Zeile)",
       "unsortedTitle": "Häufige Absender ohne Regel",
       "unsortedHint": "Absender von Mails, die keine Regel sortieren würde. Füge sie einer Liste hinzu, um auch sie zu sortieren.",
-      "noSubject": "(kein Betreff)"
+      "noSubject": "(kein Betreff)",
+      "olderOnly": "Keine der ausprobierten Mails ist alt genug; die Regel greift bei älteren Mails.",
+      "unsortedHintNoList": "Absender von Mails, die keine Regel sortieren würde. Sie bleiben im Posteingang; Regeln für sie kannst du später anlegen."
     },
     "review": {
       "summary": "{folders} Ordner, {rules} Regeln und {lists} neue Listen.",

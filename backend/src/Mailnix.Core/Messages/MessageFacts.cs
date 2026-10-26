@@ -53,11 +53,12 @@ public sealed partial class MessageFacts(MessageSnapshot message, EvaluationCont
     }
 
     /// <summary>
-    /// Invitations, replies and cancellations from a calendar: a calendar part anywhere in the message, or the
-    /// Content-Class Exchange sets on meeting messages (also when the invitation is wrapped in winmail.dat).
+    /// Invitations, replies and cancellations: a calendar part with a scheduling method (REQUEST, REPLY, CANCEL…),
+    /// or the Content-Class Exchange sets on meeting messages (also when the invitation is wrapped in winmail.dat).
+    /// Appointment files without one (PUBLISH or no method, e.g. on booking confirmations) do not count.
     /// </summary>
     public bool IsCalendarMessage =>
-        message.CalendarMethod is not null
+        message.CalendarMethod is { Length: > 0 } and not "PUBLISH"
         || message.FirstHeader("Content-Class")?.Contains("calendarmessage", StringComparison.OrdinalIgnoreCase) == true;
 
     /// <summary>Out-of-office replies and other automatic responses.</summary>

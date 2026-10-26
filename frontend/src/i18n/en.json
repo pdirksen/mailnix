@@ -1168,7 +1168,9 @@
       "domains": "Domains (one per line)",
       "unsortedTitle": "Frequent senders without a rule",
       "unsortedHint": "Senders of messages that no rule would sort. Add them to a list to sort them, too.",
-      "noSubject": "(no subject)"
+      "noSubject": "(no subject)",
+      "olderOnly": "None of the tried messages is old enough yet; the rule acts on older mail.",
+      "unsortedHintNoList": "Senders of messages that no rule would sort. They stay in the inbox; you can add rules for them later."
     },
     "review": {
       "summary": "{folders} folders, {rules} rules and {lists} new lists.",

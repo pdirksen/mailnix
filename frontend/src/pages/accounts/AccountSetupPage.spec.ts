@@ -52,7 +52,7 @@ const analysis = {
   fromCache: false,
   rules: [
     { key: 'newsletters', matched: 8, sorted: 8, blocked: 0, examples: [{ from: 'news@shop.example', subject: 'Autumn sale', date: null, targetFolder: 'INBOX.Newsletters' }] },
-    { key: 'archive', matched: 2, sorted: 2, blocked: 0, examples: [] },
+    { key: 'archive', matched: 0, sorted: 0, blocked: 0, examples: [] },
   ],
   unsortedDomains: [{ domain: 'example.com', count: 12 }],
 }
@@ -142,6 +142,10 @@ describe('AccountSetupPage', () => {
     expect(wrapper.find('[data-testid="rule-result-newsletters"]').text()).toContain('8 matches')
     expect(wrapper.text()).toContain('Autumn sale')
     expect(wrapper.find('[data-testid="assistant-domains"]').text()).toContain('example.com')
+    // Minimal has no list to put senders on; the archive only finds mail older than the sample.
+    expect(wrapper.find('[data-testid="assistant-domains"]').text()).toContain('you can add rules for them later')
+    expect(wrapper.find('[data-testid="rule-older-archive"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="rule-older-newsletters"]').exists()).toBe(false)
   })
 
   it('creates the rules in dry-run mode and switches them live afterwards', async () => {
