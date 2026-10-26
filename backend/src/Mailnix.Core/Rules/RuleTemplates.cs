@@ -15,6 +15,9 @@ public enum TemplateParameterType
 
     /// <summary>A named list of domains or patterns.</summary>
     DomainList,
+
+    /// <summary>A named list of exact addresses.</summary>
+    AddressList,
 }
 
 public sealed record TemplateParameter(string Name, TemplateParameterType Type, string? Default);
@@ -44,6 +47,14 @@ public sealed record RuleTemplate(string Id, IReadOnlyList<TemplateParameter> Pa
 public static class RuleTemplates
 {
     private const string Daily = "0 3 * * *";
+
+    // Keyword patterns cover English and German (the UI languages). Only the start of a word is anchored, so German
+    // compounds like "Versandbestätigung" match too.
+    private const string NotificationSenders = @"^(no-?reply|do-?not-?reply|notifications?|notify|alerts?|mailer-daemon|postmaster)@";
+    private const string OrderSubjects = @"\b(order|bestell|shipped|shipping|shipment|versand|versendet|liefer|delivery|delivered|tracking|sendung|paket|parcel)";
+    private const string InvoiceSubjects = @"\b(invoice|receipt|rechnung|quittung|zahlungsbeleg|kassenbeleg|kontoauszug|zahlungsbest|payment confirmation)";
+    private const string InvoiceAttachments = @"\b(invoice|receipt|rechnung|quittung)";
+    private const string TravelSubjects = @"\b(booking|buchung|reservation|reservierung|itinerary|reiseplan|boarding|check-in|flight|flug|e-ticket|hotel)";
 
     public static readonly IReadOnlyList<RuleTemplate> All =
     [
@@ -108,6 +119,74 @@ public static class RuleTemplates
                 [new MarkAsSpamAction()],
                 RuleTriggerKind.OnNew, null)),
 
+        new("notifications",
+            [new("folder", TemplateParameterType.Folder, "INBOX/Notifications")],
+            (p, name) => new RuleDraft(name,
+                new ConditionGroup(GroupOperator.All,
+                [
+                    new Condition(ConditionField.From, ConditionOperator.Regex, NotificationSenders),
+                    new Condition(ConditionField.IsNewsletter, ConditionOperator.IsFalse),
+                ]),
+                [new MoveToAction(p["folder"])],
+                RuleTriggerKind.OnNew, null)),
+
+        new("orders-shipping",
+            [new("folder", TemplateParameterType.Folder, "INBOX/Orders")],
+            (p, name) => new RuleDraft(name,
+                new Condition(ConditionField.Subject, ConditionOperator.Regex, OrderSubjects),
+                [new MoveToAction(p["folder"])],
+                RuleTriggerKind.OnNew, null)),
+
+        new("invoices",
+            [new("folder", TemplateParameterType.Folder, "INBOX/Invoices")],
+            (p, name) => new RuleDraft(name,
+                new ConditionGroup(GroupOperator.Any,
+                [
+                    new Condition(ConditionField.Subject, ConditionOperator.Regex, InvoiceSubjects),
+                    new Condition(ConditionField.AttachmentName, ConditionOperator.Regex, InvoiceAttachments),
+                ]),
+                [new MoveToAction(p["folder"])],
+                RuleTriggerKind.OnNew, null)),
+
+        new("travel",
+            [new("folder", TemplateParameterType.Folder, "INBOX/Travel")],
+            (p, name) => new RuleDraft(name,
+                new ConditionGroup(GroupOperator.Any,
+                [
+                    new Condition(ConditionField.Subject, ConditionOperator.Regex, TravelSubjects),
+                    new Condition(ConditionField.AttachmentExtension, ConditionOperator.Equals, "pkpass"),
+                ]),
+                [new MoveToAction(p["folder"])],
+                RuleTriggerKind.OnNew, null)),
+
+        new("social",
+            [new("list", TemplateParameterType.DomainList, null), new("folder", TemplateParameterType.Folder, "INBOX/Social")],
+            (p, name) => new RuleDraft(name,
+                new Condition(ConditionField.FromDomain, ConditionOperator.InList, p["list"]),
+                [new MoveToAction(p["folder"])],
+                RuleTriggerKind.OnNew, null)),
+
+        new("calendar-invites",
+            [new("folder", TemplateParameterType.Folder, "INBOX/Calendar")],
+            (p, name) => new RuleDraft(name,
+                new Condition(ConditionField.IsCalendarMessage, ConditionOperator.IsTrue),
+                [new MoveToAction(p["folder"])],
+                RuleTriggerKind.OnNew, null)),
+
+        new("cc-only-fyi",
+            [new("folder", TemplateParameterType.Folder, "INBOX/FYI")],
+            (p, name) => new RuleDraft(name,
+                new Condition(ConditionField.IAmOnlyInCcOrBcc, ConditionOperator.IsTrue),
+                [new MoveToAction(p["folder"])],
+                RuleTriggerKind.OnNew, null)),
+
+        new("vip-flag",
+            [new("list", TemplateParameterType.AddressList, null)],
+            (p, name) => new RuleDraft(name,
+                new Condition(ConditionField.From, ConditionOperator.InList, p["list"]),
+                [new FlagAction()],
+                RuleTriggerKind.OnNew, null)),
+
         new("large-attachments",
             [new("megabytes", TemplateParameterType.Megabytes, "10")],
             (p, name) => new RuleDraft(name,
@@ -137,7 +216,7 @@ public static class RuleTemplates
                 TemplateParameterType.Folder => FolderTemplate.Validate(value) is [var first, ..] ? first : null,
                 TemplateParameterType.Days or TemplateParameterType.Megabytes =>
                     double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) && number > 0 && number <= 100_000 ? null : "Enter a positive number.",
-                TemplateParameterType.DomainList => Guid.TryParse(value, out _) ? null : "Choose a list.",
+                TemplateParameterType.DomainList or TemplateParameterType.AddressList => Guid.TryParse(value, out _) ? null : "Choose a list.",
                 _ => null,
             };
             if (error is null)

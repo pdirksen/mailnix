@@ -51,6 +51,8 @@ public enum ConditionField
     IsAutoReply,
     IsReply,
     IsReplyToMyMail,
+    IsCalendarMessage,
+    CalendarMethod,
 
     // Sender trust
     SpfResult,

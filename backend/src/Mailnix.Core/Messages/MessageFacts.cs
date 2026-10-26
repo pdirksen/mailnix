@@ -52,6 +52,14 @@ public sealed partial class MessageFacts(MessageSnapshot message, EvaluationCont
         }
     }
 
+    /// <summary>
+    /// Invitations, replies and cancellations from a calendar: a calendar part anywhere in the message, or the
+    /// Content-Class Exchange sets on meeting messages (also when the invitation is wrapped in winmail.dat).
+    /// </summary>
+    public bool IsCalendarMessage =>
+        message.CalendarMethod is not null
+        || message.FirstHeader("Content-Class")?.Contains("calendarmessage", StringComparison.OrdinalIgnoreCase) == true;
+
     /// <summary>Out-of-office replies and other automatic responses.</summary>
     public bool IsAutoReply => _isAutoReply ??= DetectAutoReply();
 

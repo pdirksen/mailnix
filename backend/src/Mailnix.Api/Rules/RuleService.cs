@@ -11,15 +11,22 @@ internal sealed class RuleService(MailnixDbContext db)
     public const int MaxSourceFolders = 20;
 
     /// <summary>Validates a rule definition plus its scheduling settings against the user's rules and lists.</summary>
+    /// <param name="newLists">Lists that are created together with the rule.</param>
     public async Task<List<RuleValidationError>> ValidateAsync(
         Guid userId,
         RuleDefinition rule,
         RuleTrigger trigger,
         string? schedule,
         IReadOnlyList<string>? sourceFolders,
-        CancellationToken ct)
+        CancellationToken ct,
+        IReadOnlyDictionary<Guid, NamedListKind>? newLists = null)
     {
         var context = await LoadValidationContextAsync(userId, rule.Id, ct);
+        if (newLists is not null)
+        {
+            context = context with { Lists = context.Lists.Concat(newLists).ToDictionary() };
+        }
+
         var errors = RuleValidator.Validate(rule, context).ToList();
 
         if (trigger == RuleTrigger.Scheduled)

@@ -76,6 +76,16 @@ public static class FolderTemplate
         return string.Join(delimiter, segments);
     }
 
+    /// <summary>
+    /// The server path of the levels before the first placeholder, e.g. <c>INBOX.Archive</c> for
+    /// <c>INBOX/Archive/{year}</c>; null when the first level already has one.
+    /// </summary>
+    public static string? StaticPrefix(string template, char delimiter)
+    {
+        var segments = template.Split('/').Select(s => s.Trim()).TakeWhile(s => !s.Contains('{', StringComparison.Ordinal)).ToList();
+        return segments.Count == 0 ? null : string.Join(delimiter, segments);
+    }
+
     /// <summary>Makes a value safe as part of one folder name.</summary>
     internal static string Sanitize(string value, char delimiter)
     {

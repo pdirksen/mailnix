@@ -416,6 +416,8 @@
       "IsAutoReply": "Automatische Antwort",
       "IsReply": "Antwort",
       "IsReplyToMyMail": "Antwort auf eine E-Mail von mir",
+      "IsCalendarMessage": "Kalendereinladung oder -antwort",
+      "CalendarMethod": "Kalender-Methode",
       "SpfResult": "SPF-Ergebnis",
       "DkimResult": "DKIM-Ergebnis",
       "DmarcResult": "DMARC-Ergebnis",
@@ -548,7 +550,8 @@
         "folder": "Zielordner",
         "days": "Älter als (Tage)",
         "megabytes": "Größer als (MB)",
-        "list": "Domainliste"
+        "list": "Domainliste",
+        "addressList": "Adressliste"
       },
       "items": {
         "newsletters-to-folder": {
@@ -582,6 +585,38 @@
         "large-attachments": {
           "name": "Große Anhänge markieren",
           "description": "Markiert E-Mails mit großen Anhängen und versieht sie mit einem Schlagwort."
+        },
+        "notifications": {
+          "name": "Benachrichtigungen in einen Ordner",
+          "description": "Mails von No-Reply- und Benachrichtigungs-Absendern (Anmeldungen, Warnungen, Statusmails) verlassen den Posteingang."
+        },
+        "orders-shipping": {
+          "name": "Bestellungen und Versand",
+          "description": "Bestellbestätigungen, Versandmitteilungen und Sendungsverfolgung."
+        },
+        "invoices": {
+          "name": "Rechnungen und Belege",
+          "description": "Rechnungen, Quittungen und Kontoauszüge, nach Betreff oder Name des Anhangs."
+        },
+        "travel": {
+          "name": "Reisen",
+          "description": "Buchungen, Reservierungen, Bordkarten und Reisepläne."
+        },
+        "social": {
+          "name": "Soziale Netzwerke",
+          "description": "Benachrichtigungen von sozialen Netzwerken aus einer Domainliste."
+        },
+        "calendar-invites": {
+          "name": "Kalendereinladungen",
+          "description": "Einladungen, Zu- und Absagen von Google, Outlook und anderen Kalendern."
+        },
+        "cc-only-fyi": {
+          "name": "Kopien zur Kenntnis",
+          "description": "Mails, in denen du nur in Cc oder Bcc stehst."
+        },
+        "vip-flag": {
+          "name": "Wichtige Absender markieren",
+          "description": "Markiert Mails von den Adressen einer Liste, egal wohin sie sortiert werden."
         }
       }
     },
@@ -1042,6 +1077,127 @@
       "TwoFactorAlreadyEnabled": "Die Anmeldung in zwei Schritten ist schon an.",
       "TwoFactorSetupMissing": "Bitte starte die Einrichtung erneut.",
       "TwoFactorNotEnabled": "Die Anmeldung in zwei Schritten ist aus."
+    }
+  },
+  "assistant": {
+    "open": "Einrichtungsassistent",
+    "openEmpty": "Mit dem Assistenten einrichten",
+    "title": "Einrichtungsassistent",
+    "subtitle": "Wähle eine Ordnerstruktur, probiere die vorgeschlagenen Regeln an deinem Posteingang aus und lege alles in einem Schritt an.",
+    "steps": {
+      "blueprint": "Struktur",
+      "blueprintDescription": "Wie sortiert wird",
+      "folders": "Ordner",
+      "foldersDescription": "Namen und Ort",
+      "rules": "Regeln",
+      "rulesDescription": "Was wohin kommt",
+      "review": "Anlegen",
+      "reviewDescription": "Prüfen und anwenden"
+    },
+    "blueprints": {
+      "minimal": {
+        "name": "Minimal",
+        "description": "Ein ruhiger Posteingang mit wenigen Ordnern: Newsletter und Benachrichtigungen aus dem Weg, Älteres ins Jahresarchiv. Den Rest findest du über die Suche."
+      },
+      "by-type": {
+        "name": "Nach Art der Mail",
+        "description": "Ein Ordner pro Art: Rechnungen, Bestellungen, Reisen, soziale Netzwerke, Newsletter, Benachrichtigungen und mehr."
+      },
+      "business": {
+        "name": "Beruf und Selbstständigkeit",
+        "description": "Ein Ordner pro Kunden-Domain, Rechnungen und Verwaltung getrennt, wichtige Absender markiert."
+      },
+      "by-sender": {
+        "name": "Nach Absender",
+        "description": "Automatisch angelegte Ordner pro Shop, Newsletter-Absender und Absender-Domain, monatlich archiviert."
+      }
+    },
+    "folders": {
+      "newsletters": "Newsletter",
+      "notifications": "Benachrichtigungen",
+      "autoReplies": "Automatische Antworten",
+      "archive": "Archiv",
+      "calendar": "Kalender",
+      "invoices": "Finanzen/Rechnungen",
+      "travel": "Reisen",
+      "orders": "Bestellungen",
+      "social": "Soziales",
+      "clients": "Kunden",
+      "admin": "Verwaltung",
+      "fyi": "Zur Kenntnis",
+      "shops": "Shops",
+      "senders": "Absender"
+    },
+    "lists": {
+      "social": "Soziale Netzwerke",
+      "clients": "Kunden",
+      "senders": "Sortierte Absender",
+      "vip": "Wichtige Absender"
+    },
+    "listPurpose": {
+      "social": "Liste der sozialen Netzwerke",
+      "clients": "Liste der Kunden-Domains",
+      "senders": "Liste der zu sortierenden Absender-Domains",
+      "vip": "Liste der wichtigen Absender"
+    },
+    "folderStep": {
+      "hint": "Schalte Ordner ab, die du nicht brauchst, und benenne die anderen um. Ebenen wie das Jahr kommen automatisch dazu.",
+      "root": "Ordner anlegen",
+      "rootInbox": "Unter dem Posteingang",
+      "rootTop": "Auf oberster Ebene",
+      "rootCustom": "Unter einem anderen Ordner",
+      "rootPath": "Übergeordneter Ordner",
+      "use": "{name} verwenden",
+      "name": "Ordnername",
+      "exists": "vorhanden"
+    },
+    "ruleStep": {
+      "hint": "Diese Regeln füllen die Ordner. Sie laufen von oben nach unten; die erste, die eine Mail verschiebt, gewinnt.",
+      "analyze": "An meinem Posteingang ausprobieren",
+      "analyzeAgain": "Erneut ausprobieren",
+      "analyzeHint": "Probiere die Regeln an den neuesten Mails deines Posteingangs aus, um zu sehen, was sie tun würden. Es wird nichts geändert.",
+      "summary": "Von den neuesten {examined} Mails in {folder} sortieren deine bestehenden Regeln {existing}; {unsorted} blieben, wo sie sind.",
+      "stale": "Inzwischen geändert; bitte erneut ausprobieren.",
+      "folderOff": "Ihr Ordner ist abgeschaltet.",
+      "matched": "{count} Treffer",
+      "sorted": "sortiert {count}",
+      "blocked": "{count} vorher einsortiert",
+      "lists": "Listen",
+      "newList": "Neue Liste anlegen",
+      "addresses": "Adressen (eine pro Zeile)",
+      "domains": "Domains (eine pro Zeile)",
+      "unsortedTitle": "Häufige Absender ohne Regel",
+      "unsortedHint": "Absender von Mails, die keine Regel sortieren würde. Füge sie einer Liste hinzu, um auch sie zu sortieren.",
+      "noSubject": "(kein Betreff)"
+    },
+    "review": {
+      "summary": "{folders} Ordner, {rules} Regeln und {lists} neue Listen.",
+      "dryRun": "Im Testmodus starten",
+      "dryRunHint": "Die Regeln protokollieren nur, was sie tun würden; verschoben wird erst, wenn du sie scharf schaltest. Empfohlen.",
+      "createFolders": "Ordner jetzt anlegen",
+      "createFoldersHint": "Sonst entsteht jeder Ordner, sobald die erste Mail dorthin verschoben wird. Ebenen wie das Jahr entstehen immer erst dann.",
+      "runOnInbox": "Einmal auf den Posteingang anwenden",
+      "runOnInboxDryHint": "Wendet die neuen Regeln auf die neuesten Mails im Posteingang an; im Testmodus zeigt die Aktivität, was sie tun würden.",
+      "runOnInboxHint": "Sortiert die neuesten Mails im Posteingang mit den neuen Regeln. Große Läufe warten auf deine Bestätigung.",
+      "paused": "Das Konto ist pausiert, deshalb kann nichts laufen.",
+      "runLimit": "Mails",
+      "liveWarningTitle": "Die Regeln handeln sofort",
+      "liveWarning": "Ohne Testmodus verschieben die Regeln neue Mails sofort. Jede Aktion lässt sich in der Aktivität rückgängig machen.",
+      "apply": "Anlegen",
+      "fixErrors": "Einige Angaben müssen geändert werden, siehe unten."
+    },
+    "done": {
+      "title": "Eine Regel angelegt | {count} Regeln angelegt",
+      "dryRunHint": "Die Regeln sind im Testmodus. Prüfe in der Aktivität, was sie tun würden, und schalte sie dann scharf.",
+      "liveHint": "Die Regeln sind scharf geschaltet und sortieren neue Mails.",
+      "lists": "Eine Liste angelegt. | {count} Listen angelegt.",
+      "folders": "Ein Ordner angelegt. | {count} Ordner angelegt.",
+      "folderFailed": "{folder} konnte nicht angelegt werden: {error}",
+      "run": "Der Lauf auf dem Posteingang ist eingeplant; verfolge ihn unter",
+      "toRules": "Regeln anzeigen",
+      "goLive": "Regeln scharf schalten",
+      "liveToast": "Die Regeln sind scharf geschaltet.",
+      "sortNow": "Vorhandene Mails sortieren"
     }
   }
 }

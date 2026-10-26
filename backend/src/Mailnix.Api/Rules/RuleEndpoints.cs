@@ -20,6 +20,7 @@ internal static class RuleEndpoints
         group.MapPut("/{id:guid}", Update);
         group.MapDelete("/{id:guid}", Delete);
         group.MapPost("/reorder", Reorder);
+        group.MapPost("/dry-run", SetDryRun);
         group.MapPost("/validate", Validate);
 
         return group;
@@ -73,17 +74,26 @@ internal static class RuleEndpoints
             return TypedResults.ValidationProblem(RuleService.ToProblemErrors(errors));
         }
 
-        var now = time.GetUtcNow();
         var lastPriority = await db.Rules.Where(r => r.AccountId == account.Id).MaxAsync(r => (int?)r.Priority, ct);
+        var rule = NewRule(account, id, request, (lastPriority ?? -1) + 1, time.GetUtcNow());
+        db.Rules.Add(rule);
+        await db.SaveChangesAsync(ct);
+
+        return TypedResults.Created($"/api/rules/{rule.Id}", RuleResponse.From(rule, [], await ZoneAsync(db, userId, ct)));
+    }
+
+    /// <summary>A new rule of the account (validated by the caller), with its references.</summary>
+    internal static MailRule NewRule(MailAccount account, Guid id, CreateRuleRequest request, int priority, DateTimeOffset now)
+    {
         var rule = new MailRule
         {
             Id = id,
             TenantId = account.TenantId,
-            UserId = userId,
+            UserId = account.UserId,
             AccountId = account.Id,
             Name = request.Name.Trim(),
             Description = NullIfBlank(request.Description),
-            Priority = (lastPriority ?? -1) + 1,
+            Priority = priority,
             Enabled = request.Enabled,
             StopProcessing = request.StopProcessing,
             DryRun = request.DryRun,
@@ -96,10 +106,7 @@ internal static class RuleEndpoints
             UpdatedAt = now,
         };
         RuleService.SyncReferences(rule, request.Conditions);
-        db.Rules.Add(rule);
-        await db.SaveChangesAsync(ct);
-
-        return TypedResults.Created($"/api/rules/{rule.Id}", RuleResponse.From(rule, [], await ZoneAsync(db, userId, ct)));
+        return rule;
     }
 
     private static async Task<Results<Ok<RuleResponse>, ValidationProblem, NotFound>> Update(
@@ -199,6 +206,32 @@ internal static class RuleEndpoints
                 rule.Priority = i;
                 rule.UpdatedAt = now;
             }
+        }
+
+        await db.SaveChangesAsync(ct);
+        return TypedResults.NoContent();
+    }
+
+    private static async Task<Results<NoContent, NotFound>> SetDryRun(
+        SetDryRunRequest request,
+        ClaimsPrincipal user,
+        MailnixDbContext db,
+        TimeProvider time,
+        CancellationToken ct)
+    {
+        var userId = user.GetUserId();
+        var ids = request.RuleIds.ToHashSet();
+        var rules = await db.Rules.Where(r => ids.Contains(r.Id) && r.UserId == userId).ToListAsync(ct);
+        if (rules.Count != ids.Count)
+        {
+            return TypedResults.NotFound();
+        }
+
+        var now = time.GetUtcNow();
+        foreach (var rule in rules.Where(r => r.DryRun != request.DryRun))
+        {
+            rule.DryRun = request.DryRun;
+            rule.UpdatedAt = now;
         }
 
         await db.SaveChangesAsync(ct);

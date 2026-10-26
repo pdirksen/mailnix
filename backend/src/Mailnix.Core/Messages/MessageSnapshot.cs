@@ -51,6 +51,13 @@ public sealed record MessageSnapshot
 
     public IReadOnlyList<AttachmentInfo>? Attachments { get; init; }
 
+    /// <summary>
+    /// The METHOD of the message's first calendar part (REQUEST, REPLY, CANCEL…), wherever it sits in the
+    /// structure: invitations often carry it as an alternative body part, not as an attachment. Empty when the
+    /// part names no method; null when there is none or the structure was not fetched.
+    /// </summary>
+    public string? CalendarMethod { get; init; }
+
     /// <summary>Plain-text body (HTML converted to text), or null if not fetched.</summary>
     public string? BodyText { get; init; }
 

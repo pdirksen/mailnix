@@ -784,6 +784,31 @@
         }
       }
     },
+    "/api/rules/dry-run": {
+      "post": {
+        "tags": [
+          "Rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetDryRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/api/rules/validate": {
       "post": {
         "tags": [
@@ -1125,6 +1150,28 @@
         }
       }
     },
+    "/api/assistant/blueprints": {
+      "get": {
+        "tags": [
+          "Assistant"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlueprintInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/accounts/{id}/runs": {
       "post": {
         "tags": [
@@ -1392,6 +1439,112 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RuleDraftResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/accounts/{id}/assistant/analyze": {
+      "post": {
+        "tags": [
+          "Assistant"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantAnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantAnalyzeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/accounts/{id}/assistant/apply": {
+      "post": {
+        "tags": [
+          "Assistant"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantApplyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantApplyResponse"
                 }
               }
             }
@@ -2911,6 +3064,342 @@
           "Purge"
         ]
       },
+      "AssistantAnalyzeRequest": {
+        "required": [
+          "selection"
+        ],
+        "type": "object",
+        "properties": {
+          "selection": {
+            "$ref": "#/components/schemas/AssistantSelection"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "default": 300
+          },
+          "refresh": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "AssistantAnalyzeResponse": {
+        "required": [
+          "folder",
+          "totalInFolder",
+          "examined",
+          "sortedByExistingRules",
+          "unsorted",
+          "fetchedAt",
+          "fromCache",
+          "rules",
+          "unsortedDomains"
+        ],
+        "type": "object",
+        "properties": {
+          "folder": {
+            "type": "string"
+          },
+          "totalInFolder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "examined": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sortedByExistingRules": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unsorted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fromCache": {
+            "type": "boolean"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantRuleAnalysis"
+            }
+          },
+          "unsortedDomains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SenderDomainCount"
+            }
+          }
+        }
+      },
+      "AssistantApplyRequest": {
+        "required": [
+          "selection"
+        ],
+        "type": "object",
+        "properties": {
+          "selection": {
+            "$ref": "#/components/schemas/AssistantSelection"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "default": true
+          },
+          "createFolders": {
+            "type": "boolean",
+            "default": false
+          },
+          "runOnInboxLimit": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "AssistantApplyResponse": {
+        "required": [
+          "rules",
+          "createdListIds",
+          "run",
+          "folders"
+        ],
+        "type": "object",
+        "properties": {
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantCreatedRule"
+            }
+          },
+          "createdListIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "run": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RunSummary"
+              }
+            ]
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantFolderResult"
+            }
+          }
+        }
+      },
+      "AssistantCreatedRule": {
+        "required": [
+          "key",
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "AssistantExample": {
+        "required": [
+          "from",
+          "subject",
+          "date",
+          "targetFolder"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "subject": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "date": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "targetFolder": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "AssistantFolderResult": {
+        "required": [
+          "path",
+          "created",
+          "error"
+        ],
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "AssistantListChoice": {
+        "type": "object",
+        "properties": {
+          "listId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "entries": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AssistantRuleAnalysis": {
+        "required": [
+          "key",
+          "matched",
+          "sorted",
+          "blocked",
+          "examples"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "matched": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sorted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blocked": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantExample"
+            }
+          }
+        }
+      },
+      "AssistantRuleChoice": {
+        "required": [
+          "key",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AssistantSelection": {
+        "required": [
+          "blueprintId",
+          "folders",
+          "rules"
+        ],
+        "type": "object",
+        "properties": {
+          "blueprintId": {
+            "type": "string"
+          },
+          "folders": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssistantRuleChoice"
+            }
+          },
+          "lists": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AssistantListChoice"
+            }
+          }
+        }
+      },
       "AuthConfigResponse": {
         "required": [
           "registrationOpen",
@@ -2938,6 +3427,100 @@
           },
           "authenticatorUri": {
             "type": "string"
+          }
+        }
+      },
+      "BlueprintFolderInfo": {
+        "required": [
+          "key",
+          "suffix",
+          "defaultOn"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "defaultOn": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BlueprintInfo": {
+        "required": [
+          "id",
+          "folders",
+          "rules",
+          "lists"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintFolderInfo"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlueprintRuleInfo"
+            }
+          },
+          "lists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListSeedInfo"
+            }
+          }
+        }
+      },
+      "BlueprintRuleInfo": {
+        "required": [
+          "key",
+          "templateId",
+          "folder",
+          "list",
+          "defaultOn",
+          "parameters"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "templateId": {
+            "type": "string"
+          },
+          "folder": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "list": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "defaultOn": {
+            "type": "boolean"
+          },
+          "parameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateParameterInfo"
+            }
           }
         }
       },
@@ -3041,6 +3624,8 @@
           "IsAutoReply",
           "IsReply",
           "IsReplyToMyMail",
+          "IsCalendarMessage",
+          "CalendarMethod",
           "SpfResult",
           "DkimResult",
           "DmarcResult",
@@ -3894,6 +4479,28 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ListSeedInfo": {
+        "required": [
+          "key",
+          "kind",
+          "entries"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/NamedListKind"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -5554,6 +6161,22 @@
           }
         }
       },
+      "SenderDomainCount": {
+        "required": [
+          "domain",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "SenderRow": {
         "required": [
           "domain",
@@ -5637,6 +6260,25 @@
               "type": "integer",
               "format": "int32"
             }
+          }
+        }
+      },
+      "SetDryRunRequest": {
+        "required": [
+          "ruleIds",
+          "dryRun"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "dryRun": {
+            "type": "boolean"
           }
         }
       },
@@ -5917,7 +6559,8 @@
           "Folder",
           "Days",
           "Megabytes",
-          "DomainList"
+          "DomainList",
+          "AddressList"
         ]
       },
       "TenantInfo": {
@@ -6485,6 +7128,9 @@
     },
     {
       "name": "Lists"
+    },
+    {
+      "name": "Assistant"
     },
     {
       "name": "Runs"

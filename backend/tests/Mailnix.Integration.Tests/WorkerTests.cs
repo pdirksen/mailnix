@@ -278,4 +278,35 @@ public sealed class WorkerTests : IAsyncLifetime
         response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
         (await response.Content.ReadAsStringAsync(Ct)).ShouldContain("AccountPaused");
     }
+
+    [Fact]
+    public async Task The_assistants_run_on_the_inbox_only_logs_what_its_dry_run_rules_would_do()
+    {
+        _mail.Append("INBOX", Mail("Autumn sale", newsletter: true));
+        _mail.Append("INBOX", Mail("Hello", from: "friend@example.org"));
+        await StartWatchingAsync();
+
+        var response = await _client.PostAsJsonAsync($"/api/accounts/{_accountId}/assistant/apply", new
+        {
+            selection = new
+            {
+                blueprintId = "minimal",
+                folders = new Dictionary<string, string> { ["newsletters"] = "INBOX/Newsletters" },
+                rules = new object[] { new { key = "newsletters", name = "Newsletters" } },
+            },
+            runOnInboxLimit = 50,
+        }, Ct);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK, await response.Content.ReadAsStringAsync(Ct));
+
+        RunSummary run = null!;
+        await EventuallyAsync(async () => (run = (await RunsAsync()).SingleOrDefault()!) is { State: Infrastructure.Data.RunState.Completed });
+
+        run.MessagesMatched.ShouldBe(1);
+        run.ExecutedActions.ShouldBe(0);
+        _mail.Messages("INBOX").Count.ShouldBe(2);
+        _mail.HasFolder("INBOX.Newsletters").ShouldBeFalse();
+        await using var scope = _app.Services.CreateAsyncScope();
+        var log = await scope.ServiceProvider.GetRequiredService<MailnixDbContext>().ActionLog.Where(a => a.RunId == run.Id).ToListAsync(Ct);
+        log.ShouldHaveSingleItem().ShouldSatisfyAllConditions(a => a.DryRun.ShouldBeTrue(), a => a.TargetFolder.ShouldBe("INBOX.Newsletters"));
+    }
 }

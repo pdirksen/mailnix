@@ -90,6 +90,11 @@ export const useRulesStore = defineStore('rules', () => {
     rules.value = rules.value.map((r) => (r.accountId === accountId ? { ...r, priority: ruleIds.indexOf(r.id) } : r))
   }
 
+  async function setDryRun(ruleIds: string[], dryRun: boolean) {
+    unwrap(await api.POST('/api/rules/dry-run', { body: { ruleIds, dryRun } }))
+    rules.value = rules.value.map((r) => (ruleIds.includes(r.id) ? { ...r, dryRun } : r))
+  }
+
   async function validate(accountId: string, draft: RuleDraft, ruleId?: string) {
     const body = toBody(draft)
     return unwrap(
@@ -135,6 +140,7 @@ export const useRulesStore = defineStore('rules', () => {
     update,
     remove,
     reorder,
+    setDryRun,
     validate,
     preview,
     draftFromTemplate,

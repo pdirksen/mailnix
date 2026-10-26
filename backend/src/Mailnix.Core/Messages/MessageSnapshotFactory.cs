@@ -34,12 +34,39 @@ public static class MessageSnapshotFactory
             Keywords = keywords ?? [],
             Headers = [.. message.Headers.Select(h => new KeyValuePair<string, string>(h.Field, h.Value))],
             Attachments = [.. message.Attachments.OfType<MimePart>().Select(ToAttachment)],
+            CalendarMethod = CalendarMethod(message.BodyParts.Select(p => (p.ContentType, (p as MimePart)?.FileName))),
             BodyText = message.TextBody ?? HtmlToText(message.HtmlBody),
         };
     }
 
     public static IReadOnlyList<EmailAddress> Addresses(InternetAddressList list) =>
         [.. list.Mailboxes.Where(m => !string.IsNullOrWhiteSpace(m.Address)).Select(m => new EmailAddress(m.Address, m.Name))];
+
+    /// <summary>
+    /// The METHOD of the message's calendar parts: text/calendar (the form calendars put into the body) or an
+    /// attached .ics file. The first method named wins; empty when no part names one, null without such a part.
+    /// </summary>
+    public static string? CalendarMethod(IEnumerable<(ContentType Type, string? FileName)> parts)
+    {
+        var found = false;
+        foreach (var (type, fileName) in parts)
+        {
+            if (!type.IsMimeType("text", "calendar") && !type.IsMimeType("application", "ics")
+                && fileName?.EndsWith(".ics", StringComparison.OrdinalIgnoreCase) != true)
+            {
+                continue;
+            }
+
+            if (type.Parameters.TryGetValue("method", out string? method) && !string.IsNullOrWhiteSpace(method))
+            {
+                return method.Trim().ToUpperInvariant();
+            }
+
+            found = true;
+        }
+
+        return found ? string.Empty : null;
+    }
 
     private static AttachmentInfo ToAttachment(MimePart part)
     {

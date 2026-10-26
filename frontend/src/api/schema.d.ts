@@ -988,6 +988,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rules/dry-run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SetDryRunRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rules/validate": {
         parameters: {
             query?: never;
@@ -1364,6 +1408,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/assistant/blueprints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BlueprintInfo"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/accounts/{id}/runs": {
         parameters: {
             query?: never;
@@ -1618,6 +1697,120 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["RuleDraftResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/{id}/assistant/analyze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AssistantAnalyzeRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AssistantAnalyzeResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/accounts/{id}/assistant/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AssistantApplyRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AssistantApplyResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -2975,6 +3168,98 @@ export interface components {
         };
         /** @enum {unknown} */
         ActionType: "MarkRead" | "MarkUnread" | "Flag" | "Unflag" | "AddKeyword" | "RemoveKeyword" | "CopyTo" | "MoveTo" | "Delete" | "MarkAsSpam" | "Archive" | "Purge";
+        AssistantAnalyzeRequest: {
+            selection: components["schemas"]["AssistantSelection"];
+            /**
+             * Format: int32
+             * @default 300
+             */
+            limit: number;
+            /** @default false */
+            refresh: boolean;
+        };
+        AssistantAnalyzeResponse: {
+            folder: string;
+            /** Format: int32 */
+            totalInFolder: number;
+            /** Format: int32 */
+            examined: number;
+            /** Format: int32 */
+            sortedByExistingRules: number;
+            /** Format: int32 */
+            unsorted: number;
+            /** Format: date-time */
+            fetchedAt: string;
+            fromCache: boolean;
+            rules: components["schemas"]["AssistantRuleAnalysis"][];
+            unsortedDomains: components["schemas"]["SenderDomainCount"][];
+        };
+        AssistantApplyRequest: {
+            selection: components["schemas"]["AssistantSelection"];
+            /** @default true */
+            dryRun: boolean;
+            /** @default false */
+            createFolders: boolean;
+            /** Format: int32 */
+            runOnInboxLimit?: null | number;
+        };
+        AssistantApplyResponse: {
+            rules: components["schemas"]["AssistantCreatedRule"][];
+            createdListIds: string[];
+            run: null | components["schemas"]["RunSummary"];
+            folders: components["schemas"]["AssistantFolderResult"][];
+        };
+        AssistantCreatedRule: {
+            key: string;
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        AssistantExample: {
+            from: null | string;
+            subject: null | string;
+            /** Format: date-time */
+            date: null | string;
+            targetFolder: null | string;
+        };
+        AssistantFolderResult: {
+            path: string;
+            created: boolean;
+            error: null | string;
+        };
+        AssistantListChoice: {
+            /** Format: uuid */
+            listId?: null | string;
+            name?: null | string;
+            entries?: null | string[];
+        };
+        AssistantRuleAnalysis: {
+            key: string;
+            /** Format: int32 */
+            matched: number;
+            /** Format: int32 */
+            sorted: number;
+            /** Format: int32 */
+            blocked: number;
+            examples: components["schemas"]["AssistantExample"][];
+        };
+        AssistantRuleChoice: {
+            key: string;
+            name: string;
+            parameters?: null | {
+                [key: string]: string;
+            };
+        };
+        AssistantSelection: {
+            blueprintId: string;
+            folders: {
+                [key: string]: string;
+            };
+            rules: components["schemas"]["AssistantRuleChoice"][];
+            lists?: null | {
+                [key: string]: components["schemas"]["AssistantListChoice"];
+            };
+        };
         AuthConfigResponse: {
             registrationOpen: boolean;
             multiTenant: boolean;
@@ -2982,6 +3267,25 @@ export interface components {
         AuthenticatorSetup: {
             sharedKey: string;
             authenticatorUri: string;
+        };
+        BlueprintFolderInfo: {
+            key: string;
+            suffix: null | string;
+            defaultOn: boolean;
+        };
+        BlueprintInfo: {
+            id: string;
+            folders: components["schemas"]["BlueprintFolderInfo"][];
+            rules: components["schemas"]["BlueprintRuleInfo"][];
+            lists: components["schemas"]["ListSeedInfo"][];
+        };
+        BlueprintRuleInfo: {
+            key: string;
+            templateId: string;
+            folder: null | string;
+            list: null | string;
+            defaultOn: boolean;
+            parameters: components["schemas"]["TemplateParameterInfo"][];
         };
         ChangePasswordRequest: {
             currentPassword: string;
@@ -3004,7 +3308,7 @@ export interface components {
             caseSensitive: boolean;
         };
         /** @enum {unknown} */
-        ConditionField: "From" | "FromName" | "FromDomain" | "To" | "Cc" | "ReplyTo" | "Recipients" | "Subject" | "Header" | "Body" | "Size" | "Date" | "AgeDays" | "IsUnread" | "IsFlagged" | "IsAnswered" | "Keyword" | "IsNewsletter" | "ListId" | "IsAutoReply" | "IsReply" | "IsReplyToMyMail" | "SpfResult" | "DkimResult" | "DmarcResult" | "DisplayNameMismatch" | "SpamScore" | "IAmOnlyInCcOrBcc" | "DeliveredTo" | "PlusTag" | "RecipientCount" | "HasAttachment" | "AttachmentCount" | "AttachmentName" | "AttachmentExtension" | "AttachmentMimeType" | "AttachmentSize" | "Rule";
+        ConditionField: "From" | "FromName" | "FromDomain" | "To" | "Cc" | "ReplyTo" | "Recipients" | "Subject" | "Header" | "Body" | "Size" | "Date" | "AgeDays" | "IsUnread" | "IsFlagged" | "IsAnswered" | "Keyword" | "IsNewsletter" | "ListId" | "IsAutoReply" | "IsReply" | "IsReplyToMyMail" | "IsCalendarMessage" | "CalendarMethod" | "SpfResult" | "DkimResult" | "DmarcResult" | "DisplayNameMismatch" | "SpamScore" | "IAmOnlyInCcOrBcc" | "DeliveredTo" | "PlusTag" | "RecipientCount" | "HasAttachment" | "AttachmentCount" | "AttachmentName" | "AttachmentExtension" | "AttachmentMimeType" | "AttachmentSize" | "Rule";
         ConditionNode: components["schemas"]["ConditionNodeConditionGroup"] | components["schemas"]["ConditionNodeCondition"];
         ConditionNodeCondition: {
             /** @enum {string} */
@@ -3214,6 +3518,11 @@ export interface components {
             usedBy: components["schemas"]["RuleSummary"][];
             /** Format: date-time */
             updatedAt: string;
+        };
+        ListSeedInfo: {
+            key: string;
+            kind: components["schemas"]["NamedListKind"];
+            entries: string[];
         };
         ListSummaryResponse: {
             /** Format: uuid */
@@ -3643,6 +3952,11 @@ export interface components {
             /** Format: int32 */
             highSpam: number;
         };
+        SenderDomainCount: {
+            domain: string;
+            /** Format: int32 */
+            count: number;
+        };
         SenderRow: {
             domain: string;
             /** Format: int32 */
@@ -3664,6 +3978,10 @@ export interface components {
             key: string;
             name: null | string;
             values: number[];
+        };
+        SetDryRunRequest: {
+            ruleIds: string[];
+            dryRun: boolean;
         };
         SetTenantAdminRequest: {
             isTenantAdmin: boolean;
@@ -3734,7 +4052,7 @@ export interface components {
             default: null | string;
         };
         /** @enum {unknown} */
-        TemplateParameterType: "Folder" | "Days" | "Megabytes" | "DomainList";
+        TemplateParameterType: "Folder" | "Days" | "Megabytes" | "DomainList" | "AddressList";
         TenantInfo: {
             /** Format: uuid */
             id: string;

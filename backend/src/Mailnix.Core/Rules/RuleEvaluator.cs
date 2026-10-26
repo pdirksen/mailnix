@@ -196,6 +196,7 @@ public sealed class EvaluationSession(MessageFacts facts, EvaluationContext cont
             ConditionField.AttachmentName => Attachments.Select(a => a.FileName),
             ConditionField.AttachmentExtension => Attachments.Select(a => a.Extension),
             ConditionField.AttachmentMimeType => Attachments.Select(a => a.MimeType),
+            ConditionField.CalendarMethod => [Message.CalendarMethod],
             _ => [],
         };
         return [.. values.Where(v => !string.IsNullOrEmpty(v)).Select(v => v!)];
@@ -221,6 +222,7 @@ public sealed class EvaluationSession(MessageFacts facts, EvaluationContext cont
         ConditionField.IsAnswered => Message.IsAnswered,
         ConditionField.IsNewsletter => facts.IsNewsletter,
         ConditionField.IsAutoReply => facts.IsAutoReply,
+        ConditionField.IsCalendarMessage => facts.IsCalendarMessage,
         ConditionField.IsReply => facts.IsReply,
         ConditionField.IsReplyToMyMail => facts.IsReplyToMyMail,
         ConditionField.DisplayNameMismatch => facts.DisplayNameMismatch,

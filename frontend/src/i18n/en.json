@@ -416,6 +416,8 @@
       "IsAutoReply": "Automatic reply",
       "IsReply": "Reply",
       "IsReplyToMyMail": "Reply to a mail I sent",
+      "IsCalendarMessage": "Calendar invitation or reply",
+      "CalendarMethod": "Calendar method",
       "SpfResult": "SPF result",
       "DkimResult": "DKIM result",
       "DmarcResult": "DMARC result",
@@ -548,7 +550,8 @@
         "folder": "Target folder",
         "days": "Older than (days)",
         "megabytes": "Larger than (MB)",
-        "list": "Domain list"
+        "list": "Domain list",
+        "addressList": "Address list"
       },
       "items": {
         "newsletters-to-folder": {
@@ -582,6 +585,38 @@
         "large-attachments": {
           "name": "Flag large attachments",
           "description": "Flags messages with big attachments and tags them."
+        },
+        "notifications": {
+          "name": "Notifications into a folder",
+          "description": "Messages from no-reply and notification senders (sign-ins, alerts, status mails) leave the inbox."
+        },
+        "orders-shipping": {
+          "name": "Orders and shipping",
+          "description": "Order confirmations, shipping notices and tracking updates."
+        },
+        "invoices": {
+          "name": "Invoices and receipts",
+          "description": "Invoices, receipts and statements, by subject or attachment name."
+        },
+        "travel": {
+          "name": "Travel",
+          "description": "Bookings, reservations, boarding passes and itineraries."
+        },
+        "social": {
+          "name": "Social networks",
+          "description": "Notifications from social networks in a domain list."
+        },
+        "calendar-invites": {
+          "name": "Calendar invitations",
+          "description": "Invitations, replies and cancellations from Google, Outlook and other calendars."
+        },
+        "cc-only-fyi": {
+          "name": "Copies for your information",
+          "description": "Messages where you are only in Cc or Bcc."
+        },
+        "vip-flag": {
+          "name": "Flag important senders",
+          "description": "Flags messages from the addresses in a list, wherever they are sorted to."
         }
       }
     },
@@ -1042,6 +1077,127 @@
       "TwoFactorAlreadyEnabled": "Two-factor sign-in is already on.",
       "TwoFactorSetupMissing": "Please start the setup again.",
       "TwoFactorNotEnabled": "Two-factor sign-in is off."
+    }
+  },
+  "assistant": {
+    "open": "Setup assistant",
+    "openEmpty": "Set up with the assistant",
+    "title": "Setup assistant",
+    "subtitle": "Pick a folder structure, check the suggested rules against your inbox and create everything in one go.",
+    "steps": {
+      "blueprint": "Structure",
+      "blueprintDescription": "How to organize",
+      "folders": "Folders",
+      "foldersDescription": "Names and place",
+      "rules": "Rules",
+      "rulesDescription": "What goes where",
+      "review": "Create",
+      "reviewDescription": "Check and apply"
+    },
+    "blueprints": {
+      "minimal": {
+        "name": "Minimal",
+        "description": "A calm inbox with few folders: newsletters and notifications out of the way, everything older into a yearly archive. You find the rest by searching."
+      },
+      "by-type": {
+        "name": "By type of mail",
+        "description": "One folder per kind of mail: invoices, orders, travel, social networks, newsletters, notifications and more."
+      },
+      "business": {
+        "name": "Business and freelancing",
+        "description": "A folder per client domain, invoices and admin mail separated, important senders flagged."
+      },
+      "by-sender": {
+        "name": "By sender",
+        "description": "Folders created automatically per shop, newsletter sender and sender domain, archived by month."
+      }
+    },
+    "folders": {
+      "newsletters": "Newsletters",
+      "notifications": "Notifications",
+      "autoReplies": "Auto-Replies",
+      "archive": "Archive",
+      "calendar": "Calendar",
+      "invoices": "Finance/Invoices",
+      "travel": "Travel",
+      "orders": "Orders",
+      "social": "Social",
+      "clients": "Clients",
+      "admin": "Admin",
+      "fyi": "FYI",
+      "shops": "Shops",
+      "senders": "Senders"
+    },
+    "lists": {
+      "social": "Social networks",
+      "clients": "Clients",
+      "senders": "Sorted senders",
+      "vip": "Important senders"
+    },
+    "listPurpose": {
+      "social": "List of social networks",
+      "clients": "List of client domains",
+      "senders": "List of sender domains to sort",
+      "vip": "List of important senders"
+    },
+    "folderStep": {
+      "hint": "Switch off the folders you don't need and rename the others. Levels like the year are added automatically.",
+      "root": "Place folders",
+      "rootInbox": "Below the inbox",
+      "rootTop": "At the top level",
+      "rootCustom": "Below another folder",
+      "rootPath": "Parent folder",
+      "use": "Use {name}",
+      "name": "Folder name",
+      "exists": "exists"
+    },
+    "ruleStep": {
+      "hint": "These rules fill the folders. They run from top to bottom; the first one that moves a message wins.",
+      "analyze": "Try on my inbox",
+      "analyzeAgain": "Try again",
+      "analyzeHint": "Try the rules on the newest messages of your inbox to see what they would do. Nothing is changed.",
+      "summary": "Of the newest {examined} messages in {folder}, your existing rules sort {existing}; {unsorted} would stay where they are.",
+      "stale": "Changed since; try again.",
+      "folderOff": "Its folder is switched off.",
+      "matched": "{count} matches",
+      "sorted": "sorts {count}",
+      "blocked": "{count} sorted earlier",
+      "lists": "Lists",
+      "newList": "Create a new list",
+      "addresses": "Addresses (one per line)",
+      "domains": "Domains (one per line)",
+      "unsortedTitle": "Frequent senders without a rule",
+      "unsortedHint": "Senders of messages that no rule would sort. Add them to a list to sort them, too.",
+      "noSubject": "(no subject)"
+    },
+    "review": {
+      "summary": "{folders} folders, {rules} rules and {lists} new lists.",
+      "dryRun": "Start in dry-run mode",
+      "dryRunHint": "The rules only log what they would do; nothing is moved until you switch them live. Recommended.",
+      "createFolders": "Create the folders now",
+      "createFoldersHint": "Otherwise each folder is created when the first message is moved there. Levels like the year are always created then.",
+      "runOnInbox": "Run once on the inbox",
+      "runOnInboxDryHint": "Applies the new rules to the newest messages of the inbox; in dry-run mode, Activity shows what they would do.",
+      "runOnInboxHint": "Sorts the newest messages of the inbox with the new rules. Large runs wait for your confirmation.",
+      "paused": "The account is paused, so nothing can run.",
+      "runLimit": "Messages",
+      "liveWarningTitle": "The rules act right away",
+      "liveWarning": "Without dry-run mode, the rules move new mail immediately. Every action can be undone in Activity.",
+      "apply": "Create",
+      "fixErrors": "Some choices need changes, see below."
+    },
+    "done": {
+      "title": "One rule created | {count} rules created",
+      "dryRunHint": "The rules are in dry-run mode. Check in Activity what they would do, then switch them live.",
+      "liveHint": "The rules are live and sort new mail.",
+      "lists": "One list created. | {count} lists created.",
+      "folders": "One folder created. | {count} folders created.",
+      "folderFailed": "{folder} could not be created: {error}",
+      "run": "The run on the inbox is queued; follow it in",
+      "toRules": "Show rules",
+      "goLive": "Switch rules live",
+      "liveToast": "The rules are live.",
+      "sortNow": "Sort existing mail"
     }
   }
 }

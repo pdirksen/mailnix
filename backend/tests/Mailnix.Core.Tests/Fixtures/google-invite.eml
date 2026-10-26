@@ -1,0 +1,58 @@
+From: Alice Example <alice@example.org>
+To: me@example.com
+Reply-To: Alice Example <alice@example.org>
+Subject: Invitation: Project kickoff @ Thu 29 Oct 2026 10am - 11am (CET) (me@example.com)
+Date: Mon, 26 Oct 2026 09:12:00 +0000
+Message-ID: <calendar-0f1e2d3c@google.com>
+Sender: Google Calendar <calendar-notification@google.com>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mixed-boundary"
+
+--mixed-boundary
+Content-Type: multipart/alternative; boundary="alt-boundary"
+
+--alt-boundary
+Content-Type: text/plain; charset="UTF-8"
+
+Project kickoff
+Thursday 29 Oct 2026, 10am - 11am (CET)
+
+--alt-boundary
+Content-Type: text/html; charset="UTF-8"
+
+<p>Project kickoff</p><p>Thursday 29 Oct 2026, 10am - 11am (CET)</p>
+
+--alt-boundary
+Content-Type: text/calendar; charset="UTF-8"; method=REQUEST
+Content-Transfer-Encoding: 7bit
+
+BEGIN:VCALENDAR
+PRODID:-//Google Inc//Google Calendar 70.9054//EN
+VERSION:2.0
+METHOD:REQUEST
+BEGIN:VEVENT
+DTSTART:20261029T090000Z
+DTEND:20261029T100000Z
+UID:0f1e2d3c@google.com
+SUMMARY:Project kickoff
+END:VEVENT
+END:VCALENDAR
+
+--alt-boundary--
+
+--mixed-boundary
+Content-Type: application/ics; name="invite.ics"
+Content-Disposition: attachment; filename="invite.ics"
+Content-Transfer-Encoding: 7bit
+
+BEGIN:VCALENDAR
+PRODID:-//Google Inc//Google Calendar 70.9054//EN
+VERSION:2.0
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:0f1e2d3c@google.com
+SUMMARY:Project kickoff
+END:VEVENT
+END:VCALENDAR
+
+--mixed-boundary--

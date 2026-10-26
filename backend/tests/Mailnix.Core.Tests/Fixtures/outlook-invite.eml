@@ -1,0 +1,28 @@
+From: Bob Example <bob@company.example>
+To: me@example.com
+Subject: Budget review
+Date: Mon, 26 Oct 2026 10:30:00 +0100
+Message-ID: <AM0PR01MB0001@AM0PR01MB0001.eurprd01.prod.outlook.com>
+Content-Class: urn:content-classes:calendarmessage
+Thread-Topic: Budget review
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="_000_AM0PR01MB0001_"
+
+--_000_AM0PR01MB0001_
+Content-Type: text/plain; charset="us-ascii"
+
+Let's go through the budget.
+
+--_000_AM0PR01MB0001_
+Content-Type: text/html; charset="us-ascii"
+
+<html><body><p>Let's go through the budget.</p></body></html>
+
+--_000_AM0PR01MB0001_
+Content-Type: text/calendar; charset="utf-8"; method=REQUEST
+Content-Transfer-Encoding: base64
+
+QkVHSU46VkNBTEVOREFSDQpNRVRIT0Q6UkVRVUVTVA0KUFJPRElEOk1pY3Jvc29mdCBFeGNo
+YW5nZSBTZXJ2ZXIgMjAxMA0KVkVSU0lPTjoyLjANCkVORDpWQ0FMRU5EQVINCg==
+
+--_000_AM0PR01MB0001_--

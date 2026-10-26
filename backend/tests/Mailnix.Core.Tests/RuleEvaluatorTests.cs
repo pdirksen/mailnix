@@ -117,6 +117,19 @@ public sealed class RuleEvaluatorTests
     }
 
     [Fact]
+    public void Calendar_fields_tell_invitations_from_replies()
+    {
+        var invite = Fixture("outlook-invite.eml");
+        var reply = Fixture("outlook-reply.eml");
+
+        Matches(When(IsCalendarMessage, IsTrue), invite).ShouldBeTrue();
+        Matches(When(IsCalendarMessage, IsTrue), Fixture("cc-only.eml")).ShouldBeFalse();
+        Matches(When(ConditionField.CalendarMethod, ConditionOperator.Equals, "request"), invite).ShouldBeTrue();
+        Matches(When(ConditionField.CalendarMethod, ConditionOperator.Equals, "REQUEST"), reply).ShouldBeFalse();
+        Matches(When(ConditionField.CalendarMethod, NotEquals, "REPLY"), Fixture("cc-only.eml")).ShouldBeTrue();
+    }
+
+    [Fact]
     public void Attachment_and_recipient_fields()
     {
         var invoice = Fixture("plus-addressed.eml");

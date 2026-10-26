@@ -29,6 +29,48 @@ public sealed class MessageFactsTests
         message.BodyText.ShouldNotContain("color: red");
     }
 
+    [Theory]
+    [InlineData("google-invite.eml", "REQUEST")]
+    [InlineData("outlook-invite.eml", "REQUEST")]
+    [InlineData("outlook-reply.eml", "REPLY")]
+    public void Calendar_messages_are_detected_wherever_the_calendar_part_is(string fixture, string method)
+    {
+        var facts = Facts(fixture);
+
+        facts.Message.CalendarMethod.ShouldBe(method);
+        facts.IsCalendarMessage.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Outlook_invitations_have_no_calendar_attachment()
+    {
+        // The reason attachment conditions miss them: the calendar part is an alternative body, not a file.
+        Fixture("outlook-invite.eml").Attachments.ShouldBeEmpty();
+        Fixture("google-invite.eml").Attachments!.Single().FileName.ShouldBe("invite.ics");
+    }
+
+    [Fact]
+    public void Exchange_content_class_marks_calendar_messages_without_a_calendar_part()
+    {
+        // Older Outlook wraps the invitation in winmail.dat (TNEF), which hides the calendar part.
+        var tnef = Simple() with
+        {
+            Headers = [new("Content-Class", "urn:content-classes:calendarmessage")],
+            Attachments = [new AttachmentInfo("winmail.dat", "application/ms-tnef", 4000)],
+        };
+
+        new MessageFacts(tnef, Context()).IsCalendarMessage.ShouldBeTrue();
+        Fixture("cc-only.eml").CalendarMethod.ShouldBeNull();
+        Facts("cc-only.eml").IsCalendarMessage.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Calendar_parts_without_a_method_count_with_an_empty_method()
+    {
+        MessageSnapshotFactory.CalendarMethod([(new MimeKit.ContentType("application", "octet-stream"), "meeting.ICS")]).ShouldBe(string.Empty);
+        MessageSnapshotFactory.CalendarMethod([(new MimeKit.ContentType("text", "plain"), null)]).ShouldBeNull();
+    }
+
     [Fact]
     public void German_out_of_office_reply_is_an_auto_reply()
     {

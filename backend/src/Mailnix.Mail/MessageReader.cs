@@ -126,6 +126,7 @@ internal sealed class MessageReader(IImapConnector connector) : IMessageReader
             Attachments = summary.Body is null
                 ? null
                 : [.. summary.Attachments.Select(a => new AttachmentInfo(a.FileName, a.ContentType.MimeType.ToLowerInvariant(), a.Octets))],
+            CalendarMethod = summary.Body is null ? null : MessageSnapshotFactory.CalendarMethod(summary.BodyParts.Select(p => (p.ContentType, p.FileName))),
             BodyText = bodyText,
         };
     }

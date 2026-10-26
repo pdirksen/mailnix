@@ -88,3 +88,6 @@ public sealed record RuleResponse(
 }
 
 public sealed record FieldCatalogResponse(IReadOnlyList<FieldDefinition> Fields, IReadOnlyList<string> FolderPlaceholders);
+
+/// <summary>Switches dry-run on or off for several rules (e.g. "go live" after the setup assistant).</summary>
+public sealed record SetDryRunRequest([Required, MinLength(1), MaxLength(200)] IReadOnlyList<Guid> RuleIds, bool DryRun);

@@ -51,6 +51,13 @@ export const routes: RouteRecordRaw[] = [
         meta: { titleKey: 'nav.accounts' },
       },
       {
+        path: 'accounts/:id/setup',
+        name: 'account-setup',
+        component: () => import('@/pages/accounts/AccountSetupPage.vue'),
+        props: true,
+        meta: { titleKey: 'assistant.title' },
+      },
+      {
         path: 'rules',
         name: 'rules',
         component: () => import('@/pages/rules/RulesPage.vue'),

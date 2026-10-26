@@ -171,6 +171,12 @@ function summary(rule: Rule) {
           <PlayIcon />
           {{ $t('runNow.button') }}
         </Button>
+        <Button variant="outline" as-child>
+          <RouterLink :to="{ name: 'account-setup', params: { id: accountId } }">
+            <WandSparklesIcon />
+            {{ $t('assistant.open') }}
+          </RouterLink>
+        </Button>
         <Button variant="outline" data-testid="open-templates" @click="templatesOpen = true">
           <SparklesIcon />
           {{ $t('rules.fromTemplate') }}
@@ -211,6 +217,9 @@ function summary(rule: Rule) {
           <WandSparklesIcon class="text-muted-foreground size-8" />
           <p class="font-medium">{{ $t('rules.empty') }}</p>
           <p class="text-muted-foreground text-sm">{{ $t('rules.emptyHint') }}</p>
+          <Button v-if="accountId" as-child class="mt-2" data-testid="empty-assistant">
+            <RouterLink :to="{ name: 'account-setup', params: { id: accountId } }">{{ $t('assistant.openEmpty') }}</RouterLink>
+          </Button>
         </CardContent>
       </Card>
 

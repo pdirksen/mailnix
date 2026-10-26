@@ -20,7 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ApiError } from '@/api/client'
 import { useConnectionErrors } from '@/lib/connectionErrors'
 import { useAccountsStore } from '@/stores/accounts'
-import { ArrowLeftIcon, Loader2Icon, PlugZapIcon, Trash2Icon } from '@lucide/vue'
+import { ArrowLeftIcon, Loader2Icon, PlugZapIcon, Trash2Icon, WandSparklesIcon } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -102,6 +102,12 @@ async function deleteAccount() {
           <p class="text-muted-foreground mt-1 truncate">{{ account.username }} · {{ account.host }}</p>
         </div>
         <div class="flex gap-2">
+          <Button variant="outline" as-child data-testid="open-assistant">
+            <RouterLink :to="{ name: 'account-setup', params: { id: account.id } }">
+              <WandSparklesIcon />
+              <span class="hidden sm:inline">{{ $t('assistant.open') }}</span>
+            </RouterLink>
+          </Button>
           <Button variant="outline" :disabled="testing" data-testid="test-connection" @click="testConnection">
             <Loader2Icon v-if="testing" class="animate-spin" />
             <PlugZapIcon v-else />

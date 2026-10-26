@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Mailnix.Api.Accounts;
+using Mailnix.Api.Assistant;
 using Mailnix.Api.Auth;
 using Mailnix.Api.Hosting;
 using Mailnix.Api.Lists;
@@ -63,6 +64,7 @@ builder.Services.ConfigureHttpJsonOptions(json =>
     json.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
 });
 builder.Services.AddScoped<RuleService>();
+builder.Services.AddSingleton<MessageSampler>();
 if (hostOptions.ServesApi)
 {
     builder.Services.AddSignalR().AddJsonProtocol(json => RuleJson.Configure(json.PayloadSerializerOptions));
@@ -149,6 +151,7 @@ if (hostOptions.ServesApi)
     api.MapRuleEndpoints();
     api.MapListEndpoints();
     api.MapPreviewEndpoints();
+    api.MapAssistantEndpoints();
     api.MapRunEndpoints();
     api.MapStatsEndpoints();
     api.MapActivityEndpoints();

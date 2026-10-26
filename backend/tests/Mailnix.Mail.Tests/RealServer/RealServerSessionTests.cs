@@ -156,4 +156,47 @@ public sealed class RealServerSessionTests : IAsyncLifetime
         (await _session.IdleAsync(watched, TimeSpan.FromSeconds(30), wake.Token, Ct)).ShouldBe(IdleOutcome.Woken);
         (await _session.IdleAsync(watched, TimeSpan.FromSeconds(1), CancellationToken.None, Ct)).ShouldBe(IdleOutcome.TimedOut);
     }
+
+    private static MimeMessage Invitation(string subject, bool attachIcs)
+    {
+        const string ics = "BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nVERSION:2.0\r\nEND:VCALENDAR\r\n";
+        var calendar = new TextPart("calendar") { Text = ics };
+        calendar.ContentType.Parameters.Add("method", "REQUEST");
+        var alternative = new MultipartAlternative { new TextPart("plain") { Text = "Meeting" }, new TextPart("html") { Text = "<p>Meeting</p>" }, calendar };
+        var message = Message(subject, $"{subject}-{Guid.NewGuid():N}@mailnix.invalid");
+        if (attachIcs)
+        {
+            // Google: the calendar part inside the body and the same data as invite.ics.
+            var file = new MimePart("application", "ics") { FileName = "invite.ics", Content = new MimeContent(new MemoryStream(System.Text.Encoding.ASCII.GetBytes(ics))) };
+            message.Body = new Multipart("mixed") { alternative, file };
+        }
+        else
+        {
+            // Outlook: only the alternative body part, no attachment.
+            message.Headers.Add("Content-Class", "urn:content-classes:calendarmessage");
+            message.Body = alternative;
+        }
+
+        return message;
+    }
+
+    [Fact]
+    public async Task Calendar_parts_are_found_in_the_servers_body_structure()
+    {
+        Assert.SkipWhen(_session is null, "No real IMAP credentials configured (test-email-credentials.ini).");
+        var session = _session!;
+        var folder = Folder("calendar");
+        await session.AppendAsync(folder, Invitation("google", attachIcs: true), Ct);
+        await session.AppendAsync(folder, Invitation("outlook", attachIcs: false), Ct);
+        await session.AppendAsync(folder, Message("plain", $"plain-{Guid.NewGuid():N}@mailnix.invalid"), Ct);
+
+        await session.OpenAsync(folder, writable: false, Ct);
+        var messages = (await session.FetchNewAsync(folder, 0, 10, FetchRequirements.BodyStructure, Ct)).ToDictionary(m => m.Subject!);
+
+        messages["google"].CalendarMethod.ShouldBe("REQUEST");
+        messages["google"].Attachments!.Single().Extension.ShouldBe("ics");
+        messages["outlook"].CalendarMethod.ShouldBe("REQUEST");
+        messages["outlook"].Attachments.ShouldBeEmpty();
+        messages["plain"].CalendarMethod.ShouldBeNull();
+    }
 }

@@ -18,6 +18,15 @@ public sealed class FolderTemplateTests
     }
 
     [Fact]
+    public void The_static_prefix_ends_before_the_first_placeholder()
+    {
+        FolderTemplate.StaticPrefix("INBOX/Archive/{year}/{month}", '.').ShouldBe("INBOX.Archive");
+        FolderTemplate.StaticPrefix("INBOX/ Newsletters ", '/').ShouldBe("INBOX/Newsletters");
+        FolderTemplate.StaticPrefix("INBOX/News-{year}", '/').ShouldBe("INBOX");
+        FolderTemplate.StaticPrefix("{fromDomain}/Mail", '/').ShouldBeNull();
+    }
+
+    [Fact]
     public void Placeholder_values_never_create_extra_levels()
     {
         // "mail.shop.example" must stay one folder on a server whose delimiter is ".".

@@ -228,7 +228,7 @@ internal static class RunEndpoints
     private static ProblemHttpResult WrongState(string title) =>
         TypedResults.Problem(statusCode: StatusCodes.Status409Conflict, title: title, extensions: new Dictionary<string, object?> { ["errorCode"] = "WrongState" });
 
-    private static ProblemHttpResult Paused() =>
+    internal static ProblemHttpResult Paused() =>
         TypedResults.Problem(statusCode: StatusCodes.Status409Conflict, title: "The account is paused. Switch \"Process new mail\" on first.",
             extensions: new Dictionary<string, object?> { ["errorCode"] = "AccountPaused" });
 }

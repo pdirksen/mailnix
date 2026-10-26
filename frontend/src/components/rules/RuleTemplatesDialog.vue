@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import FormField from '@/components/common/FormField.vue'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useConnectionErrors } from '@/lib/connectionErrors'
 import { toDraft } from '@/rules/model'
 import { useListsStore } from '@/stores/lists'
 import { type RuleTemplateInfo, useRulesStore } from '@/stores/rules'
 import { ArrowLeftIcon, Loader2Icon, SparklesIcon } from '@lucide/vue'
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import TemplateParameterFields from './TemplateParameterFields.vue'
 import { ApiError } from '@/api/client'
 
 const props = defineProps<{ accountId: string }>()
@@ -33,8 +31,6 @@ watch(open, async (isOpen) => {
   selected.value = null
   await Promise.all([rules.loadTemplates(), lists.fetchAll()])
 })
-
-const domainLists = computed(() => lists.lists.filter((l) => l.kind !== 'Address'))
 
 function choose(template: RuleTemplateInfo) {
   selected.value = template
@@ -89,31 +85,7 @@ async function use() {
       </div>
 
       <form v-else class="grid gap-4" novalidate @submit.prevent="use">
-        <FormField
-          v-for="parameter in selected.parameters"
-          :id="`template-${parameter.name}`"
-          :key="parameter.name"
-          v-slot="aria"
-          :label="$t(`rules.templates.parameters.${parameter.name}`)"
-          :error="errors[parameter.name]"
-        >
-          <Select v-if="parameter.type === 'DomainList'" v-model="values[parameter.name]">
-            <SelectTrigger :id="`template-${parameter.name}`" class="w-full" v-bind="aria">
-              <SelectValue :placeholder="domainLists.length ? $t('rules.value.chooseList') : $t('rules.value.noLists')" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem v-for="list in domainLists" :key="list.id" :value="list.id">{{ list.name }}</SelectItem>
-            </SelectContent>
-          </Select>
-          <Input
-            v-else
-            :id="`template-${parameter.name}`"
-            v-model="values[parameter.name]"
-            v-bind="aria"
-            :type="parameter.type === 'Folder' ? 'text' : 'number'"
-            :class="{ 'font-mono': parameter.type === 'Folder' }"
-          />
-        </FormField>
+        <TemplateParameterFields v-model="values" :parameters="selected.parameters" :errors="errors" id-prefix="template" />
         <p v-if="errors._" class="text-destructive text-sm">{{ errors._ }}</p>
         <DialogFooter class="sm:justify-between">
           <Button type="button" variant="ghost" @click="selected = null">

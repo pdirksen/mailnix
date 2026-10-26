@@ -199,7 +199,7 @@ internal static class ListEndpoints
     }
 
     /// <summary>Normalizes and deduplicates entries; validation errors are keyed by entry index.</summary>
-    private static (List<ListEntryDto> Entries, Dictionary<string, string[]> Errors) PrepareEntries(NamedListKind kind, IReadOnlyList<ListEntryDto> input)
+    internal static (List<ListEntryDto> Entries, Dictionary<string, string[]> Errors) PrepareEntries(NamedListKind kind, IReadOnlyList<ListEntryDto> input)
     {
         var errors = new Dictionary<string, string[]>();
         if (input.Count > MaxEntries)
@@ -238,7 +238,7 @@ internal static class ListEndpoints
         list.Entries.AddRange(entries.Where(e => !present.Contains(e.Value)).Select(e => NewEntry(list.Id, e)));
     }
 
-    private static NamedListEntryEntity NewEntry(Guid listId, ListEntryDto entry) =>
+    internal static NamedListEntryEntity NewEntry(Guid listId, ListEntryDto entry) =>
         new() { Id = Guid.CreateVersion7(), ListId = listId, Value = entry.Value, Note = entry.Note };
 
     private static string? Truncate(string? text, int max) =>

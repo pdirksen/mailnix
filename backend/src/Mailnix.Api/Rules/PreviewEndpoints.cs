@@ -8,7 +8,6 @@ using Mailnix.Infrastructure.OAuth;
 using Mailnix.Mail;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Mailnix.Api.Rules;
 
@@ -16,8 +15,6 @@ internal static class PreviewEndpoints
 {
     /// <summary>Bodies cost one round trip per message, so previews of body conditions read fewer messages.</summary>
     public const int MaxMessagesWithBody = 100;
-
-    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(2);
 
     public static IEndpointRouteBuilder MapPreviewEndpoints(this IEndpointRouteBuilder routes)
     {
@@ -38,10 +35,8 @@ internal static class PreviewEndpoints
         MailnixDbContext db,
         RuleService rules,
         RuleSetLoader loader,
-        IMessageReader reader,
+        MessageSampler sampler,
         AccountCredentials credentials,
-        IMemoryCache cache,
-        TimeProvider time,
         CancellationToken ct)
     {
         var userId = user.GetUserId();
@@ -91,30 +86,12 @@ internal static class PreviewEndpoints
         var requirements = FieldCatalog.RequiredFetch(ruleSet, allRules);
         var limit = requirements.HasFlag(FetchRequirements.Body) ? Math.Min(request.Limit, MaxMessagesWithBody) : request.Limit;
 
-        FolderSample sample;
+        MessageSample read;
         IReadOnlySet<string> sentIds;
-        bool fromCache;
-        DateTimeOffset fetchedAt;
         try
         {
-            // Cached per account state, folder, size and fetched data, so editing a rule does not hit the server again.
-            var key = (account.Id, account.UpdatedAt, folder, limit, requirements);
-            CachedSample? entry = null;
-            fromCache = !request.Refresh && cache.TryGetValue(key, out entry) && entry is not null;
-            if (!fromCache)
-            {
-                entry = new CachedSample(await reader.ReadLatestAsync(settings, folder, limit, requirements, ct), time.GetUtcNow());
-                cache.Set(key, entry, CacheDuration);
-            }
-
-            (sample, fetchedAt) = (entry!.Sample, entry.FetchedAt);
-            sentIds = FieldCatalog.UsedFields(ruleSet, allRules).Contains(ConditionField.IsReplyToMyMail) && account.SpecialFolders.Sent is { } sent
-                ? await cache.GetOrCreateAsync((account.Id, account.UpdatedAt, "sent-ids"), async entry =>
-                {
-                    entry.AbsoluteExpirationRelativeToNow = CacheDuration;
-                    return await reader.ReadMessageIdsAsync(settings, sent, 500, ct);
-                }) ?? new HashSet<string>()
-                : new HashSet<string>();
+            read = await sampler.ReadAsync(account, settings, folder, limit, requirements, request.Refresh, ct);
+            sentIds = await sampler.SentIdsAsync(account, settings, ruleSet, allRules, ct);
         }
         catch (MailConnectionException ex)
         {
@@ -125,6 +102,7 @@ internal static class PreviewEndpoints
             return TypedResults.ValidationProblem(new Dictionary<string, string[]> { ["folder"] = [ex.Message] });
         }
 
+        var (sample, fetchedAt, fromCache) = read;
         var context = loaded.Context with { SentMessageIds = sentIds, Rules = allRules };
         var names = ruleSet.ToDictionary(r => r.Id, r => r.Name);
         var messages = sample.Messages.Select(message =>
@@ -162,8 +140,6 @@ internal static class PreviewEndpoints
             messages));
     }
 
-    private sealed record CachedSample(FolderSample Sample, DateTimeOffset FetchedAt);
-
     private static Ok<List<RuleTemplateInfo>> ListTemplates() =>
         TypedResults.Ok(RuleTemplates.All
             .Select(t => new RuleTemplateInfo(t.Id, [.. t.Parameters.Select(p => new TemplateParameterInfo(p.Name, p.Type, p.Default))]))
@@ -182,13 +158,19 @@ internal static class PreviewEndpoints
         }
 
         var values = RuleTemplates.ResolveParameters(template, request.Parameters, out var errors);
-        if (values.TryGetValue("list", out var listId))
+        var userId = user.GetUserId();
+        foreach (var parameter in template.Parameters.Where(p => p.Type is TemplateParameterType.DomainList or TemplateParameterType.AddressList))
         {
-            var userId = user.GetUserId();
-            var list = await db.NamedLists.Where(l => l.Id == Guid.Parse(listId) && l.UserId == userId).Select(l => (NamedListKind?)l.Kind).SingleOrDefaultAsync(ct);
-            if (list is null or NamedListKind.Address)
+            if (!values.TryGetValue(parameter.Name, out var listId))
             {
-                errors["list"] = "Choose one of your domain or pattern lists.";
+                continue;
+            }
+
+            var kind = await db.NamedLists.Where(l => l.Id == Guid.Parse(listId) && l.UserId == userId).Select(l => (NamedListKind?)l.Kind).SingleOrDefaultAsync(ct);
+            var wantsAddresses = parameter.Type == TemplateParameterType.AddressList;
+            if (kind is null || (kind == NamedListKind.Address) != wantsAddresses)
+            {
+                errors[parameter.Name] = wantsAddresses ? "Choose one of your address lists." : "Choose one of your domain or pattern lists.";
             }
         }
 
@@ -202,12 +184,14 @@ internal static class PreviewEndpoints
             draft.Name,
             draft.Conditions,
             draft.Actions,
-            draft.Trigger switch
-            {
-                RuleTriggerKind.Scheduled => RuleTrigger.Scheduled,
-                RuleTriggerKind.Manual => RuleTrigger.Manual,
-                _ => RuleTrigger.OnNew,
-            },
+            ToTrigger(draft.Trigger),
             draft.Schedule));
     }
+
+    internal static RuleTrigger ToTrigger(RuleTriggerKind kind) => kind switch
+    {
+        RuleTriggerKind.Scheduled => RuleTrigger.Scheduled,
+        RuleTriggerKind.Manual => RuleTrigger.Manual,
+        _ => RuleTrigger.OnNew,
+    };
 }

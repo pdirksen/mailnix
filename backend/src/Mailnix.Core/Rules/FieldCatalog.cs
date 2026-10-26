@@ -84,6 +84,9 @@ public static class FieldCatalog
     /// <summary>Authentication-Results values (RFC 8601); "none" also when no result is present.</summary>
     public static readonly IReadOnlyList<string> AuthResultValues = ["pass", "fail", "softfail", "neutral", "none", "temperror", "permerror"];
 
+    /// <summary>iTIP methods (RFC 5546): REQUEST invites, REPLY answers, CANCEL calls off.</summary>
+    public static readonly IReadOnlyList<string> CalendarMethods = ["REQUEST", "REPLY", "CANCEL", "PUBLISH", "COUNTER", "DECLINECOUNTER", "REFRESH", "ADD"];
+
     private static readonly FieldDefinition[] Definitions =
     [
         new(ConditionField.From, FieldCategory.Sender, FieldValueType.Address, AddressOperators),
@@ -116,6 +119,8 @@ public static class FieldCatalog
         new(ConditionField.IsAutoReply, FieldCategory.MailType, FieldValueType.Boolean, BooleanOperators, FetchRequirements.Headers),
         new(ConditionField.IsReply, FieldCategory.MailType, FieldValueType.Boolean, BooleanOperators, FetchRequirements.Headers),
         new(ConditionField.IsReplyToMyMail, FieldCategory.MailType, FieldValueType.Boolean, BooleanOperators, FetchRequirements.Headers),
+        new(ConditionField.IsCalendarMessage, FieldCategory.MailType, FieldValueType.Boolean, BooleanOperators, FetchRequirements.Headers | FetchRequirements.BodyStructure),
+        new(ConditionField.CalendarMethod, FieldCategory.MailType, FieldValueType.Enum, EnumOperators, FetchRequirements.BodyStructure, Options: CalendarMethods),
 
         new(ConditionField.SpfResult, FieldCategory.SenderTrust, FieldValueType.Enum, EnumOperators, FetchRequirements.Headers, Options: AuthResultValues),
         new(ConditionField.DkimResult, FieldCategory.SenderTrust, FieldValueType.Enum, EnumOperators, FetchRequirements.Headers, Options: AuthResultValues),
