@@ -7,8 +7,9 @@ import { type Locale, LOCALE_NAMES, SUPPORTED_LOCALES } from '@/i18n'
 import { useConnectionErrors } from '@/lib/connectionErrors'
 import { browserTimeZone, describeTimeZone, timeIn } from '@/lib/timeZones'
 import { type Profile, useProfileStore } from '@/stores/profile'
-import { type ThemePreference, useUiStore } from '@/stores/ui'
-import { CheckIcon, ClockIcon, FolderIcon, MonitorIcon, MoonIcon, SunIcon } from '@lucide/vue'
+import { BASE_THEME_OPTIONS, COLOR_THEME_OPTIONS, type Theme, THEME_CLASSES, type ThemePreference } from '@/lib/themes'
+import { useUiStore } from '@/stores/ui'
+import { CheckIcon, ClockIcon, FolderIcon } from '@lucide/vue'
 import { useIntervalFn } from '@vueuse/core'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -40,11 +41,15 @@ async function chooseLanguage(language: Locale) {
 }
 
 // Theme: a choice of this browser only.
-const themes: { value: ThemePreference; icon: typeof SunIcon }[] = [
-  { value: 'light', icon: SunIcon },
-  { value: 'dark', icon: MoonIcon },
-  { value: 'auto', icon: MonitorIcon },
+const themeGroups = [
+  { labelKey: null, options: BASE_THEME_OPTIONS },
+  { labelKey: 'common.colorThemes', options: COLOR_THEME_OPTIONS },
 ]
+
+/** The themes a preview shows: "system" shows light and dark side by side. */
+function previewThemes(theme: ThemePreference): Theme[] {
+  return theme === 'auto' ? ['light', 'dark'] : [theme]
+}
 
 // Time zone
 const timeZone = ref(props.profile.timeZone)
@@ -101,49 +106,51 @@ const exampleFolder = computed(() => {
         <CardDescription>{{ $t('settings.preferences.themeHint') }}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div role="radiogroup" :aria-label="$t('common.theme')" class="grid grid-cols-3 gap-3">
-          <button
-            v-for="theme in themes"
-            :key="theme.value"
-            type="button"
-            role="radio"
-            :aria-checked="ui.theme === theme.value"
-            class="focus-visible:ring-ring/50 group grid gap-2 rounded-lg text-left outline-none focus-visible:ring-3"
-            :data-testid="`theme-${theme.value}`"
-            @click="ui.setTheme(theme.value)"
-          >
-            <span
-              class="relative block aspect-[4/3] overflow-hidden rounded-lg border-2 transition-colors"
-              :class="ui.theme === theme.value ? 'border-primary' : 'border-border group-hover:border-muted-foreground/40'"
-              aria-hidden="true"
-            >
-              <!-- A tiny picture of the app in that theme; "system" shows both halves. -->
-              <span v-if="theme.value !== 'dark'" class="absolute inset-0 flex bg-white" :class="theme.value === 'auto' ? 'w-1/2' : ''">
-                <span class="w-1/4 border-r border-zinc-200 bg-zinc-50" />
-                <span class="grid flex-1 content-start gap-1.5 p-2">
-                  <span class="h-1.5 w-2/3 rounded bg-zinc-300" />
-                  <span class="h-1.5 w-1/2 rounded bg-zinc-200" />
-                  <span class="mt-1 h-5 rounded bg-zinc-100" />
-                </span>
-              </span>
-              <span
-                v-if="theme.value !== 'light'"
-                class="absolute inset-y-0 right-0 flex bg-zinc-950"
-                :class="theme.value === 'auto' ? 'w-1/2' : 'left-0'"
+        <div role="radiogroup" :aria-label="$t('common.theme')" class="grid gap-5">
+          <div v-for="group in themeGroups" :key="group.labelKey ?? ''" class="grid gap-3">
+            <h3 v-if="group.labelKey" class="text-muted-foreground text-sm font-medium">{{ $t(group.labelKey) }}</h3>
+            <div class="grid grid-cols-3 gap-3 lg:grid-cols-6">
+              <button
+                v-for="theme in group.options"
+                :key="theme.value"
+                type="button"
+                role="radio"
+                :aria-checked="ui.theme === theme.value"
+                class="focus-visible:ring-ring/50 group grid gap-2 rounded-lg text-left outline-none focus-visible:ring-3"
+                :data-testid="`theme-${theme.value}`"
+                @click="ui.setTheme(theme.value)"
               >
-                <span v-if="theme.value === 'dark'" class="w-1/4 border-r border-zinc-800 bg-zinc-900" />
-                <span class="grid flex-1 content-start gap-1.5 p-2">
-                  <span class="h-1.5 w-2/3 rounded bg-zinc-600" />
-                  <span class="h-1.5 w-1/2 rounded bg-zinc-700" />
-                  <span class="mt-1 h-5 rounded bg-zinc-800" />
+                <span
+                  class="flex aspect-[4/3] overflow-hidden rounded-lg border-2 transition-colors"
+                  :class="
+                    ui.theme === theme.value ? 'border-primary' : 'border-border group-hover:border-muted-foreground/40'
+                  "
+                  aria-hidden="true"
+                >
+                  <!-- A tiny picture of the app, drawn with the theme's own tokens; "system" shows both halves. -->
+                  <span
+                    v-for="(look, index) in previewThemes(theme.value)"
+                    :key="look"
+                    class="bg-background flex flex-1"
+                    :class="THEME_CLASSES[look]"
+                  >
+                    <span v-if="index === 0" class="bg-sidebar border-sidebar-border w-1/4 border-r" />
+                    <span class="grid flex-1 content-start gap-1.5 p-2">
+                      <span class="bg-foreground/30 h-1.5 w-2/3 rounded" />
+                      <span class="bg-muted-foreground/30 h-1.5 w-1/2 rounded" />
+                      <span class="bg-card mt-1 flex h-5 items-end rounded border p-1">
+                        <span class="bg-primary h-1 w-1/3 rounded-full" />
+                      </span>
+                    </span>
+                  </span>
                 </span>
-              </span>
-            </span>
-            <span class="flex items-center gap-1.5 text-sm font-medium">
-              <component :is="theme.icon" class="size-4" />
-              {{ $t(theme.value === 'auto' ? 'common.themeSystem' : theme.value === 'light' ? 'common.themeLight' : 'common.themeDark') }}
-            </span>
-          </button>
+                <span class="flex items-center gap-1.5 text-sm font-medium">
+                  <component :is="theme.icon" class="size-4" />
+                  {{ $t(theme.labelKey) }}
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -161,7 +168,9 @@ const exampleFolder = computed(() => {
         >
           <ClockIcon class="text-muted-foreground size-4 shrink-0" />
           <span class="flex-1">{{ $t('settings.timeZone.browserDiffers', { zone: browserZone }) }}</span>
-          <Button size="sm" variant="outline" @click="timeZone = browserZone!">{{ $t('settings.timeZone.useBrowser') }}</Button>
+          <Button size="sm" variant="outline" @click="timeZone = browserZone!">{{
+            $t('settings.timeZone.useBrowser')
+          }}</Button>
         </div>
         <div class="grid gap-2">
           <Label for="time-zone">{{ $t('settings.timeZone.title') }}</Label>

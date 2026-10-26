@@ -3,7 +3,7 @@
  * Decorative backdrop of the sign-in pages: a Gaulish landscape (hills, standing stones, a village of round huts
  * behind a palisade) under a sky, a girl on the front hill flying the logo's winged letter as a kite, and a soft
  * golden glow behind the form.
- * Day in light mode, a starry night in dark mode. Purely decorative: hidden from screen readers, no pointer events.
+ * Day in the light themes, a starry night in the dark ones. Purely decorative: hidden from screen readers, no pointer events.
  */
 
 const WIDTH = 1440
@@ -172,7 +172,7 @@ const wing =
 </template>
 
 <style>
-/* Theme colors as variables; unscoped because a scoped style cannot target the .dark class on <html>. */
+/* Theme colors as variables; unscoped because a scoped style cannot target the theme classes on <html>. */
 .auth-backdrop {
   --sky-top: #ffffff;
   --sky-bottom: #f8f3e6;
@@ -212,6 +212,117 @@ const wing =
   --line: #6b6b6b;
   --girl: #4f4f4f;
   --stars: 1;
+}
+
+.theme-sepia .auth-backdrop {
+  --sky-top: #fbf5e8;
+  --sky-bottom: #f1e3c8;
+  --glow-strength: 0.38;
+  --hill-far: #ecdfc6;
+  --hill-mid: #e2d2b4;
+  --hill-near: #d6c4a2;
+  --stone: #cdb995;
+  --tree: #d3c19f;
+  --hut-wall: #dccbab;
+  --hut-roof: #c9b48e;
+  --hut-door: #b9a27b;
+  --palisade: #c7b28c;
+  --letter: #fdfaf2;
+  --letter-edge: #c4b294;
+  --line: #9a8364;
+  --girl: #9c8562;
+}
+
+/* After .dark: <html> carries both classes. */
+.theme-midnight .auth-backdrop {
+  --sky-top: #050b17;
+  --sky-bottom: #0e1829;
+  --glow-strength: 0.14;
+  --hill-far: #111b2d;
+  --hill-mid: #152034;
+  --hill-near: #1a263c;
+  --stone: #1f2c44;
+  --tree: #18233a;
+  --hut-wall: #1a253b;
+  --hut-roof: #213049;
+  --hut-door: #101a2b;
+  --palisade: #1f2c43;
+  --letter: #e9eff6;
+  --letter-edge: #e9eff6;
+  --line: #5c6d88;
+  --girl: #3e4d66;
+}
+
+.theme-rose .auth-backdrop {
+  --sky-top: #fffafc;
+  --sky-bottom: #fde8ef;
+  --hill-far: #f7e1e9;
+  --hill-mid: #efd6df;
+  --hill-near: #e5c8d2;
+  --stone: #debdc8;
+  --tree: #e2c5cf;
+  --hut-wall: #e9d0d8;
+  --hut-roof: #d4b4bf;
+  --hut-door: #c3a0ac;
+  --palisade: #d1b0bc;
+  --letter: #fffafc;
+  --letter-edge: #cfb6bf;
+  --line: #9f7a88;
+  --girl: #a6808e;
+}
+
+.theme-sage .auth-backdrop {
+  --sky-top: #f8fdf9;
+  --sky-bottom: #e3f4e6;
+  --hill-far: #ddeddf;
+  --hill-mid: #d1e4d4;
+  --hill-near: #c2d8c5;
+  --stone: #b6cfba;
+  --tree: #bed5c2;
+  --hut-wall: #caddcd;
+  --hut-roof: #acc5b0;
+  --hut-door: #97b39c;
+  --palisade: #a9c2ad;
+  --letter: #f8fdf9;
+  --letter-edge: #b1c4b4;
+  --line: #718f76;
+  --girl: #77957c;
+}
+
+.theme-forest .auth-backdrop {
+  --sky-top: #010804;
+  --sky-bottom: #03130b;
+  --hill-far: #091a11;
+  --hill-mid: #0a2015;
+  --hill-near: #0e271b;
+  --stone: #162f22;
+  --tree: #0c2217;
+  --hut-wall: #0f2419;
+  --hut-roof: #162f22;
+  --hut-door: #05160d;
+  --palisade: #162f22;
+  --letter: #e9f1ec;
+  --letter-edge: #e9f1ec;
+  --line: #506b5b;
+  --girl: #2f493b;
+}
+
+.theme-plum .auth-backdrop {
+  --sky-top: #08040b;
+  --sky-bottom: #130c19;
+  --hill-far: #1a1220;
+  --hill-mid: #201627;
+  --hill-near: #271c30;
+  --stone: #2f2338;
+  --tree: #221829;
+  --hut-wall: #241a2c;
+  --hut-roof: #2f2338;
+  --hut-door: #160e1b;
+  --palisade: #2f2338;
+  --letter: #f0edf4;
+  --letter-edge: #f0edf4;
+  --line: #6a5d75;
+  --girl: #493d53;
 }
 </style>
 

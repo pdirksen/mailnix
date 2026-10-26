@@ -9,15 +9,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { type ThemePreference, useUiStore } from '@/stores/ui'
-import { MonitorIcon, MoonIcon, SunIcon } from '@lucide/vue'
+import { BASE_THEME_OPTIONS, COLOR_THEME_OPTIONS, type ThemePreference } from '@/lib/themes'
+import { useUiStore } from '@/stores/ui'
+import { MoonIcon, SunIcon } from '@lucide/vue'
 
 const ui = useUiStore()
 
-const options: { value: ThemePreference; labelKey: string; icon: typeof SunIcon }[] = [
-  { value: 'light', labelKey: 'common.themeLight', icon: SunIcon },
-  { value: 'dark', labelKey: 'common.themeDark', icon: MoonIcon },
-  { value: 'auto', labelKey: 'common.themeSystem', icon: MonitorIcon },
+const groups = [
+  { labelKey: 'common.theme', options: BASE_THEME_OPTIONS },
+  { labelKey: 'common.colorThemes', options: COLOR_THEME_OPTIONS },
 ]
 </script>
 
@@ -30,17 +30,19 @@ const options: { value: ThemePreference; labelKey: string; icon: typeof SunIcon 
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      <DropdownMenuLabel>{{ $t('common.theme') }}</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuRadioGroup
-        :model-value="ui.theme"
-        @update:model-value="(value) => ui.setTheme(value as ThemePreference)"
-      >
-        <DropdownMenuRadioItem v-for="option in options" :key="option.value" :value="option.value">
-          <component :is="option.icon" class="size-4" />
-          {{ $t(option.labelKey) }}
-        </DropdownMenuRadioItem>
-      </DropdownMenuRadioGroup>
+      <template v-for="(group, index) in groups" :key="group.labelKey">
+        <DropdownMenuSeparator v-if="index > 0" />
+        <DropdownMenuLabel>{{ $t(group.labelKey) }}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          :model-value="ui.theme"
+          @update:model-value="(value) => ui.setTheme(value as ThemePreference)"
+        >
+          <DropdownMenuRadioItem v-for="option in group.options" :key="option.value" :value="option.value">
+            <component :is="option.icon" class="size-4" />
+            {{ $t(option.labelKey) }}
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </template>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>

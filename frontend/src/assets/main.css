@@ -3,8 +3,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* shadcn-vue theme tokens (neutral). Colors are defined once here and mapped to Tailwind below. */
-:root {
+/*
+ * shadcn-vue theme tokens. Colors are defined once here and mapped to Tailwind below. The theme classes are set on
+ * <html> (see stores/ui.ts), but also work on any element, which the theme previews in the settings use.
+ */
+:root,
+.light {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -77,6 +81,204 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Warm paper with brown ink; a light theme. */
+.theme-sepia {
+  --background: oklch(0.965 0.018 85);
+  --foreground: oklch(0.28 0.035 60);
+  --card: oklch(0.985 0.011 85);
+  --card-foreground: oklch(0.28 0.035 60);
+  --popover: oklch(0.985 0.011 85);
+  --popover-foreground: oklch(0.28 0.035 60);
+  --primary: oklch(0.5 0.1 55);
+  --primary-foreground: oklch(0.985 0.011 85);
+  --secondary: oklch(0.935 0.022 82);
+  --secondary-foreground: oklch(0.32 0.04 60);
+  --muted: oklch(0.935 0.022 82);
+  --muted-foreground: oklch(0.52 0.035 65);
+  --accent: oklch(0.92 0.028 80);
+  --accent-foreground: oklch(0.32 0.04 60);
+  --destructive: oklch(0.55 0.2 30);
+  --destructive-foreground: oklch(0.985 0.011 85);
+  --success: oklch(0.55 0.12 150);
+  --warning: oklch(0.7 0.15 70);
+  --border: oklch(0.885 0.028 80);
+  --input: oklch(0.86 0.03 80);
+  --ring: oklch(0.65 0.07 65);
+  --sidebar: oklch(0.945 0.022 83);
+  --sidebar-foreground: oklch(0.28 0.035 60);
+  --sidebar-primary: oklch(0.5 0.1 55);
+  --sidebar-primary-foreground: oklch(0.985 0.011 85);
+  --sidebar-accent: oklch(0.91 0.03 80);
+  --sidebar-accent-foreground: oklch(0.32 0.04 60);
+  --sidebar-border: oklch(0.885 0.028 80);
+  --sidebar-ring: oklch(0.65 0.07 65);
+}
+
+/* Deep navy with a blue accent; a dark theme, so <html> also has the `dark` class (declared after .dark to win). */
+.theme-midnight {
+  --background: oklch(0.17 0.03 262);
+  --foreground: oklch(0.95 0.012 250);
+  --card: oklch(0.215 0.035 262);
+  --card-foreground: oklch(0.95 0.012 250);
+  --popover: oklch(0.215 0.035 262);
+  --popover-foreground: oklch(0.95 0.012 250);
+  --primary: oklch(0.7 0.14 250);
+  --primary-foreground: oklch(0.17 0.03 262);
+  --secondary: oklch(0.275 0.035 262);
+  --secondary-foreground: oklch(0.95 0.012 250);
+  --muted: oklch(0.275 0.035 262);
+  --muted-foreground: oklch(0.72 0.03 255);
+  --accent: oklch(0.29 0.04 262);
+  --accent-foreground: oklch(0.95 0.012 250);
+  --destructive: oklch(0.68 0.19 22);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.72 0.14 160);
+  --warning: oklch(0.8 0.14 80);
+  --border: oklch(0.85 0.05 255 / 12%);
+  --input: oklch(0.85 0.05 255 / 16%);
+  --ring: oklch(0.6 0.12 250);
+  --sidebar: oklch(0.195 0.035 262);
+  --sidebar-foreground: oklch(0.95 0.012 250);
+  --sidebar-primary: oklch(0.7 0.14 250);
+  --sidebar-primary-foreground: oklch(0.17 0.03 262);
+  --sidebar-accent: oklch(0.275 0.035 262);
+  --sidebar-accent-foreground: oklch(0.95 0.012 250);
+  --sidebar-border: oklch(0.85 0.05 255 / 12%);
+  --sidebar-ring: oklch(0.6 0.12 250);
+}
+
+/* Blush pink with a raspberry accent; a light theme. */
+.theme-rose {
+  --background: oklch(0.97 0.014 355);
+  --foreground: oklch(0.27 0.035 355);
+  --card: oklch(0.988 0.008 355);
+  --card-foreground: oklch(0.27 0.035 355);
+  --popover: oklch(0.988 0.008 355);
+  --popover-foreground: oklch(0.27 0.035 355);
+  --primary: oklch(0.56 0.16 355);
+  --primary-foreground: oklch(0.988 0.008 355);
+  --secondary: oklch(0.94 0.02 355);
+  --secondary-foreground: oklch(0.32 0.04 355);
+  --muted: oklch(0.94 0.02 355);
+  --muted-foreground: oklch(0.52 0.035 355);
+  --accent: oklch(0.925 0.028 355);
+  --accent-foreground: oklch(0.32 0.04 355);
+  --destructive: oklch(0.55 0.21 27);
+  --destructive-foreground: oklch(0.988 0.008 355);
+  --success: oklch(0.55 0.12 150);
+  --warning: oklch(0.7 0.15 70);
+  --border: oklch(0.895 0.025 355);
+  --input: oklch(0.87 0.03 355);
+  --ring: oklch(0.68 0.08 355);
+  --sidebar: oklch(0.955 0.018 355);
+  --sidebar-foreground: oklch(0.27 0.035 355);
+  --sidebar-primary: oklch(0.56 0.16 355);
+  --sidebar-primary-foreground: oklch(0.988 0.008 355);
+  --sidebar-accent: oklch(0.925 0.028 355);
+  --sidebar-accent-foreground: oklch(0.32 0.04 355);
+  --sidebar-border: oklch(0.895 0.025 355);
+  --sidebar-ring: oklch(0.68 0.08 355);
+}
+
+/* Soft green-grey with a deep green accent; a light theme. */
+.theme-sage {
+  --background: oklch(0.97 0.014 150);
+  --foreground: oklch(0.27 0.035 150);
+  --card: oklch(0.988 0.008 150);
+  --card-foreground: oklch(0.27 0.035 150);
+  --popover: oklch(0.988 0.008 150);
+  --popover-foreground: oklch(0.27 0.035 150);
+  --primary: oklch(0.5 0.09 160);
+  --primary-foreground: oklch(0.988 0.008 150);
+  --secondary: oklch(0.94 0.02 150);
+  --secondary-foreground: oklch(0.32 0.04 150);
+  --muted: oklch(0.94 0.02 150);
+  --muted-foreground: oklch(0.52 0.035 150);
+  --accent: oklch(0.925 0.028 150);
+  --accent-foreground: oklch(0.32 0.04 150);
+  --destructive: oklch(0.55 0.21 27);
+  --destructive-foreground: oklch(0.988 0.008 150);
+  --success: oklch(0.55 0.12 150);
+  --warning: oklch(0.7 0.15 70);
+  --border: oklch(0.895 0.025 150);
+  --input: oklch(0.87 0.03 150);
+  --ring: oklch(0.68 0.08 160);
+  --sidebar: oklch(0.955 0.018 150);
+  --sidebar-foreground: oklch(0.27 0.035 150);
+  --sidebar-primary: oklch(0.5 0.09 160);
+  --sidebar-primary-foreground: oklch(0.988 0.008 150);
+  --sidebar-accent: oklch(0.925 0.028 150);
+  --sidebar-accent-foreground: oklch(0.32 0.04 150);
+  --sidebar-border: oklch(0.895 0.025 150);
+  --sidebar-ring: oklch(0.68 0.08 160);
+}
+
+/* Dark pine green with a fresh green accent; a dark theme. */
+.theme-forest {
+  --background: oklch(0.17 0.025 160);
+  --foreground: oklch(0.95 0.01 160);
+  --card: oklch(0.21 0.03 160);
+  --card-foreground: oklch(0.95 0.01 160);
+  --popover: oklch(0.21 0.03 160);
+  --popover-foreground: oklch(0.95 0.01 160);
+  --primary: oklch(0.74 0.13 160);
+  --primary-foreground: oklch(0.17 0.025 160);
+  --secondary: oklch(0.27 0.03 160);
+  --secondary-foreground: oklch(0.95 0.01 160);
+  --muted: oklch(0.27 0.03 160);
+  --muted-foreground: oklch(0.72 0.03 160);
+  --accent: oklch(0.29 0.035 160);
+  --accent-foreground: oklch(0.95 0.01 160);
+  --destructive: oklch(0.68 0.19 22);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.72 0.14 160);
+  --warning: oklch(0.8 0.14 80);
+  --border: oklch(0.85 0.04 160 / 12%);
+  --input: oklch(0.85 0.04 160 / 16%);
+  --ring: oklch(0.6 0.1 160);
+  --sidebar: oklch(0.195 0.03 160);
+  --sidebar-foreground: oklch(0.95 0.01 160);
+  --sidebar-primary: oklch(0.74 0.13 160);
+  --sidebar-primary-foreground: oklch(0.17 0.025 160);
+  --sidebar-accent: oklch(0.27 0.03 160);
+  --sidebar-accent-foreground: oklch(0.95 0.01 160);
+  --sidebar-border: oklch(0.85 0.04 160 / 12%);
+  --sidebar-ring: oklch(0.6 0.1 160);
+}
+
+/* Dark aubergine with a lilac accent; a dark theme. */
+.theme-plum {
+  --background: oklch(0.17 0.025 310);
+  --foreground: oklch(0.95 0.01 310);
+  --card: oklch(0.21 0.03 310);
+  --card-foreground: oklch(0.95 0.01 310);
+  --popover: oklch(0.21 0.03 310);
+  --popover-foreground: oklch(0.95 0.01 310);
+  --primary: oklch(0.74 0.13 310);
+  --primary-foreground: oklch(0.17 0.025 310);
+  --secondary: oklch(0.27 0.03 310);
+  --secondary-foreground: oklch(0.95 0.01 310);
+  --muted: oklch(0.27 0.03 310);
+  --muted-foreground: oklch(0.72 0.03 310);
+  --accent: oklch(0.29 0.035 310);
+  --accent-foreground: oklch(0.95 0.01 310);
+  --destructive: oklch(0.68 0.19 22);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.72 0.14 160);
+  --warning: oklch(0.8 0.14 80);
+  --border: oklch(0.85 0.04 310 / 12%);
+  --input: oklch(0.85 0.04 310 / 16%);
+  --ring: oklch(0.6 0.1 310);
+  --sidebar: oklch(0.195 0.03 310);
+  --sidebar-foreground: oklch(0.95 0.01 310);
+  --sidebar-primary: oklch(0.74 0.13 310);
+  --sidebar-primary-foreground: oklch(0.17 0.025 310);
+  --sidebar-accent: oklch(0.27 0.03 310);
+  --sidebar-accent-foreground: oklch(0.95 0.01 310);
+  --sidebar-border: oklch(0.85 0.04 310 / 12%);
+  --sidebar-ring: oklch(0.6 0.1 310);
 }
 
 @theme inline {

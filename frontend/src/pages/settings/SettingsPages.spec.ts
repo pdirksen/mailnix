@@ -111,6 +111,23 @@ describe('PreferencesSettings', () => {
     expect(useUiStore().theme).toBe('dark')
     expect(apiMock.PUT).not.toHaveBeenCalled()
   })
+
+  it('offers sepia and midnight, and midnight counts as dark', async () => {
+    const wrapper = await mountPage(PreferencesSettings)
+
+    await wrapper.find('[data-testid="theme-midnight"]').trigger('click')
+    await flushPromises()
+
+    expect(useUiStore().theme).toBe('midnight')
+    expect([...document.documentElement.classList]).toEqual(expect.arrayContaining(['dark', 'theme-midnight']))
+
+    await wrapper.find('[data-testid="theme-sepia"]').trigger('click')
+    await flushPromises()
+
+    const classes = document.documentElement.classList
+    expect(classes.contains('theme-sepia')).toBe(true)
+    expect(classes.contains('dark') || classes.contains('theme-midnight')).toBe(false)
+  })
 })
 
 describe('SecuritySettings', () => {

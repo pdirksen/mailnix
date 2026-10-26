@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Schemas } from '@/api/client'
-import { chrome, compact, useDarkMode } from '@/lib/charts'
+import { chrome, compact, useTheme } from '@/lib/charts'
+import { isDarkTheme } from '@/lib/themes'
 import type { EChartsOption } from 'echarts'
 import { computed } from 'vue'
 import VChart from 'vue-echarts'
@@ -27,14 +28,15 @@ const props = defineProps<{
 const emit = defineEmits<{ select: [bucket: string, key: string] }>()
 
 const { locale } = useI18n()
-const dark = useDarkMode()
+const theme = useTheme()
 
 function escape(text: string) {
   return text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 }
 
 const option = computed<EChartsOption>(() => {
-  const c = chrome(dark.value)
+  const c = chrome(theme.value)
+  const dark = isDarkTheme(theme.value)
   const series = props.data.series.map((s) => ({ ...s, style: props.styleOf(s.key, s.name) }))
   const number = new Intl.NumberFormat(locale.value)
   return {
@@ -59,7 +61,7 @@ const option = computed<EChartsOption>(() => {
       axisPointer:
         props.kind === 'line'
           ? { type: 'line', lineStyle: { color: c.axis } }
-          : { type: 'shadow', shadowStyle: { color: dark.value ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' } },
+          : { type: 'shadow', shadowStyle: { color: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' } },
       backgroundColor: c.tooltip,
       borderColor: c.border,
       textStyle: { color: c.text },
