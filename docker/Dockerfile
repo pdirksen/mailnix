@@ -40,7 +40,7 @@ RUN mkdir /data && chown app:app /data
 COPY --from=backend /app ./
 COPY LICENSE ./
 ENV ASPNETCORE_HTTP_PORTS=8080 \
-    Mailnix__Database__ConnectionString="Data Source=/data/mailnix.db"
+    Mailnix__DataDirectory=/data
 VOLUME /data
 EXPOSE 8080
 USER app

@@ -41,6 +41,8 @@ const string InitializeOnly = "--initialize-only";
 var initializeOnly = args.Contains(InitializeOnly);
 
 var builder = WebApplication.CreateBuilder(args.Where(a => a != InitializeOnly).ToArray());
+// Settings in the data folder (Mailnix:DataDirectory) outlive updates, which replace everything next to the executable.
+builder.Configuration.AddDataDirectorySettings();
 
 // The build-time OpenAPI generator boots the app without a database.
 var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";

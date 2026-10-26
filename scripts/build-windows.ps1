@@ -119,7 +119,9 @@ Other address or port:
 Reachable from other computers (put a TLS reverse proxy in front for anything public):
     mailnix.exe --urls http://0.0.0.0:8080
 
-Settings can be changed in appsettings.json or with environment variables, e.g.
+Settings can be changed in data\appsettings.json (same format as appsettings.json here;
+unlike the files next to mailnix.exe, it is kept on updates) or with environment
+variables, e.g.
     set Mailnix__Auth__AllowRegistration=false
 All settings are listed in the project README, section "Configuration".
 

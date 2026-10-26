@@ -20,12 +20,13 @@ public static class InfrastructureServiceCollectionExtensions
         IConfiguration configuration,
         bool persistDataProtectionKeys = true)
     {
-        services.AddOptions<DatabaseOptions>().Bind(configuration.GetSection(DatabaseOptions.Section));
+        services.AddOptions<DatabaseOptions>().Bind(configuration.GetSection(DatabaseOptions.Section)).PostConfigure(o => o.ApplyDefaults(configuration));
         services.AddOptions<BootstrapOptions>().Bind(configuration.GetSection(BootstrapOptions.Section));
         services.AddOptions<TenancyOptions>().Bind(configuration.GetSection(TenancyOptions.Section));
         services.AddOptions<KeyProtectionOptions>().Bind(configuration.GetSection(KeyProtectionOptions.Section));
 
         var database = configuration.GetSection(DatabaseOptions.Section).Get<DatabaseOptions>() ?? new DatabaseOptions();
+        database.ApplyDefaults(configuration);
         switch (database.Provider)
         {
             case DatabaseProvider.Sqlite:

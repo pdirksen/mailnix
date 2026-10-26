@@ -92,9 +92,10 @@ password=...
 Builds `artifacts\windows\win-x64\mailnix.exe`: a self-contained single executable (no .NET installation needed)
 with the web UI in `wwwroot\` next to it. Start it and open http://localhost:5000 (other address:
 `mailnix.exe --urls http://localhost:8080`). The database and encryption keys live in `data\` next to the
-executable, whatever the working directory is. Rebuilding keeps an existing `data\` folder, and `-Zip` never
-includes it. The encryption keys in it are protected with Windows DPAPI for the account that runs mailnix, so a copied
-`data\` folder is useless elsewhere; to run mailnix as a Windows service under another account, set
+executable, whatever the working directory is (another folder: `Mailnix__DataDirectory`). Settings that should survive
+an update go into `data\appsettings.json`, not the `appsettings.json` next to the executable, which an update replaces.
+Rebuilding keeps an existing `data\` folder, and `-Zip` never includes it. The encryption keys in it are protected with
+Windows DPAPI for the account that runs mailnix, so a copied `data\` folder is useless elsewhere; to run mailnix as a Windows service under another account, set
 `Mailnix__DataProtection__KeyProtection=WindowsMachine` before its first start there (or enter the mailbox passwords again).
 On Linux, macOS and in Docker, configure a master key (see below); without one, the keys are stored unencrypted in
 the database and mailnix logs a warning at startup.
@@ -191,7 +192,8 @@ All settings can be given as environment variables (`__` separates sections).
 |---|---|---|
 | `Mailnix__Mode` | `AllInOne` | `AllInOne`, `Api` (API + UI only) or `Worker` (mailbox processing only) |
 | `Mailnix__Database__Provider` | `Sqlite` | `Sqlite` or `Postgres` |
-| `Mailnix__Database__ConnectionString` | `Data Source=data/mailnix.db` | |
+| `Mailnix__DataDirectory` | `data` | Folder for the SQLite database and an optional `appsettings.json` whose settings rank above the `appsettings.json` next to the executable (environment variables and the command line still win), so they survive updates. Relative to the executable's folder in published builds, otherwise to the working directory. Can't be set in that file itself |
+| `Mailnix__Database__ConnectionString` | SQLite: `mailnix.db` in the data directory | Required for Postgres |
 | `Mailnix__Database__AutoMigrate` | `true` | Apply database migrations on startup |
 | `Mailnix__Auth__AllowRegistration` | `true` | Self-service signup (the first user can always register; invited users always can) |
 | `Mailnix__Tenancy__Mode` | `SingleTenant` | `SingleTenant` (everybody in one organization, self-hosted) or `MultiTenant` (every signup founds its own organization, SaaS) |
