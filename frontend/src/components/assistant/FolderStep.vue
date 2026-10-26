@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { type AssistantState, folderTemplate, ROOT_PRESETS, staticPath } from '@/rules/assistant'
 import { resolveExample } from '@/rules/folderTemplate'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
   /** Server paths of the account's folders; null while unknown. */
@@ -17,11 +17,13 @@ const props = defineProps<{
 const state = defineModel<AssistantState>({ required: true })
 
 const CUSTOM = '__custom__'
+// Its own flag: a custom root may start out equal to a preset (e.g. "INBOX") while it is being typed.
+const custom = ref(!(ROOT_PRESETS as readonly string[]).includes(state.value.root))
 const rootChoice = computed({
-  get: () => ((ROOT_PRESETS as readonly string[]).includes(state.value.root) ? state.value.root || '__top__' : CUSTOM),
+  get: () => (custom.value ? CUSTOM : state.value.root || '__top__'),
   set: (value) => {
-    if (value === CUSTOM) state.value.root = state.value.root || 'INBOX/'
-    else state.value.root = value === '__top__' ? '' : value
+    custom.value = value === CUSTOM
+    if (!custom.value) state.value.root = value === '__top__' ? '' : value
   },
 })
 
