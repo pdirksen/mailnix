@@ -335,4 +335,9 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+  /* Tailwind 4 leaves buttons with the default cursor. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
 }
