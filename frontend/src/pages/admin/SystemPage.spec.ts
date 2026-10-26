@@ -12,6 +12,7 @@ vi.mock('@/api/client', async (importOriginal) => ({
 vi.mock('vue-sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 const system = {
+  version: '1.4.0',
   mode: 'Api',
   multiTenant: true,
   workers: [
@@ -39,6 +40,7 @@ describe('SystemPage', () => {
     await flushPromises()
 
     expect(wrapper.find('[data-testid="run-mode"]').text()).toBe('API process')
+    expect(wrapper.find('[data-testid="version"]').text()).toBe('Version 1.4.0')
     expect(wrapper.find('[data-testid="kpi-unleased"]').text()).toContain('1')
     const workers = wrapper.find('[data-testid="workers"]').text()
     expect(workers).toContain('Running')

@@ -1,0 +1,87 @@
+name: Release
+
+# Push a tag like v1.4.0 (v1.5.0-beta.1 for a pre-release): the full CI runs, then the standalone Windows builds are
+# attached to a GitHub release for that tag.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+      prerelease: ${{ steps.tag.outputs.prerelease }}
+    steps:
+      - id: tag
+        name: Version from the tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          # Semantic versioning, which the update feed of the Windows installer will compare.
+          if ! [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag $TAG is not v<major>.<minor>.<patch>[-<pre-release>]"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$version" == *-* ]]; then echo "prerelease=true"; else echo "prerelease=false"; fi >> "$GITHUB_OUTPUT"
+
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  windows:
+    needs: [version, ci]
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        runtime: [win-x64, win-arm64]
+    env:
+      # Picked up by every dotnet build (Directory.Build.props).
+      MailnixVersion: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: backend/global.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build
+        shell: pwsh
+        run: ./scripts/build-windows.ps1 -Runtime ${{ matrix.runtime }} -Output "artifacts/mailnix-$env:MailnixVersion-${{ matrix.runtime }}" -Zip
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mailnix-${{ matrix.runtime }}
+          path: artifacts/mailnix-*.zip
+          if-no-files-found: error
+
+  release:
+    needs: [version, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.version.outputs.version }}
+          PRERELEASE: ${{ needs.version.outputs.prerelease }}
+        run: |
+          (cd dist && sha256sum *.zip > SHA256SUMS)
+          flags=()
+          if [[ "$PRERELEASE" == true ]]; then flags+=(--prerelease); fi
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --verify-tag --title "mailnix $VERSION" --generate-notes "${flags[@]}"

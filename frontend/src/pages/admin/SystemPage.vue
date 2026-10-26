@@ -93,6 +93,7 @@ async function saveLimit(tenant: Schemas['TenantRow']) {
       <div class="flex flex-wrap gap-2 text-sm">
         <Badge variant="secondary" data-testid="run-mode">{{ $t(`system.modes.${system.mode}`) }}</Badge>
         <Badge variant="outline">{{ system.multiTenant ? $t('system.multiTenant') : $t('system.singleTenant') }}</Badge>
+        <Badge variant="outline" data-testid="version">{{ $t('system.version', { version: system.version }) }}</Badge>
       </div>
 
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">

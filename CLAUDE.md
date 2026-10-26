@@ -41,7 +41,11 @@ E2E needs the backend to serve the built SPA. Run `npm run build` and copy `fron
 `backend/src/Mailnix.Api/wwwroot` (git-ignored), then start the backend. `e2e/team.spec.ts` is skipped unless the
 instance runs with `Mailnix__Tenancy__Mode=MultiTenant`.
 
-Windows standalone build: `scripts/build-windows.ps1` (output in `artifacts/`); start it with `scripts/run-windows.ps1`.
+Standalone builds: `scripts/build-windows.ps1` / `scripts/run-windows.ps1` on Windows, `scripts/build-unix.sh` /
+`scripts/run-unix.sh` on Linux and macOS (output in `artifacts/`).
+
+Releases: pushing a tag `vX.Y.Z` runs `.github/workflows/release.yml` (CI, then the Windows zips on a GitHub release).
+The version comes from `MailnixVersion` (environment variable or MSBuild property); without it builds are `0.0.0-dev`.
 
 ## Architecture
 

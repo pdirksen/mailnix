@@ -882,6 +882,7 @@
     },
     "multiTenant": "Mehrere Organisationen",
     "singleTenant": "Eine Organisation",
+    "version": "Version {version}",
     "mailboxes": "Postfächer",
     "unleased": "Ohne Worker",
     "queued": "Wartende Läufe",

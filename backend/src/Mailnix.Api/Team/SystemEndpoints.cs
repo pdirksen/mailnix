@@ -14,7 +14,9 @@ public sealed record WorkerInfo(string Id, string Host, DateTimeOffset StartedAt
 
 public sealed record TenantRow(Guid Id, string Name, int Users, int Accounts, int? MaxAccounts, DateTimeOffset CreatedAt);
 
+/// <param name="Version">The version of this API process.</param>
 public sealed record SystemResponse(
+    string Version,
     MailnixMode Mode,
     bool MultiTenant,
     IReadOnlyList<WorkerInfo> Workers,
@@ -58,6 +60,7 @@ internal static class SystemEndpoints
             .ToList();
 
         return TypedResults.Ok(new SystemResponse(
+            AppVersion.Current,
             host.Value.Mode,
             tenancy.Value.Mode == TenancyMode.MultiTenant,
             workers,

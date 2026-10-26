@@ -3697,6 +3697,7 @@ export interface components {
             ruleIds?: null | string[];
         };
         SystemResponse: {
+            version: string;
             mode: components["schemas"]["MailnixMode"];
             multiTenant: boolean;
             workers: components["schemas"]["WorkerInfo"][];

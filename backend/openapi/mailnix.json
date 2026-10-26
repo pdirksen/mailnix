@@ -5773,6 +5773,7 @@
       },
       "SystemResponse": {
         "required": [
+          "version",
           "mode",
           "multiTenant",
           "workers",
@@ -5784,6 +5785,9 @@
         ],
         "type": "object",
         "properties": {
+          "version": {
+            "type": "string"
+          },
           "mode": {
             "$ref": "#/components/schemas/MailnixMode"
           },

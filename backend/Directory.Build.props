@@ -9,9 +9,13 @@
     <!-- XML doc comments are optional; don't warn on missing ones -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <!-- Runtime-specific publishes (scripts/build-windows.ps1) keep their lock files in obj/, so the committed ones
-         stay platform-neutral. -->
+    <!-- Runtime-specific publishes (scripts/build-windows.ps1, build-unix.sh) keep their lock files in obj/, so the
+         committed ones stay platform-neutral. -->
     <NuGetLockFilePath Condition="'$(MailnixRuntimeLockFiles)' == 'true'">$(MSBuildProjectDirectory)/obj/packages.runtime.lock.json</NuGetLockFilePath>
+    <!-- Releases set MailnixVersion from the git tag, as an environment variable or -p:MailnixVersion=1.4.0 (see
+         .github/workflows/release.yml); everything else is a development build. -->
+    <Version Condition="'$(MailnixVersion)' != ''">$(MailnixVersion)</Version>
+    <Version Condition="'$(Version)' == ''">0.0.0-dev</Version>
     <Company>mailnix</Company>
     <Product>mailnix</Product>
   </PropertyGroup>

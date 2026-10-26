@@ -208,6 +208,7 @@ public sealed class TenancyTests : IAsyncLifetime
         await Seed.AccountAsync(_app, "alice@acme.test");
 
         var system = await GetAsync<SystemResponse>(_operator, "/api/system");
+        system.Version.ShouldStartWith("0.0.0-dev", Case.Sensitive, "tests run on development builds");
         system.MultiTenant.ShouldBeTrue();
         system.Accounts.ShouldBe(1);
         system.UnleasedAccounts.ShouldBe(1, "no worker runs in this test");

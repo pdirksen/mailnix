@@ -90,6 +90,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks().AddDbContextCheck<MailnixDbContext>();
 
 var app = builder.Build();
+Log.Information("mailnix {Version} ({Mode})", AppVersion.Current, hostOptions.Mode);
 
 if (!isOpenApiGeneration)
 {

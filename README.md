@@ -99,6 +99,41 @@ includes it. The encryption keys in it are protected with Windows DPAPI for the 
 On Linux, macOS and in Docker, configure a master key (see below); without one, the keys are stored unencrypted in
 the database and mailnix logs a warning at startup.
 
+## Standalone Linux and macOS app
+
+```bash
+./scripts/build-unix.sh                # --runtime linux-arm64 | linux-musl-x64 | osx-arm64 | ..., --archive, --output <dir>
+./scripts/run-unix.sh                  # builds if needed, starts it, opens the browser; --build, --urls, --no-browser
+```
+
+The same build as the Windows app, for the machine it runs on unless `--runtime` says otherwise:
+`artifacts/linux/linux-x64/mailnix` or `artifacts/macos/osx-arm64/mailnix`, with `wwwroot/` and `data/` next to it.
+`--archive` writes a `.tar.gz` without `data/`. There is no DPAPI, so create a master key before the first start:
+
+```bash
+./mailnix --generate-master-key > ~/.mailnix-master.key && chmod 600 ~/.mailnix-master.key
+Mailnix__DataProtection__MasterKeyFile=~/.mailnix-master.key ./mailnix
+```
+
+macOS builds made on another OS are not code-signed, and Apple Silicon runs only signed executables: sign it on the
+Mac with `codesign --force --sign - mailnix`. A downloaded archive also needs `xattr -dr com.apple.quarantine <folder>`.
+
+## Releases
+
+Versions follow [semantic versioning](https://semver.org) and come from git tags. To release, tag a commit on `main`
+and push the tag:
+
+```bash
+git tag v1.4.0 && git push origin v1.4.0      # a tag like v1.5.0-beta.1 makes a pre-release
+```
+
+The *Release* workflow then runs the full CI, builds the standalone Windows apps (x64 and ARM64) with that version and
+attaches the zips and a `SHA256SUMS` file to a GitHub release with generated notes.
+
+Every other build (`dotnet run`, the build scripts, Docker) is a development build `0.0.0-dev` unless `MailnixVersion`
+is set: as an environment variable, with `-p:MailnixVersion=1.4.0`, or with `--build-arg MailnixVersion=1.4.0` for
+the Docker image. Administrators see the version on the *System* page, and mailnix logs it at startup.
+
 ## Gmail and Microsoft 365
 
 Each installation registers its own OAuth app with Google and/or Microsoft; see [docs/oauth-setup.md](docs/oauth-setup.md)

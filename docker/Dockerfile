@@ -26,11 +26,15 @@ COPY backend/src/Mailnix.Worker/Mailnix.Worker.csproj backend/src/Mailnix.Worker
 RUN dotnet restore src/Mailnix.Api/Mailnix.Api.csproj --locked-mode
 COPY backend/ ./
 COPY --from=frontend /src/frontend/dist/ src/Mailnix.Api/wwwroot/
+# Release images: --build-arg MailnixVersion=1.4.0 (without it, the image is a development build).
+ARG MailnixVersion
 # The OpenAPI document is generated during development builds only.
 RUN dotnet publish src/Mailnix.Api/Mailnix.Api.csproj -c Release -o /app --no-restore -p:OpenApiGenerateDocuments=false
 
 # --- Runtime ---------------------------------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+ARG MailnixVersion=0.0.0-dev
+LABEL org.opencontainers.image.version=$MailnixVersion
 WORKDIR /app
 RUN mkdir /data && chown app:app /data
 COPY --from=backend /app ./
