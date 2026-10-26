@@ -196,7 +196,15 @@ if [ "$archive" = true ]; then
     tarball="$output.tar.gz"
     rm -f "$tarball"
     # Never ship a local data folder: it holds the database and the keys for stored mailbox passwords.
-    tar -czf "$tarball" -C "$(dirname "$output")" --exclude="$name/data" "$name"
+    if tar --version 2>/dev/null | grep -q 'GNU tar'; then
+        # Built on Windows (Git Bash), files have no executable bit and belong to the Windows account: set both here.
+        owner=(--owner=0 --group=0 --numeric-owner)
+        tar -cf "$output.tar" "${owner[@]}" -C "$(dirname "$output")" --exclude="$name/data" --exclude="$name/mailnix" "$name"
+        tar -rf "$output.tar" "${owner[@]}" --mode=0755 -C "$(dirname "$output")" "$name/mailnix"
+        gzip -f "$output.tar"
+    else
+        tar -czf "$tarball" --uid 0 --gid 0 -C "$(dirname "$output")" --exclude="$name/data" "$name"
+    fi
     echo "Archive: $tarball"
 fi
 

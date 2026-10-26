@@ -120,15 +120,19 @@ Mac with `codesign --force --sign - mailnix`. A downloaded archive also needs `x
 
 ## Releases
 
-Versions follow [semantic versioning](https://semver.org) and come from git tags. To release, tag a commit on `main`
-and push the tag:
+Versions follow [semantic versioning](https://semver.org). A release is built on a Windows machine from a clean
+checkout of the commit to release:
 
-```bash
-git tag v1.4.0 && git push origin v1.4.0      # a tag like v1.5.0-beta.1 makes a pre-release
+```powershell
+.\scripts\release.ps1 1.4.0                             # 1.5.0-beta.1 makes a pre-release
+.\scripts\release.ps1 1.4.0 -NoTag -Runtimes win-x64     # trial run: no tag, uncommitted changes allowed
 ```
 
-The *Release* workflow then runs the full CI, builds the standalone Windows apps (x64 and ARM64) with that version and
-attaches the zips and a `SHA256SUMS` file to a GitHub release with generated notes.
+It runs the backend and frontend tests (not the e2e tests: run those before), builds the standalone apps for
+`win-x64`, `win-arm64`, `linux-x64` and `linux-arm64` with that version (the Linux ones in Git Bash), writes them with a
+`SHA256SUMS` file to `artifacts/releases/<version>/` and tags the commit `v<version>`. Push the tag and upload the
+folder to the download server yourself. macOS builds have to be signed on a Mac: build them there with
+`build-unix.sh --archive`, add them to the folder and update `SHA256SUMS`.
 
 Every other build (`dotnet run`, the build scripts, Docker) is a development build `0.0.0-dev` unless `MailnixVersion`
 is set: as an environment variable, with `-p:MailnixVersion=1.4.0`, or with `--build-arg MailnixVersion=1.4.0` for

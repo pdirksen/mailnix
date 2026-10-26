@@ -44,8 +44,9 @@ instance runs with `Mailnix__Tenancy__Mode=MultiTenant`.
 Standalone builds: `scripts/build-windows.ps1` / `scripts/run-windows.ps1` on Windows, `scripts/build-unix.sh` /
 `scripts/run-unix.sh` on Linux and macOS (output in `artifacts/`).
 
-Releases: pushing a tag `vX.Y.Z` runs `.github/workflows/release.yml` (CI, then the Windows zips on a GitHub release).
-The version comes from `MailnixVersion` (environment variable or MSBuild property); without it builds are `0.0.0-dev`.
+Releases: `scripts/release.ps1 <version>` runs locally (tests, Windows and Linux builds, `SHA256SUMS`, tag `v<version>`)
+into `artifacts/releases/<version>/`; nothing depends on GitHub. The version comes from `MailnixVersion` (environment
+variable or MSBuild property); without it builds are `0.0.0-dev`.
 
 ## Architecture
 

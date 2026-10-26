@@ -12,8 +12,8 @@
     <!-- Runtime-specific publishes (scripts/build-windows.ps1, build-unix.sh) keep their lock files in obj/, so the
          committed ones stay platform-neutral. -->
     <NuGetLockFilePath Condition="'$(MailnixRuntimeLockFiles)' == 'true'">$(MSBuildProjectDirectory)/obj/packages.runtime.lock.json</NuGetLockFilePath>
-    <!-- Releases set MailnixVersion from the git tag, as an environment variable or -p:MailnixVersion=1.4.0 (see
-         .github/workflows/release.yml); everything else is a development build. -->
+    <!-- Releases set MailnixVersion, as an environment variable or -p:MailnixVersion=1.4.0 (see scripts/release.ps1);
+         everything else is a development build. -->
     <Version Condition="'$(MailnixVersion)' != ''">$(MailnixVersion)</Version>
     <Version Condition="'$(Version)' == ''">0.0.0-dev</Version>
     <Company>mailnix</Company>
