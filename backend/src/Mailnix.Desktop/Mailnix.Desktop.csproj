@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The Windows desktop app: a notification-area icon that runs mailnix.exe in the background. Plain Win32 instead of
+       WinForms, so it shares the runtime files of mailnix.exe in one folder (scripts/build-windows.ps1 -Desktop). -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>mailnix-desktop</AssemblyName>
+    <RootNamespace>Mailnix.Desktop</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>..\Mailnix.Api\mailnix.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mailnix.Integration.Tests" />
+  </ItemGroup>
+
+</Project>

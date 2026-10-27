@@ -789,14 +789,17 @@
           "xunit.v3.runner.common": "[4.0.2]"
         }
       },
+      "mailnix-desktop": {
+        "type": "Project"
+      },
       "mailnix.api": {
         "type": "Project",
         "dependencies": {
           "Cronos": "[0.13.0, )",
-          "Mailnix.Core": "[1.0.0, )",
-          "Mailnix.Infrastructure": "[1.0.0, )",
-          "Mailnix.Mail": "[1.0.0, )",
-          "Mailnix.Worker": "[1.0.0, )",
+          "Mailnix.Core": "[0.0.0-dev, )",
+          "Mailnix.Infrastructure": "[0.0.0-dev, )",
+          "Mailnix.Mail": "[0.0.0-dev, )",
+          "Mailnix.Worker": "[0.0.0-dev, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.13, )",
           "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "[10.0.13, )",
           "Scalar.AspNetCore": "[2.18.3, )",
@@ -813,8 +816,8 @@
         "type": "Project",
         "dependencies": {
           "Cronos": "[0.13.0, )",
-          "Mailnix.Core": "[1.0.0, )",
-          "Mailnix.Mail": "[1.0.0, )",
+          "Mailnix.Core": "[0.0.0-dev, )",
+          "Mailnix.Mail": "[0.0.0-dev, )",
           "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[10.0.13, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.13, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.13, )",
@@ -825,7 +828,7 @@
         "type": "Project",
         "dependencies": {
           "MailKit": "[4.18.2, )",
-          "Mailnix.Core": "[1.0.0, )",
+          "Mailnix.Core": "[0.0.0-dev, )",
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.13, )",
           "Microsoft.Extensions.Options.ConfigurationExtensions": "[10.0.13, )"
         }
@@ -833,9 +836,9 @@
       "mailnix.worker": {
         "type": "Project",
         "dependencies": {
-          "Mailnix.Core": "[1.0.0, )",
-          "Mailnix.Infrastructure": "[1.0.0, )",
-          "Mailnix.Mail": "[1.0.0, )"
+          "Mailnix.Core": "[0.0.0-dev, )",
+          "Mailnix.Infrastructure": "[0.0.0-dev, )",
+          "Mailnix.Mail": "[0.0.0-dev, )"
         }
       },
       "Cronos": {

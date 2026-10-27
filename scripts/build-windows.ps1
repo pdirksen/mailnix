@@ -14,16 +14,24 @@
 
 .EXAMPLE
     .\scripts\build-windows.ps1
+    With -Desktop: the desktop app instead (the base of the Windows installer). mailnix.exe and its runtime as
+    separate files, and mailnix-desktop.exe, which runs it in the background with an icon in the notification area.
+
 .EXAMPLE
     .\scripts\build-windows.ps1 -Runtime win-arm64 -Zip
+.EXAMPLE
+    .\scripts\build-windows.ps1 -Desktop
 #>
 [CmdletBinding()]
 param(
     [ValidateSet('win-x64', 'win-arm64')]
     [string] $Runtime = 'win-x64',
 
-    # Defaults to artifacts\windows\<runtime> in the repository.
+    # Defaults to artifacts\windows\<runtime> (with -Desktop: artifacts\windows-desktop\<runtime>) in the repository.
     [string] $Output,
+
+    # The desktop app: mailnix-desktop.exe next to mailnix.exe.
+    [switch] $Desktop,
 
     # Also create <Output>.zip.
     [switch] $Zip,
@@ -39,7 +47,7 @@ $root = Split-Path -Parent $PSScriptRoot
 $frontend = Join-Path $root 'frontend'
 $backend = Join-Path $root 'backend'
 $api = Join-Path $backend 'src\Mailnix.Api'
-if (-not $Output) { $Output = Join-Path $root "artifacts\windows\$Runtime" }
+if (-not $Output) { $Output = Join-Path $root "artifacts\$(if ($Desktop) { 'windows-desktop' } else { 'windows' })\$Runtime" }
 $Output = [System.IO.Path]::GetFullPath($Output)
 
 function Invoke-Step([string] $Title, [scriptblock] $Action) {
@@ -73,24 +81,33 @@ Copy-Item (Join-Path $frontend 'dist') $wwwroot -Recurse
 
 # --- Backend -----------------------------------------------------------------------------------------
 if (Test-Path $Output) {
-    $running = Get-Process mailnix -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq (Join-Path $Output 'mailnix.exe') }
-    if ($running) { throw "mailnix.exe is running from $Output (process $($running.Id -join ', ')). Stop it first." }
+    $running = Get-Process mailnix, mailnix-desktop -ErrorAction SilentlyContinue | Where-Object { $_.Path -like (Join-Path $Output '*.exe') }
+    if ($running) { throw "mailnix is running from $Output (process $($running.Id -join ', ')). Stop it first." }
     # Replace the previous build, but keep its data folder (database, keys): it may be a local install in use.
     Get-ChildItem $Output -Force | Where-Object Name -ne 'data' | Remove-Item -Recurse -Force
 }
+$publish = @(
+    '--configuration', 'Release',
+    '--runtime', $Runtime,
+    '--self-contained', 'true',
+    '--output', $Output,
+    '-p:DebugType=None',
+    '-p:MailnixRuntimeLockFiles=true'
+)
+# The desktop app shares the runtime files with mailnix.exe, so neither is a single file; that also keeps the
+# installer's update packages small.
+$singleFile = if ($Desktop) { @() } else {
+    @('-p:PublishSingleFile=true', '-p:IncludeNativeLibrariesForSelfExtract=true', '-p:EnableCompressionInSingleFile=true')
+}
 Invoke-Step "Publishing the backend ($Runtime, self-contained)" {
-    dotnet publish (Join-Path $api 'Mailnix.Api.csproj') `
-        --configuration Release `
-        --runtime $Runtime `
-        --self-contained true `
-        --output $Output `
-        -p:PublishSingleFile=true `
-        -p:IncludeNativeLibrariesForSelfExtract=true `
-        -p:EnableCompressionInSingleFile=true `
-        -p:DebugType=None `
+    dotnet publish (Join-Path $api 'Mailnix.Api.csproj') @publish @singleFile `
         -p:OpenApiGenerateDocuments=false `
-        -p:IsTransformWebConfigDisabled=true `
-        -p:MailnixRuntimeLockFiles=true
+        -p:IsTransformWebConfigDisabled=true
+}
+if ($Desktop) {
+    Invoke-Step "Publishing the desktop app ($Runtime)" {
+        dotnet publish (Join-Path $backend 'src\Mailnix.Desktop\Mailnix.Desktop.csproj') @publish
+    }
 }
 
 Rename-Item (Join-Path $Output 'Mailnix.Api.exe') 'mailnix.exe'
@@ -98,7 +115,34 @@ Rename-Item (Join-Path $Output 'Mailnix.Api.exe') 'mailnix.exe'
 Get-ChildItem $Output -Filter 'appsettings.Development.json' | Remove-Item
 Copy-Item (Join-Path $root 'LICENSE') $Output
 
-@"
+if ($Desktop) {
+    $title = "mailnix desktop $Runtime"
+    @"
+$title
+$('=' * $title.Length)
+
+Start mailnix-desktop.exe: mailnix runs in the background, with its icon in the
+notification area, and opens http://localhost:5480 in your browser. The icon's menu
+opens mailnix, starts it with Windows, shows the data folder and the log, and quits it.
+The first account you register becomes the administrator; nobody else can register
+afterwards (Mailnix:Auth:AllowRegistration in data\appsettings.json changes that).
+
+Data (SQLite database, encryption keys for stored mailbox passwords) and logs are kept
+in the 'data' folder next to mailnix-desktop.exe. Back it up, and keep it when updating:
+replace everything else with the new version. The keys are encrypted for the Windows
+account that runs mailnix: a backup restored on another computer or account needs the
+mailbox passwords entered again.
+
+Settings go into data\appsettings.json (same format as appsettings.json here), e.g. a
+fixed port:
+    { "Mailnix": { "Desktop": { "Port": 5480 } } }
+All settings are listed in the project README, section "Configuration".
+
+License: MIT (LICENSE). Third-party notices: wwwroot\THIRD-PARTY-NOTICES.md.
+"@ | Set-Content (Join-Path $Output 'README.txt') -Encoding utf8
+}
+else {
+    @"
 mailnix $Runtime
 ================
 
@@ -127,6 +171,7 @@ All settings are listed in the project README, section "Configuration".
 
 License: MIT (LICENSE). Third-party notices: wwwroot\THIRD-PARTY-NOTICES.md.
 "@ | Set-Content (Join-Path $Output 'README.txt') -Encoding utf8
+}
 
 if ($Zip) {
     $archive = "$Output.zip"

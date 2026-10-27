@@ -42,7 +42,8 @@ E2E needs the backend to serve the built SPA. Run `npm run build` and copy `fron
 instance runs with `Mailnix__Tenancy__Mode=MultiTenant`.
 
 Standalone builds: `scripts/build-windows.ps1` / `scripts/run-windows.ps1` on Windows, `scripts/build-unix.sh` /
-`scripts/run-unix.sh` on Linux and macOS (output in `artifacts/`).
+`scripts/run-unix.sh` on Linux and macOS (output in `artifacts/`). `build-windows.ps1 -Desktop` builds the Windows
+desktop app instead: `mailnix-desktop.exe` next to a multi-file `mailnix.exe`, in `artifacts/windows-desktop/`.
 
 Releases: `scripts/release.ps1 <version>` runs locally (tests, Windows and Linux builds, `SHA256SUMS`, tag `v<version>`)
 into `artifacts/releases/<version>/`; nothing depends on GitHub. The version comes from `MailnixVersion` (environment
@@ -83,6 +84,12 @@ step; see `docker/compose.saas.yml`.
   - `LeaseManager`: `MailboxLease` rows with conditional updates and fair-share balancing between worker processes.
 - `Mailnix.Api`: minimal-API endpoint groups (`*Endpoints.cs` per area), SignalR `LiveHub` at `/hubs/live`, and it
   serves `wwwroot`.
+- `Mailnix.Desktop` (`mailnix-desktop.exe`, Windows only): a tray icon in plain Win32 (`TrayIcon`, no WinForms, so it
+  shares the runtime files of `mailnix.exe`).
+  - It runs `mailnix.exe` hidden (`ServerProcess`) in the environment `Desktop` (`appsettings.Desktop.json`), with
+    `Mailnix:StopWhenInputCloses`; closing its standard input stops it.
+  - Data goes to `data\` next to it, or to `%LocalAppData%\mailnix-data` when installed (`DesktopPaths`).
+  - Its tests are in Integration.Tests (`DesktopTests`), including the real server as a child process.
 
 **Jobs go through the database.**
 - Manual runs, confirmations of capped runs and undo are queued as `Run` rows. The watcher that holds the account's

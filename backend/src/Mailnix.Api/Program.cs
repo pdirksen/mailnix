@@ -86,6 +86,12 @@ switch (hostOptions.Mode)
         break;
 }
 
+if (hostOptions.StopWhenInputCloses)
+{
+    builder.Services.AddHostedService(services => new InputClosedShutdown(
+        Console.In, services.GetRequiredService<IHostApplicationLifetime>(), services.GetRequiredService<ILogger<InputClosedShutdown>>()));
+}
+
 builder.Services.AddMailnixWorker(builder.Configuration, runWatchers: hostOptions.Mode is MailnixMode.AllInOne or MailnixMode.Worker && !isOpenApiGeneration);
 builder.Services.AddMemoryCache();
 builder.Services.AddProblemDetails();

@@ -100,6 +100,28 @@ Windows DPAPI for the account that runs mailnix, so a copied `data\` folder is u
 On Linux, macOS and in Docker, configure a master key (see below); without one, the keys are stored unencrypted in
 the database and mailnix logs a warning at startup.
 
+## Windows desktop app
+
+```powershell
+.\scripts\build-windows.ps1 -Desktop    # artifacts\windows-desktop\win-x64; -Runtime win-arm64, -Zip, -Output <dir>
+```
+
+For one person on their own PC, and the base of the upcoming Windows installer. `mailnix-desktop.exe` runs mailnix in
+the background with an icon in the notification area. A click on the icon opens mailnix in the browser. Its menu can
+also start mailnix with Windows, open the data folder and the log, and restart or quit mailnix.
+
+- mailnix listens on http://localhost:5480 only. For another port, put
+  `{ "Mailnix": { "Desktop": { "Port": 5481 } } }` into `appsettings.json` in the data folder. If the port is taken,
+  that run uses a free one and says so. Sign-in with Google or Microsoft needs the port that the OAuth app has
+  registered.
+- It runs in the environment `Desktop` (`appsettings.Desktop.json`), so only the first user can register.
+- Data is in `data\` next to it. An installed copy keeps it in `%LocalAppData%\mailnix-data` instead, which updates
+  and uninstalling leave alone.
+- Logs are in `logs\` in the data folder: `mailnix.log`, `mailnix.previous.log` for the run before, and
+  `desktop.log` for the desktop app's own errors.
+- Quitting closes mailnix's standard input (`Mailnix__StopWhenInputCloses`), so mailnix finishes cleanly.
+  `taskkill /im mailnix-desktop.exe` without `/f` does the same.
+
 ## Standalone Linux and macOS app
 
 ```bash
@@ -191,6 +213,7 @@ All settings can be given as environment variables (`__` separates sections).
 | Setting | Default | Description |
 |---|---|---|
 | `Mailnix__Mode` | `AllInOne` | `AllInOne`, `Api` (API + UI only) or `Worker` (mailbox processing only) |
+| `Mailnix__StopWhenInputCloses` | `false` | Stop when standard input closes; the Windows desktop app runs mailnix this way |
 | `Mailnix__Database__Provider` | `Sqlite` | `Sqlite` or `Postgres` |
 | `Mailnix__DataDirectory` | `data` | Folder for the SQLite database and an optional `appsettings.json` whose settings rank above the `appsettings.json` next to the executable (environment variables and the command line still win), so they survive updates. Relative to the executable's folder in published builds, otherwise to the working directory. Can't be set in that file itself |
 | `Mailnix__Database__ConnectionString` | SQLite: `mailnix.db` in the data directory | Required for Postgres |

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mailnix.Api\Mailnix.Api.csproj" />
+    <ProjectReference Include="..\..\src\Mailnix.Desktop\Mailnix.Desktop.csproj" />
   </ItemGroup>
 
   <ItemGroup>

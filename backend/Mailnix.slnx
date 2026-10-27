@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Mailnix.Api/Mailnix.Api.csproj" />
     <Project Path="src/Mailnix.Core/Mailnix.Core.csproj" />
+    <Project Path="src/Mailnix.Desktop/Mailnix.Desktop.csproj" />
     <Project Path="src/Mailnix.Infrastructure/Mailnix.Infrastructure.csproj" />
     <Project Path="src/Mailnix.Mail/Mailnix.Mail.csproj" />
     <Project Path="src/Mailnix.Worker/Mailnix.Worker.csproj" />
