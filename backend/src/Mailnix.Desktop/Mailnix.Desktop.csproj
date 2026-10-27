@@ -5,6 +5,8 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <AssemblyName>mailnix-desktop</AssemblyName>
+    <!-- The file description, which Windows shows as the sender of the tray app's notifications. -->
+    <AssemblyTitle>mailnix</AssemblyTitle>
     <RootNamespace>Mailnix.Desktop</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>..\Mailnix.Api\mailnix.ico</ApplicationIcon>
