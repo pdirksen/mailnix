@@ -106,8 +106,8 @@ the database and mailnix logs a warning at startup.
 .\scripts\build-windows.ps1 -Desktop    # artifacts\windows-desktop\win-x64; -Runtime win-arm64, -Zip, -Output <dir>
 ```
 
-For one person on their own PC, and the base of the upcoming Windows installer. `mailnix-desktop.exe` runs mailnix in
-the background with an icon in the notification area. A click on the icon opens mailnix in the browser. Its menu can
+For one person on their own PC, and what the Windows installer installs (see below). `mailnix-desktop.exe` runs
+mailnix in the background with an icon in the notification area. A click on the icon opens mailnix in the browser. Its menu can
 also start mailnix with Windows, open the data folder and the log, and restart or quit mailnix.
 
 - mailnix listens on http://localhost:5480 only. For another port, put
@@ -121,6 +121,25 @@ also start mailnix with Windows, open the data folder and the log, and restart o
   `desktop.log` for the desktop app's own errors.
 - Quitting closes mailnix's standard input (`Mailnix__StopWhenInputCloses`), so mailnix finishes cleanly.
   `taskkill /im mailnix-desktop.exe` without `/f` does the same.
+
+### Installer and updates
+
+Releases include `mailnix-<version>-win-x64-setup.exe` (made with [Velopack](https://velopack.io), MIT). It installs
+for the current user, without administrator rights, into `%LocalAppData%\mailnix`, adds shortcuts on the desktop and
+in the Start menu and starts mailnix. Data goes to `%LocalAppData%\mailnix-data`, which updates and uninstalling leave
+alone (delete it yourself to remove everything). Uninstalling also removes the "start with Windows" entry.
+
+An installed copy looks for updates a minute after it starts and then every 12 hours, and on request (*Check for
+updates* in the menu). A newer version is downloaded in the background (usually as a small delta) and announced; *Install
+update* in the menu stops mailnix cleanly, installs it and starts the new version. An update that was downloaded but
+not installed yet is installed at the next start of the app.
+
+The update address is built into each release (`release.ps1 -UpdateUrl`); `{ "Mailnix": { "Desktop": { "UpdateUrl":
+"https://…" } } }` in `appsettings.json` in the data folder overrides it, and may also be a folder or a file share.
+Without an address, an installed copy does not look for updates.
+
+The installer and the programs are not code-signed yet, so Windows SmartScreen warns before the first start of the
+installer ("More info" → "Run anyway").
 
 ## Standalone Linux and macOS app
 
@@ -147,14 +166,21 @@ Versions follow [semantic versioning](https://semver.org). A release is built on
 checkout of the commit to release:
 
 ```powershell
-.\scripts\release.ps1 1.4.0                             # 1.5.0-beta.1 makes a pre-release
+.\scripts\release.ps1 1.4.0 -UpdateUrl https://downloads.example.com/mailnix/updates   # 1.5.0-beta.1: a pre-release
 .\scripts\release.ps1 1.4.0 -NoTag -Runtimes win-x64     # trial run: no tag, uncommitted changes allowed
 ```
 
 It runs the backend and frontend tests (not the e2e tests: run those before), builds the standalone apps for
 `win-x64`, `win-arm64`, `linux-x64` and `linux-arm64` with that version (the Linux ones in Git Bash), writes them with a
 `SHA256SUMS` file to `artifacts/releases/<version>/` and tags the commit `v<version>`. Push the tag and upload the
-folder to the download server yourself. macOS builds have to be signed on a Mac: build them there with
+folder to the download server yourself.
+
+For each Windows runtime it also builds the desktop app and packs it with Velopack (`vpk`, a local dotnet tool in
+`backend/`): the installer goes into the release folder, the update packages into the feed folder
+`artifacts/releases/updates/` (`-Feed` for another one). Keep that folder between releases: it lists every version,
+and the next release builds its delta updates from it. Upload its content to the address given with `-UpdateUrl`.
+Each runtime is its own update channel (`win-x64`, `win-arm64`); pre-releases go to `win-x64-beta` and so on, so
+installed stable versions never get a pre-release. `-NoInstaller` skips all this. macOS builds have to be signed on a Mac: build them there with
 `build-unix.sh --archive`, add them to the folder and update `SHA256SUMS`.
 
 Every other build (`dotnet run`, the build scripts, Docker) is a development build `0.0.0-dev` unless `MailnixVersion`

@@ -17,4 +17,13 @@
     <InternalsVisibleTo Include="Mailnix.Integration.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Velopack" />
+  </ItemGroup>
+
+  <!-- The update feed of a release (scripts/release.ps1 -UpdateUrl, or the environment variable MailnixUpdateUrl). -->
+  <ItemGroup Condition="'$(MailnixUpdateUrl)' != ''">
+    <AssemblyMetadata Include="MailnixUpdateUrl" Value="$(MailnixUpdateUrl)" />
+  </ItemGroup>
+
 </Project>

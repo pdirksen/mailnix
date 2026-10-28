@@ -790,7 +790,10 @@
         }
       },
       "mailnix-desktop": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Velopack": "[1.2.161, )"
+        }
       },
       "mailnix.api": {
         "type": "Project",
@@ -974,6 +977,12 @@
           "Serilog.Sinks.Debug": "3.0.0",
           "Serilog.Sinks.File": "7.0.0"
         }
+      },
+      "Velopack": {
+        "type": "CentralTransitive",
+        "requested": "[1.2.161, )",
+        "resolved": "1.2.161",
+        "contentHash": "OpHNacIumnkhaaX3ZlQ/TCR4YPOJvud2/PAOoWb6o+mIrLwIVA275I5wAgt4q/1O2VrJeDwR1qFQyqzG4lUArg=="
       }
     }
   }

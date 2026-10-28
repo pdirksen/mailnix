@@ -3,7 +3,8 @@ using System.Text.Json;
 namespace Mailnix.Desktop;
 
 /// <summary>What the desktop app reads from appsettings.json in the data folder (the server reads the same file).</summary>
-internal sealed record DesktopSettings(int Port)
+/// <param name="UpdateUrl">Mailnix:Desktop:UpdateUrl, the update feed (overrides the one the release was built with).</param>
+internal sealed record DesktopSettings(int Port, string? UpdateUrl = null)
 {
     public const int DefaultPort = 5480;
 
@@ -17,10 +18,12 @@ internal sealed record DesktopSettings(int Port)
                 CommentHandling = JsonCommentHandling.Skip,
                 AllowTrailingCommas = true,
             });
-            var port = Find(Find(Find(document.RootElement, "Mailnix"), "Desktop"), "Port");
+            var desktop = Find(Find(document.RootElement, "Mailnix"), "Desktop");
+            var port = Find(desktop, "Port");
+            var updateUrl = Find(desktop, "UpdateUrl") is { ValueKind: JsonValueKind.String } url ? url.GetString() : null;
             return port is { ValueKind: JsonValueKind.Number } && port.Value.TryGetInt32(out var value) && value is > 0 and <= 65535
-                ? new DesktopSettings(value)
-                : new DesktopSettings(DefaultPort);
+                ? new DesktopSettings(value, updateUrl)
+                : new DesktopSettings(DefaultPort, updateUrl);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException)
         {

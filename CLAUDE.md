@@ -45,8 +45,9 @@ Standalone builds: `scripts/build-windows.ps1` / `scripts/run-windows.ps1` on Wi
 `scripts/run-unix.sh` on Linux and macOS (output in `artifacts/`). `build-windows.ps1 -Desktop` builds the Windows
 desktop app instead: `mailnix-desktop.exe` next to a multi-file `mailnix.exe`, in `artifacts/windows-desktop/`.
 
-Releases: `scripts/release.ps1 <version>` runs locally (tests, Windows and Linux builds, `SHA256SUMS`, tag `v<version>`)
-into `artifacts/releases/<version>/`; nothing depends on GitHub. The version comes from `MailnixVersion` (environment
+Releases: `scripts/release.ps1 <version> -UpdateUrl <feed address>` runs locally (tests, Windows and Linux builds,
+Windows installers, `SHA256SUMS`, tag `v<version>`) into `artifacts/releases/<version>/`, and the Velopack update feed
+into `artifacts/releases/updates/` (kept across releases for delta updates); nothing depends on GitHub. The version comes from `MailnixVersion` (environment
 variable or MSBuild property); without it builds are `0.0.0-dev`.
 
 ## Architecture
@@ -89,7 +90,10 @@ step; see `docker/compose.saas.yml`.
   - It runs `mailnix.exe` hidden (`ServerProcess`) in the environment `Desktop` (`appsettings.Desktop.json`), with
     `Mailnix:StopWhenInputCloses`; closing its standard input stops it.
   - Data goes to `data\` next to it, or to `%LocalAppData%\mailnix-data` when installed (`DesktopPaths`).
-  - Its tests are in Integration.Tests (`DesktopTests`), including the real server as a child process.
+  - Its tests are in Integration.Tests (`DesktopTests`, `DesktopUpdatesTests`), including the real server as a child process.
+  - Installer and updates: Velopack (`VelopackApp` first in `Program.Main`, `Updates.cs`). Velopack's own
+    apply-at-start is off because it kills a running instance; `DesktopApp.Run` installs a downloaded update only
+    after the single-instance check, before mailnix starts. `vpk` (same version as the package) is a local tool.
 
 **Jobs go through the database.**
 - Manual runs, confirmations of capped runs and undo are queued as `Run` rows. The watcher that holds the account's

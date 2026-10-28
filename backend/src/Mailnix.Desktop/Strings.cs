@@ -39,5 +39,25 @@ internal static class Strings
         ? "Einzelheiten stehen im Protokoll (hier klicken). „Neu starten“ im Menü startet mailnix wieder."
         : "Details are in the log (click here). Restart in the menu starts mailnix again.";
 
+    public static string CheckForUpdates(string version) => German ? $"Nach Updates suchen (Version {version})" : $"Check for updates (version {version})";
+
+    public static string CheckingForUpdates => German ? "Suche nach Updates …" : "Checking for updates…";
+
+    public static string InstallUpdate(string version) => German ? $"Update {version} installieren (startet mailnix neu)" : $"Install update {version} (restarts mailnix)";
+
+    public static string UpdateReadyTitle(string version) => German ? $"mailnix {version} ist bereit" : $"mailnix {version} is ready";
+
+    public static string UpdateReady => German
+        ? "Hier klicken oder im Menü „Update installieren“ wählen. mailnix startet dafür kurz neu."
+        : "Click here, or choose Install update in the menu. mailnix restarts briefly.";
+
+    public static string UpToDateTitle => German ? "mailnix ist aktuell" : "mailnix is up to date";
+
+    public static string UpToDate(string version) => German ? $"Version {version} ist die neueste." : $"Version {version} is the newest.";
+
+    public static string UpdateFailedTitle => German ? "Suche nach Updates fehlgeschlagen" : "Could not check for updates";
+
+    public static string UpdatedTitle(string version) => German ? $"mailnix wurde auf {version} aktualisiert" : $"mailnix was updated to {version}";
+
     public static string NotRunning => German ? "mailnix läuft gerade nicht. „Neu starten“ im Menü startet es." : "mailnix is not running. Restart in the menu starts it.";
 }

@@ -9,14 +9,20 @@
        running instance and are not part of this; run them before a release.
     3. Builds each runtime with MailnixVersion=<version>: build-windows.ps1 for win-*, build-unix.sh in Git Bash for
        linux-*.
-    4. Output: <Output>\mailnix-<version>-<runtime>.zip / .tar.gz and SHA256SUMS, as they go on the download server.
-    5. Tags the commit v<version>. Pushing the tag and uploading the folder are up to you.
+    4. Windows installer (unless -NoInstaller): for each win-* runtime the desktop app (build-windows.ps1 -Desktop),
+       packed with Velopack (vpk, a local dotnet tool in backend/) into the update feed <Feed> and a Setup.exe.
+       The feed folder is kept across releases: Velopack lists all versions there and builds delta updates from the
+       previous one. Pre-releases go to their own channel (<runtime>-beta), so installed stable versions never get them.
+    5. Output: <Output>\mailnix-<version>-<runtime>.zip / .tar.gz / -setup.exe and SHA256SUMS, as they go on the
+       download server.
+    6. Tags the commit v<version>. Pushing the tag and uploading the folders are up to you: <Output> to the download
+       area, the content of <Feed> to the address given with -UpdateUrl.
 
     macOS builds have to be signed on a Mac (see README): build them there with build-unix.sh --archive, add them to
     the folder and update SHA256SUMS.
 
 .EXAMPLE
-    .\scripts\release.ps1 1.4.0
+    .\scripts\release.ps1 1.4.0 -UpdateUrl https://downloads.example.com/mailnix/updates
 .EXAMPLE
     .\scripts\release.ps1 1.5.0-beta.1 -Runtimes win-x64 -NoTag
 #>
@@ -32,7 +38,17 @@ param(
     [string] $Output,
 
     # A trial run: no tag, and uncommitted changes are allowed. Delete the folder afterwards.
-    [switch] $NoTag
+    [switch] $NoTag,
+
+    # Where installed desktop apps look for updates: the web address the content of the feed folder is uploaded to.
+    # Built into mailnix-desktop.exe; Mailnix:Desktop:UpdateUrl in the data folder's appsettings.json overrides it.
+    [string] $UpdateUrl,
+
+    # The Velopack feed folder, kept across releases. Defaults to artifacts\releases\updates in the repository.
+    [string] $Feed,
+
+    # Only the zip/tar.gz builds, no Windows installer.
+    [switch] $NoInstaller
 )
 
 $ErrorActionPreference = 'Stop'
@@ -42,6 +58,9 @@ $root = Split-Path -Parent $PSScriptRoot
 $tag = "v$Version"
 if (-not $Output) { $Output = Join-Path $root "artifacts\releases\$Version" }
 $Output = [System.IO.Path]::GetFullPath($Output)
+if (-not $Feed) { $Feed = Join-Path $root 'artifacts\releases\updates' }
+$Feed = [System.IO.Path]::GetFullPath($Feed)
+$installers = -not $NoInstaller -and ($Runtimes -like 'win-*')
 $staging = Join-Path $root "artifacts\release-build\$Version"
 
 function Invoke-Step([string] $Title, [scriptblock] $Action) {
@@ -64,6 +83,11 @@ $changes = git -C $root status --porcelain
 if ($changes -and -not $NoTag) { throw "There are uncommitted changes; a release is built from a commit:`n$($changes -join "`n")" }
 $branch = git -C $root branch --show-current
 if ($branch -ne 'main') { Write-Warning "Releasing from '$branch', not main." }
+
+if ($installers -and -not $UpdateUrl) {
+    Write-Warning 'No -UpdateUrl: installed apps of this release only look for updates once Mailnix:Desktop:UpdateUrl is set in their data folder.'
+}
+if ($UpdateUrl -and $UpdateUrl -notmatch '^https?://') { throw "-UpdateUrl must be an http(s) address, not '$UpdateUrl'." }
 
 $bash = $null
 if ($Runtimes -like 'linux-*') {
@@ -94,8 +118,20 @@ finally {
 # --- Builds ------------------------------------------------------------------------------------------
 if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
 $previousVersion = $env:MailnixVersion
-# Picked up by every dotnet build (Directory.Build.props).
+$previousUpdateUrl = $env:MailnixUpdateUrl
+# Picked up by every dotnet build (Directory.Build.props, Mailnix.Desktop.csproj).
 $env:MailnixVersion = $Version
+$env:MailnixUpdateUrl = $UpdateUrl
+if ($installers) {
+    Push-Location (Join-Path $root 'backend')
+    try {
+        Invoke-Step 'Restoring vpk' { dotnet tool restore }
+    }
+    finally {
+        Pop-Location
+    }
+    New-Item -ItemType Directory $Feed -Force | Out-Null
+}
 try {
     foreach ($runtime in $Runtimes) {
         $build = Join-Path $staging "mailnix-$Version-$runtime"
@@ -103,6 +139,26 @@ try {
             Invoke-Step "Building $runtime" { & (Join-Path $PSScriptRoot 'build-windows.ps1') -Runtime $runtime -Output $build -Zip }
             $built = (Get-Item (Join-Path $build 'mailnix.exe')).VersionInfo.ProductVersion
             if ($built -ne $Version -and -not $built.StartsWith("$Version+")) { throw "mailnix.exe reports version '$built', not $Version." }
+
+            if ($installers) {
+                $desktop = Join-Path $staging "desktop-$runtime"
+                Invoke-Step "Building the desktop app ($runtime)" { & (Join-Path $PSScriptRoot 'build-windows.ps1') -Runtime $runtime -Output $desktop -Desktop }
+                $channel = if ($Version -like '*-*') { "$runtime-beta" } else { $runtime }
+                Push-Location (Join-Path $root 'backend')
+                try {
+                    Invoke-Step "Packing the installer ($runtime, channel $channel)" {
+                        dotnet tool run vpk pack --packId mailnix --packVersion $Version --packDir $desktop `
+                            --mainExe mailnix-desktop.exe --packTitle mailnix --packAuthors mailnix `
+                            --icon (Join-Path $root 'backend\src\Mailnix.Api\mailnix.ico') `
+                            --runtime $runtime --channel $channel --outputDir $Feed --noPortable `
+                            --exclude '(^|[\\/])data[\\/]|\.pdb$'
+                    }
+                }
+                finally {
+                    Pop-Location
+                }
+                Copy-Item (Join-Path $Feed "mailnix-$channel-Setup.exe") (Join-Path $staging "mailnix-$Version-$runtime-setup.exe")
+            }
         }
         else {
             $script = (Join-Path $PSScriptRoot 'build-unix.sh') -replace '\\', '/'
@@ -112,10 +168,11 @@ try {
 }
 finally {
     $env:MailnixVersion = $previousVersion
+    $env:MailnixUpdateUrl = $previousUpdateUrl
 }
 
 New-Item -ItemType Directory $Output | Out-Null
-Get-ChildItem $staging -File | Where-Object { $_.Name -like '*.zip' -or $_.Name -like '*.tar.gz' } | Move-Item -Destination $Output
+Get-ChildItem $staging -File | Where-Object { $_.Name -like '*.zip' -or $_.Name -like '*.tar.gz' -or $_.Name -like '*-setup.exe' } | Move-Item -Destination $Output
 # The format of sha256sum, so `sha256sum -c SHA256SUMS` checks a download.
 $sums = Get-ChildItem $Output -File | Sort-Object Name | ForEach-Object {
     '{0}  {1}' -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name
@@ -133,3 +190,6 @@ else {
     Write-Host "Push the tag with: git push origin $tag"
 }
 Get-ChildItem $Output | Format-Table Name, @{ n = 'MB'; e = { '{0:N1}' -f ($_.Length / 1MB) } } -AutoSize
+if ($installers) {
+    Write-Host "Update feed: $Feed$(if ($UpdateUrl) { " (upload its content to $UpdateUrl)" })"
+}
