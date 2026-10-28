@@ -19,6 +19,12 @@ public sealed class MailnixHostOptions
     public MailnixMode Mode { get; set; } = MailnixMode.AllInOne;
 
     /// <summary>
+    /// The public address of mailnix (e.g. https://mail.example.com), for links in emails. Without it, emails with
+    /// links (password reset, invitations) are not sent.
+    /// </summary>
+    public string? PublicUrl { get; set; }
+
+    /// <summary>
     /// Stop when standard input closes. The Windows desktop app starts mailnix this way, so closing the pipe stops it
     /// cleanly, and mailnix doesn't outlive a desktop app that ends abruptly.
     /// </summary>

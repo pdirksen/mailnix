@@ -15,7 +15,9 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -109,11 +111,17 @@ const inviting = ref(false)
 /** The link of the invitation just created; the server shows it only once. */
 const createdLink = ref<string>()
 
+/** Send the link by email as well (when the server can send email and an address is given). */
+const sendEmail = ref(true)
+const canEmail = computed(() => !!team.value?.emailAvailable && inviteEmail.value.trim() !== '')
+
 async function invite() {
   inviting.value = true
   try {
-    const created = unwrap(await api.POST('/api/team/invitations', { body: { email: inviteEmail.value.trim() || null } }))
+    const email = inviteEmail.value.trim() || null
+    const created = unwrap(await api.POST('/api/team/invitations', { body: { email, sendEmail: canEmail.value && sendEmail.value } }))
     createdLink.value = created.url
+    if (created.emailSent) toast.success(t('team.emailSent', { email }))
     inviteEmail.value = ''
     await load()
   } catch (error) {
@@ -252,6 +260,10 @@ async function revoke(invitation: Schemas['InvitationItem']) {
               <MailPlusIcon v-else />
               {{ $t('team.invite') }}
             </Button>
+            <div v-if="canEmail" class="flex basis-full items-center gap-2">
+              <Checkbox id="invite-send-email" v-model="sendEmail" />
+              <Label for="invite-send-email" class="font-normal">{{ $t('team.sendByEmail') }}</Label>
+            </div>
           </form>
 
           <div v-if="createdLink" class="bg-muted/50 grid gap-2 rounded-lg border p-3" data-testid="invitation-link">

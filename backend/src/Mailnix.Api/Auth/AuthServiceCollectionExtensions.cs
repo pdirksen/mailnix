@@ -56,6 +56,9 @@ internal static class AuthServiceCollectionExtensions
         // changed admin rights take effect within a minute (default: 30 minutes).
         services.Configure<SecurityStampValidatorOptions>(validator => validator.ValidationInterval = TimeSpan.FromMinutes(1));
 
+        // Password-reset links (Identity's data protection tokens) work for two hours.
+        services.Configure<DataProtectionTokenProviderOptions>(tokens => tokens.TokenLifespan = Email.AccountEmails.ResetLinkLifetime);
+
         services.AddIdentityCore<AppUser>(identity =>
             {
                 identity.User.RequireUniqueEmail = true;

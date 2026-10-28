@@ -1,3 +1,4 @@
+using Mailnix.Mail.Email;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +13,8 @@ public static class MailServiceCollectionExtensions
         services.AddSingleton<IMailboxProbe, MailboxProbe>();
         services.AddSingleton<IMessageReader, MessageReader>();
         services.AddSingleton<IMailboxSessionFactory, ImapMailboxSessionFactory>();
+        services.AddOptions<EmailOptions>().Bind(configuration.GetSection(EmailOptions.Section));
+        services.AddSingleton<IEmailSender, SmtpEmailSender>();
         return services;
     }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { api, type Schemas, unwrap } from '@/api/client'
+import { api, ApiError, type Schemas, unwrap } from '@/api/client'
 import KpiTile from '@/components/stats/KpiTile.vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useConnectionErrors } from '@/lib/connectionErrors'
 import { formatDateTime, formatRelative } from '@/lib/format'
-import { RefreshCwIcon } from '@lucide/vue'
+import { CircleAlertIcon, CircleCheckIcon, Loader2Icon, MailIcon, RefreshCwIcon, SendIcon } from '@lucide/vue'
 import { useIntervalFn } from '@vueuse/core'
 import { onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -49,6 +49,22 @@ function limitValid(tenantId: string) {
 
 function limitChanged(tenant: Schemas['TenantRow']) {
   return (limits[tenant.id]?.trim() ?? '') !== (tenant.maxAccounts?.toString() ?? '')
+}
+
+// Email: send a test message to the signed-in administrator; failures are shown with the server's reason.
+const sendingTest = ref(false)
+const testError = ref<string>()
+async function sendTestEmail() {
+  sendingTest.value = true
+  testError.value = undefined
+  try {
+    unwrap(await api.POST('/api/system/test-email'))
+    toast.success(t('system.email.testSent'))
+  } catch (error) {
+    testError.value = error instanceof ApiError ? (error.problem.detail ?? error.message) : describeRequestError(error).message
+  } finally {
+    sendingTest.value = false
+  }
 }
 
 async function saveLimit(tenant: Schemas['TenantRow']) {
@@ -102,6 +118,44 @@ async function saveLimit(tenant: Schemas['TenantRow']) {
         <KpiTile :label="$t('system.queued')" :value="system.queuedRuns" test-id="kpi-queued" />
         <KpiTile :label="$t('system.awaiting')" :value="system.awaitingConfirmation" test-id="kpi-awaiting" />
       </div>
+
+      <Card data-testid="email-status">
+        <CardHeader>
+          <CardTitle class="flex items-center gap-2"><MailIcon class="size-4" />{{ $t('system.email.title') }}</CardTitle>
+          <CardDescription>{{ $t('system.email.description') }}</CardDescription>
+        </CardHeader>
+        <CardContent class="grid gap-4">
+          <dl class="grid gap-3 text-sm sm:grid-cols-2">
+            <div class="flex items-start gap-3 rounded-lg border px-3 py-2.5">
+              <CircleCheckIcon v-if="system.email.configured" class="text-success mt-0.5 size-4 shrink-0" />
+              <CircleAlertIcon v-else class="text-warning mt-0.5 size-4 shrink-0" />
+              <div class="min-w-0">
+                <dt class="font-medium">{{ $t('system.email.server') }}</dt>
+                <dd class="text-muted-foreground truncate">
+                  {{ system.email.configured ? $t('system.email.sendsAs', { from: system.email.from }) : $t('system.email.notConfigured') }}
+                </dd>
+              </div>
+            </div>
+            <div class="flex items-start gap-3 rounded-lg border px-3 py-2.5">
+              <CircleCheckIcon v-if="system.email.publicUrl" class="text-success mt-0.5 size-4 shrink-0" />
+              <CircleAlertIcon v-else class="text-warning mt-0.5 size-4 shrink-0" />
+              <div class="min-w-0">
+                <dt class="font-medium">{{ $t('system.email.publicUrl') }}</dt>
+                <dd class="text-muted-foreground truncate">{{ system.email.publicUrl ?? $t('system.email.publicUrlMissing') }}</dd>
+              </div>
+            </div>
+          </dl>
+          <div class="flex flex-wrap items-center gap-3">
+            <Button variant="outline" :disabled="!system.email.configured || sendingTest" data-testid="send-test-email" @click="sendTestEmail">
+              <Loader2Icon v-if="sendingTest" class="animate-spin" />
+              <SendIcon v-else />
+              {{ $t('system.email.sendTest') }}
+            </Button>
+            <span class="text-muted-foreground text-xs">{{ $t('system.email.configHint') }}</span>
+          </div>
+          <p v-if="testError" class="text-destructive text-sm" role="alert" data-testid="test-email-error">{{ testError }}</p>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

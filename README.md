@@ -213,6 +213,11 @@ All settings can be given as environment variables (`__` separates sections).
 | Setting | Default | Description |
 |---|---|---|
 | `Mailnix__Mode` | `AllInOne` | `AllInOne`, `Api` (API + UI only) or `Worker` (mailbox processing only) |
+| `Mailnix__PublicUrl` | – | Public address of mailnix (e.g. `https://mail.example.com`), used for links in emails (password reset, invitations). Links in emails never use the request's host name, so without this setting (or `Mailnix__OAuth__RedirectBaseUrl`) no password-reset emails are sent |
+| `Mailnix__Email__Host` / `Port` | – / by security | SMTP server for mailnix's own emails (password reset, invitations, security notices). Port defaults to 587 (`StartTls`), 465 (`SslOnConnect`) or 25 (`None`). Without a host, every email feature is off and "Forgot password?" is hidden |
+| `Mailnix__Email__Security` | `StartTls` | `StartTls`, `SslOnConnect` or `None` (e.g. a relay on the local network) |
+| `Mailnix__Email__Username` / `Password` | – | SMTP sign-in; leave empty for relays that need none |
+| `Mailnix__Email__FromAddress` / `FromName` | – / `mailnix` | Sender of the emails; the address is required for sending |
 | `Mailnix__StopWhenInputCloses` | `false` | Stop when standard input closes; the Windows desktop app runs mailnix this way |
 | `Mailnix__Database__Provider` | `Sqlite` | `Sqlite` or `Postgres` |
 | `Mailnix__DataDirectory` | `data` | Folder for the SQLite database and an optional `appsettings.json` whose settings rank above the `appsettings.json` next to the executable (environment variables and the command line still win), so they survive updates. Relative to the executable's folder in published builds, otherwise to the working directory. Can't be set in that file itself |

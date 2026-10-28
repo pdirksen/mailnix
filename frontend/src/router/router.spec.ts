@@ -16,6 +16,8 @@ describe('routes', () => {
     ['/', 'dashboard'],
     ['/login', 'login'],
     ['/register', 'register'],
+    ['/forgot-password', 'forgot-password'],
+    ['/reset-password', 'reset-password'],
     ['/accounts', 'accounts'],
     ['/accounts/new', 'account-new'],
     ['/accounts/123', 'account-detail'],

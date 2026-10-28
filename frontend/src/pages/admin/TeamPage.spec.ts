@@ -23,6 +23,7 @@ const team = () => ({
     { id: colleague, email: 'carol@acme.test', displayName: null, isTenantAdmin: false, isAdmin: false, accounts: 0, createdAt: '2026-10-20T10:00:00Z' },
   ],
   invitations: [{ id: 'i1', email: null, createdAt: '2026-10-24T10:00:00Z', expiresAt: '2026-10-31T10:00:00Z' }],
+  emailAvailable: true,
 })
 
 async function mountTeam() {
@@ -62,7 +63,7 @@ describe('TeamPage', () => {
     await wrapper.find('[data-testid="create-invitation"]').trigger('submit')
     await flushPromises()
 
-    expect(apiMock.POST).toHaveBeenCalledWith('/api/team/invitations', { body: { email: 'dave@acme.test' } })
+    expect(apiMock.POST).toHaveBeenCalledWith('/api/team/invitations', { body: { email: 'dave@acme.test', sendEmail: true } })
     expect(wrapper.find<HTMLInputElement>('[data-testid="invitation-link"] input').element.value).toBe(
       'https://mailnix.test/register?invite=abc',
     )
@@ -82,5 +83,21 @@ describe('TeamPage', () => {
     expect(toast.error).toHaveBeenCalledWith(
       'Someone has to stay admin of the organization. Make another member admin first.',
     )
+  })
+
+  it('sends the invitation by email when an address is given', async () => {
+    const wrapper = await mountTeam()
+    apiMock.POST.mockResolvedValue(
+      apiResult(200, { invitation: team().invitations[0], url: 'https://mailnix.test/register?invite=abc', emailSent: true }),
+    )
+    expect(wrapper.find('#invite-send-email').exists()).toBe(false)
+
+    await wrapper.find('#invite-email').setValue('dave@acme.test')
+    expect(wrapper.find('#invite-send-email').exists()).toBe(true)
+    await wrapper.find('[data-testid="create-invitation"]').trigger('submit')
+    await flushPromises()
+
+    expect(apiMock.POST).toHaveBeenCalledWith('/api/team/invitations', { body: { email: 'dave@acme.test', sendEmail: true } })
+    expect(toast.success).toHaveBeenCalledWith('Invitation sent to dave@acme.test.')
   })
 })

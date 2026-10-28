@@ -153,6 +153,60 @@
         }
       }
     },
+    "/api/auth/forgot-password": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/logout": {
       "post": {
         "tags": [
@@ -2391,6 +2445,18 @@
         }
       }
     },
+    "/api/system/test-email": {
+      "post": {
+        "tags": [
+          "System"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/profile": {
       "get": {
         "tags": [
@@ -3403,7 +3469,8 @@
       "AuthConfigResponse": {
         "required": [
           "registrationOpen",
-          "multiTenant"
+          "multiTenant",
+          "passwordResetAvailable"
         ],
         "type": "object",
         "properties": {
@@ -3411,6 +3478,9 @@
             "type": "boolean"
           },
           "multiTenant": {
+            "type": "boolean"
+          },
+          "passwordResetAvailable": {
             "type": "boolean"
           }
         }
@@ -3868,7 +3938,8 @@
       "CreatedInvitation": {
         "required": [
           "invitation",
-          "url"
+          "url",
+          "emailSent"
         ],
         "type": "object",
         "properties": {
@@ -3877,6 +3948,9 @@
           },
           "url": {
             "type": "string"
+          },
+          "emailSent": {
+            "type": "boolean"
           }
         }
       },
@@ -3888,6 +3962,10 @@
               "null",
               "string"
             ]
+          },
+          "sendEmail": {
+            "type": "boolean",
+            "default": false
           }
         }
       },
@@ -3981,6 +4059,31 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "EmailStatus": {
+        "required": [
+          "configured",
+          "from",
+          "publicUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "from": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "publicUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -4180,6 +4283,23 @@
           },
           "growth": {
             "$ref": "#/components/schemas/TimeSeries"
+          }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "language": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -5356,6 +5476,25 @@
           }
         }
       },
+      "ResetPasswordRequest": {
+        "required": [
+          "email",
+          "token",
+          "newPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string"
+          }
+        }
+      },
       "RuleAction": {
         "required": [
           "type"
@@ -6423,7 +6562,8 @@
           "unleasedAccounts",
           "queuedRuns",
           "awaitingConfirmation",
-          "tenants"
+          "tenants",
+          "email"
         ],
         "type": "object",
         "properties": {
@@ -6463,6 +6603,9 @@
             "items": {
               "$ref": "#/components/schemas/TenantRow"
             }
+          },
+          "email": {
+            "$ref": "#/components/schemas/EmailStatus"
           }
         }
       },
@@ -6511,7 +6654,8 @@
         "required": [
           "tenant",
           "users",
-          "invitations"
+          "invitations",
+          "emailAvailable"
         ],
         "type": "object",
         "properties": {
@@ -6529,6 +6673,9 @@
             "items": {
               "$ref": "#/components/schemas/InvitationItem"
             }
+          },
+          "emailAvailable": {
+            "type": "boolean"
           }
         }
       },

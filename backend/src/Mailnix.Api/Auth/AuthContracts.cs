@@ -4,7 +4,19 @@ namespace Mailnix.Api.Auth;
 
 /// <param name="RegistrationOpen">Anyone may sign up (invitations work regardless).</param>
 /// <param name="MultiTenant">Signing up creates an own tenant (SaaS).</param>
-public sealed record AuthConfigResponse(bool RegistrationOpen, bool MultiTenant);
+/// <param name="PasswordResetAvailable">"Forgot password" works (email and the public address are configured).</param>
+public sealed record AuthConfigResponse(bool RegistrationOpen, bool MultiTenant, bool PasswordResetAvailable);
+
+/// <param name="Language">The UI language, for the email when the account has none chosen.</param>
+public sealed record ForgotPasswordRequest(
+    [Required, EmailAddress, MaxLength(256)] string Email,
+    [MaxLength(10)] string? Language = null);
+
+/// <param name="Token">From the link in the email.</param>
+public sealed record ResetPasswordRequest(
+    [Required, EmailAddress, MaxLength(256)] string Email,
+    [Required, MaxLength(2048)] string Token,
+    [Required, MinLength(10), MaxLength(256)] string NewPassword);
 
 /// <summary>What an invitation link leads to, shown on the signup page.</summary>
 public sealed record InvitationInfo(string TenantName, string? Email);

@@ -30,6 +30,14 @@ x-mailnix: &mailnix
     # Customers' mail servers only: no connections into the hosting network.
     Mailnix__Mail__BlockPrivateNetworks: "true"
     Mailnix__OAuth__RedirectBaseUrl: https://${MAILNIX_DOMAIN:-localhost}
+    # Links in emails (password reset, invitations) use this address, never the request's host name.
+    Mailnix__PublicUrl: https://${MAILNIX_DOMAIN:-localhost}
+    # SMTP for password reset, invitations and security notices (without it, these emails are off):
+    Mailnix__Email__Host: ${MAILNIX_SMTP_HOST:-}
+    Mailnix__Email__Port: ${MAILNIX_SMTP_PORT:-587}
+    Mailnix__Email__Username: ${MAILNIX_SMTP_USER:-}
+    Mailnix__Email__Password: ${MAILNIX_SMTP_PASSWORD:-}
+    Mailnix__Email__FromAddress: ${MAILNIX_SMTP_FROM:-}
     # Mailnix__OAuth__Google__ClientId / ClientSecret, Mailnix__OAuth__Microsoft__ClientId / ClientSecret: see README
 
 services:

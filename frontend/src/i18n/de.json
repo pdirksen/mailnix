@@ -76,7 +76,8 @@
       "InvitationInvalid": "Diese Einladung ist nicht mehr gültig.",
       "InvitationForOtherEmail": "Diese Einladung gilt für eine andere E-Mail-Adresse.",
       "InvalidCode": "Dieser Code ist nicht gültig. Prüfe die Uhrzeit auf deinem Handy oder warte auf den nächsten Code.",
-      "TwoFactorExpired": "Das hat zu lange gedauert. Bitte melde dich erneut mit deinem Passwort an."
+      "TwoFactorExpired": "Das hat zu lange gedauert. Bitte melde dich erneut mit deinem Passwort an.",
+      "ResetLinkInvalid": "Dieser Link ist nicht mehr gültig."
     },
     "twoFactorTitle": "Anmeldung in zwei Schritten",
     "twoFactorHint": "Gib den 6-stelligen Code aus deiner Authenticator-App ein.",
@@ -86,7 +87,29 @@
     "useRecoveryCode": "Stattdessen einen Wiederherstellungscode verwenden",
     "useAuthenticator": "Stattdessen die Authenticator-App verwenden",
     "verify": "Bestätigen",
-    "backToPassword": "Zurück"
+    "backToPassword": "Zurück",
+    "forgot": {
+      "link": "Passwort vergessen?",
+      "title": "Passwort zurücksetzen",
+      "subtitle": "Gib die E-Mail-Adresse ein, mit der du dich anmeldest. Wir schicken dir einen Link, mit dem du ein neues Passwort wählst.",
+      "send": "Link senden",
+      "sentTitle": "Schau in dein Postfach",
+      "sent": "Falls es ein Konto für {email} gibt, ist ein Link zum Zurücksetzen des Passworts unterwegs. Er gilt 2 Stunden.",
+      "notArrived": "Nach ein paar Minuten noch nichts angekommen? Schau im Spam-Ordner nach oder sende den Link erneut.",
+      "sendAgain": "Erneut senden",
+      "backToLogin": "Zurück zur Anmeldung",
+      "unavailable": "Diese Installation kann keine E-Mails senden, daher lassen sich Passwörter hier nicht zurücksetzen. Bitte wende dich an deinen Administrator."
+    },
+    "reset": {
+      "title": "Neues Passwort wählen",
+      "subtitle": "Für dein Konto {email}.",
+      "subtitleNoEmail": "Für dein mailnix-Konto.",
+      "save": "Passwort speichern",
+      "done": "Dein Passwort wurde geändert. Melde dich mit dem neuen an.",
+      "invalidHint": "Links funktionieren einmal und 2 Stunden lang. Fordere einen neuen an.",
+      "requestNew": "Neuen Link anfordern",
+      "signedOutHint": "Alle Geräte werden abgemeldet; danach meldest du dich mit dem neuen Passwort an."
+    }
   },
   "validation": {
     "required": "Dieses Feld ist erforderlich.",
@@ -905,7 +928,9 @@
       "LastTenantAdmin": "Jemand muss Admin der Organisation bleiben. Mache zuerst ein anderes Mitglied zum Admin.",
       "CannotRemoveSelf": "Du kannst dich nicht selbst entfernen.",
       "CannotRemoveAdmin": "Der Admin der Installation kann hier nicht entfernt werden."
-    }
+    },
+    "sendByEmail": "Einladung auch per E-Mail senden",
+    "emailSent": "Einladung an {email} gesendet."
   },
   "system": {
     "title": "System",
@@ -939,7 +964,19 @@
     "limitFor": "Postfach-Grenze für {name}",
     "unlimited": "Unbegrenzt",
     "limitSaved": "Grenze für {name} gespeichert.",
-    "created": "Angelegt"
+    "created": "Angelegt",
+    "email": {
+      "title": "E-Mail",
+      "description": "Für Links zum Zurücksetzen von Passwörtern, Einladungen und Sicherheitshinweise.",
+      "server": "Mailserver",
+      "sendsAs": "Sendet als {from}",
+      "notConfigured": "Nicht eingerichtet: Es werden keine E-Mails gesendet.",
+      "publicUrl": "Öffentliche Adresse",
+      "publicUrlMissing": "Nicht gesetzt: E-Mails mit Links (Passwort zurücksetzen, Einladungen) werden nicht gesendet.",
+      "sendTest": "Test-E-Mail an mich senden",
+      "testSent": "Test-E-Mail gesendet. Schau in dein Postfach.",
+      "configHint": "Einstellungen: Mailnix__Email__* und Mailnix__PublicUrl (siehe README)."
+    }
   },
   "settings": {
     "title": "Einstellungen",

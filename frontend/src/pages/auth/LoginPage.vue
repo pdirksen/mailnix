@@ -11,7 +11,7 @@ import { errorMessages } from '@/lib/errors'
 import { toTypedSchema } from '@/lib/zodForm'
 import { safeRedirect } from '@/router/safeRedirect'
 import { useAuthStore } from '@/stores/auth'
-import { CircleAlertIcon, Loader2Icon, SmartphoneIcon } from '@lucide/vue'
+import { CircleAlertIcon, CircleCheckIcon, Loader2Icon, SmartphoneIcon } from '@lucide/vue'
 import { useForm } from 'vee-validate'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -148,6 +148,10 @@ function backToPassword() {
           <CircleAlertIcon />
           <AlertDescription>{{ $t('auth.sessionExpired') }}</AlertDescription>
         </Alert>
+        <Alert v-if="route.query.reset && failure.length === 0" data-testid="password-reset-done">
+          <CircleCheckIcon />
+          <AlertDescription>{{ $t('auth.reset.done') }}</AlertDescription>
+        </Alert>
         <Alert v-if="failure.length > 0" variant="destructive" data-testid="login-error">
           <CircleAlertIcon />
           <AlertTitle>{{ $t('auth.loginFailed') }}</AlertTitle>
@@ -168,9 +172,18 @@ function backToPassword() {
             autocomplete="current-password"
           />
         </FormField>
-        <div class="flex items-center gap-2">
-          <Checkbox id="remember-me" v-model="rememberMe" />
-          <Label for="remember-me" class="font-normal">{{ $t('auth.rememberMe') }}</Label>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <Checkbox id="remember-me" v-model="rememberMe" />
+            <Label for="remember-me" class="font-normal">{{ $t('auth.rememberMe') }}</Label>
+          </div>
+          <RouterLink
+            v-if="auth.passwordResetAvailable"
+            :to="{ name: 'forgot-password', query: email ? { email } : {} }"
+            class="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
+          >
+            {{ $t('auth.forgot.link') }}
+          </RouterLink>
         </div>
       </CardContent>
       <CardFooter class="mt-6 flex flex-col gap-4">

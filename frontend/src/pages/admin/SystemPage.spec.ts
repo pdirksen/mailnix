@@ -24,6 +24,7 @@ const system = {
   queuedRuns: 2,
   awaitingConfirmation: 0,
   tenants: [{ id: 't1', name: 'Acme', users: 2, accounts: 4, maxAccounts: null, createdAt: '2026-10-01T10:00:00Z' }],
+  email: { configured: true, from: 'mailnix@example.org', publicUrl: 'https://mail.example.org' },
 }
 
 describe('SystemPage', () => {
@@ -54,5 +55,21 @@ describe('SystemPage', () => {
     await flushPromises()
 
     expect(apiMock.PUT).toHaveBeenCalledWith('/api/system/tenants/{id}', { params: { path: { id: 't1' } }, body: { maxAccounts: 25 } })
+  })
+
+  it('sends a test email and shows why it failed', async () => {
+    apiMock.GET.mockResolvedValue(apiResult(200, system))
+    apiMock.POST.mockResolvedValue(
+      apiResult(502, { title: 'The test email could not be sent.', detail: 'Sending through smtp.example.org failed: 535', errorCode: 'EmailFailed' }),
+    )
+    const wrapper = mount(SystemPage, { global: { plugins: [i18n] }, attachTo: document.body })
+    await flushPromises()
+    expect(wrapper.find('[data-testid="email-status"]').text()).toContain('Sends as mailnix@example.org')
+
+    await wrapper.find('[data-testid="send-test-email"]').trigger('click')
+    await flushPromises()
+
+    expect(apiMock.POST).toHaveBeenCalledWith('/api/system/test-email')
+    expect(wrapper.find('[data-testid="test-email-error"]').text()).toBe('Sending through smtp.example.org failed: 535')
   })
 })

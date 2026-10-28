@@ -30,6 +30,12 @@ services:
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: ${MAILNIX_BEHIND_PROXY:-false}
       # Allow plain-text IMAP (not recommended):
       # Mailnix__Mail__AllowInsecureConnections: "true"
+      # Email for "forgot password", invitations and security notices (see README):
+      # Mailnix__PublicUrl: https://mail.example.com
+      # Mailnix__Email__Host: smtp.example.com
+      # Mailnix__Email__Username: mailnix@example.com
+      # Mailnix__Email__Password: change-me
+      # Mailnix__Email__FromAddress: mailnix@example.com
       # PostgreSQL instead of SQLite:
       # Mailnix__Database__Provider: Postgres
       # Mailnix__Database__ConnectionString: Host=postgres;Database=mailnix;Username=mailnix;Password=change-me

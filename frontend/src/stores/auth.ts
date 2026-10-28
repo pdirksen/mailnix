@@ -18,6 +18,8 @@ export const useAuthStore = defineStore('auth', () => {
   const registrationOpen = ref(false)
   /** SaaS: every signup founds its own organization. */
   const multiTenant = ref(false)
+  /** "Forgot password" works: the server can send email with links. */
+  const passwordResetAvailable = ref(false)
   const initialized = ref(false)
 
   const isAuthenticated = computed(() => user.value !== null)
@@ -36,6 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
         setUser(me.response.ok ? (me.data ?? null) : null)
         registrationOpen.value = config.data?.registrationOpen ?? false
         multiTenant.value = config.data?.multiTenant ?? false
+        passwordResetAvailable.value = config.data?.passwordResetAvailable ?? false
       } catch {
         // Backend unreachable: treat as signed out; the login page reports errors on submit.
         user.value = null
@@ -90,6 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     registrationOpen,
     multiTenant,
+    passwordResetAvailable,
     initialized,
     isAuthenticated,
     isAdmin,

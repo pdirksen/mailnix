@@ -202,7 +202,7 @@ public sealed class ProfileTests : IAsyncLifetime
     }
 
     /// <summary>What an authenticator app computes (RFC 6238: 30-second steps, 6 digits, HMAC-SHA1).</summary>
-    private static class Totp
+    internal static class Totp
     {
         public static int Now(string base32Key) => Compute(Base32(base32Key), DateTimeOffset.UtcNow.ToUnixTimeSeconds() / 30);
 

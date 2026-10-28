@@ -209,6 +209,89 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/forgot-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ForgotPasswordRequest"];
+                };
+            };
+            responses: {
+                /** @description Accepted */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ResetPasswordRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/logout": {
         parameters: {
             query?: never;
@@ -2687,6 +2770,39 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/system/test-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/profile": {
         parameters: {
             query?: never;
@@ -3263,6 +3379,7 @@ export interface components {
         AuthConfigResponse: {
             registrationOpen: boolean;
             multiTenant: boolean;
+            passwordResetAvailable: boolean;
         };
         AuthenticatorSetup: {
             sharedKey: string;
@@ -3357,9 +3474,12 @@ export interface components {
         CreatedInvitation: {
             invitation: components["schemas"]["InvitationItem"];
             url: string;
+            emailSent: boolean;
         };
         CreateInvitationRequest: {
             email?: null | string;
+            /** @default false */
+            sendEmail: boolean;
         };
         CreateListRequest: {
             name: string;
@@ -3383,6 +3503,11 @@ export interface components {
             trigger?: components["schemas"]["RuleTrigger"];
             schedule?: null | string;
             sourceFolders?: null | string[];
+        };
+        EmailStatus: {
+            configured: boolean;
+            from: null | string;
+            publicUrl: null | string;
         };
         EnableTwoFactorRequest: {
             code: string;
@@ -3435,6 +3560,10 @@ export interface components {
             date: null | string;
             folders: components["schemas"]["FolderRow"][];
             growth: components["schemas"]["TimeSeries"];
+        };
+        ForgotPasswordRequest: {
+            email: string;
+            language?: null | string;
         };
         /** @enum {unknown} */
         Granularity: "Day" | "Week" | "Month";
@@ -3730,6 +3859,11 @@ export interface components {
             /** Format: uuid */
             accountId: string;
             ruleIds: string[];
+        };
+        ResetPasswordRequest: {
+            email: string;
+            token: string;
+            newPassword: string;
         };
         RuleAction: components["schemas"]["RuleActionMarkReadAction"] | components["schemas"]["RuleActionMarkUnreadAction"] | components["schemas"]["RuleActionFlagAction"] | components["schemas"]["RuleActionUnflagAction"] | components["schemas"]["RuleActionAddKeywordAction"] | components["schemas"]["RuleActionRemoveKeywordAction"] | components["schemas"]["RuleActionCopyToAction"] | components["schemas"]["RuleActionMoveToAction"] | components["schemas"]["RuleActionDeleteAction"] | components["schemas"]["RuleActionMarkAsSpamAction"] | components["schemas"]["RuleActionArchiveAction"];
         RuleActionAddKeywordAction: {
@@ -4028,6 +4162,7 @@ export interface components {
             /** Format: int32 */
             awaitingConfirmation: number;
             tenants: components["schemas"]["TenantRow"][];
+            email: components["schemas"]["EmailStatus"];
         };
         TeamMember: {
             /** Format: uuid */
@@ -4045,6 +4180,7 @@ export interface components {
             tenant: components["schemas"]["TenantInfo"];
             users: components["schemas"]["TeamMember"][];
             invitations: components["schemas"]["InvitationItem"][];
+            emailAvailable: boolean;
         };
         TemplateParameterInfo: {
             name: string;

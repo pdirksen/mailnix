@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using System.Text;
+using Mailnix.Api.Email;
 using Mailnix.Api.Hosting;
 using Mailnix.Api.Profile;
 using Mailnix.Api.Team;
@@ -7,6 +9,7 @@ using Mailnix.Infrastructure.Identity;
 using Mailnix.Infrastructure.Options;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -23,16 +26,72 @@ internal static class AuthEndpoints
         group.MapPost("/register", Register).AllowAnonymous().RequireRateLimiting(RateLimiting.Auth);
         group.MapPost("/login", Login).AllowAnonymous().RequireRateLimiting(RateLimiting.Auth);
         group.MapPost("/login/two-factor", LoginTwoFactor).AllowAnonymous().RequireRateLimiting(RateLimiting.Auth);
+        group.MapPost("/forgot-password", ForgotPassword).AllowAnonymous().RequireRateLimiting(RateLimiting.Auth);
+        group.MapPost("/reset-password", ResetPassword).AllowAnonymous().RequireRateLimiting(RateLimiting.Auth);
         group.MapPost("/logout", Logout);
         group.MapGet("/me", Me);
 
         return group;
     }
 
-    private static async Task<Ok<AuthConfigResponse>> GetConfig(UserManager<AppUser> userManager, IOptions<AuthOptions> options, IOptions<TenancyOptions> tenancy) =>
+    private static async Task<Ok<AuthConfigResponse>> GetConfig(
+        UserManager<AppUser> userManager, IOptions<AuthOptions> options, IOptions<TenancyOptions> tenancy, AccountEmails emails) =>
         TypedResults.Ok(new AuthConfigResponse(
             options.Value.AllowRegistration || !await userManager.Users.AnyAsync(),
-            tenancy.Value.Mode == TenancyMode.MultiTenant));
+            tenancy.Value.Mode == TenancyMode.MultiTenant,
+            emails.CanSendLinks));
+
+    /// <summary>
+    /// Sends a reset link when the address has an account. The answer is the same either way (and the email goes out
+    /// in the background), so nobody can find out which addresses have accounts.
+    /// </summary>
+    private static async Task<Accepted> ForgotPassword(ForgotPasswordRequest request, UserManager<AppUser> userManager, AccountEmails emails)
+    {
+        if (emails.CanSendLinks && await userManager.FindByEmailAsync(request.Email.Trim()) is { } user)
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            emails.PasswordReset(user, request.Language, WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token)));
+        }
+
+        return TypedResults.Accepted((string?)null);
+    }
+
+    /// <summary>Sets the new password from a reset link. Signs out every device; the user then signs in normally (with two-factor sign-in, if on).</summary>
+    private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> ResetPassword(
+        ResetPasswordRequest request, UserManager<AppUser> userManager, AccountEmails emails)
+    {
+        string token;
+        try
+        {
+            token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
+        }
+        catch (FormatException)
+        {
+            return ResetLinkInvalid();
+        }
+
+        if (await userManager.FindByEmailAsync(request.Email.Trim()) is not { } user)
+        {
+            return ResetLinkInvalid();
+        }
+
+        var result = await userManager.ResetPasswordAsync(user, token, request.NewPassword);
+        if (!result.Succeeded)
+        {
+            return result.Errors.Any(e => e.Code == nameof(IdentityErrorDescriber.InvalidToken))
+                ? ResetLinkInvalid()
+                : TypedResults.ValidationProblem(ToValidationErrors(result));
+        }
+
+        // Whoever got locked out by wrong guesses can sign in again with the new password.
+        await userManager.SetLockoutEndDateAsync(user, null);
+        await userManager.ResetAccessFailedCountAsync(user);
+        emails.PasswordChanged(user);
+        return TypedResults.NoContent();
+    }
+
+    private static ProblemHttpResult ResetLinkInvalid() =>
+        Problem(StatusCodes.Status400BadRequest, "ResetLinkInvalid", "This link is no longer valid. Please ask for a new one.");
 
     private static async Task<Results<Ok<InvitationInfo>, NotFound>> GetInvitation(string token, MailnixDbContext db, TimeProvider time) =>
         await FindInvitationAsync(db, token, time) is { } found

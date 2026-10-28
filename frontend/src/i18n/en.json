@@ -76,7 +76,8 @@
       "InvitationInvalid": "This invitation is no longer valid.",
       "InvitationForOtherEmail": "This invitation is for a different email address.",
       "InvalidCode": "This code is not valid. Check that the time on your phone is correct, or wait for the next code.",
-      "TwoFactorExpired": "That took too long. Please sign in again with your password."
+      "TwoFactorExpired": "That took too long. Please sign in again with your password.",
+      "ResetLinkInvalid": "This link is no longer valid."
     },
     "twoFactorTitle": "Two-factor sign-in",
     "twoFactorHint": "Enter the 6-digit code from your authenticator app.",
@@ -86,7 +87,29 @@
     "useRecoveryCode": "Use a recovery code instead",
     "useAuthenticator": "Use the authenticator app instead",
     "verify": "Verify",
-    "backToPassword": "Back"
+    "backToPassword": "Back",
+    "forgot": {
+      "link": "Forgot password?",
+      "title": "Reset your password",
+      "subtitle": "Enter the email address you sign in with. We will send you a link to choose a new password.",
+      "send": "Send link",
+      "sentTitle": "Check your inbox",
+      "sent": "If there is an account for {email}, a link to reset its password is on its way. It works for 2 hours.",
+      "notArrived": "Nothing arrived after a few minutes? Look in the spam folder, or send the link again.",
+      "sendAgain": "Send again",
+      "backToLogin": "Back to sign-in",
+      "unavailable": "This installation cannot send email, so passwords cannot be reset here. Please ask your administrator."
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "subtitle": "For your account {email}.",
+      "subtitleNoEmail": "For your mailnix account.",
+      "save": "Save password",
+      "done": "Your password was changed. Sign in with the new one.",
+      "invalidHint": "Links work once and for 2 hours. Ask for a new one.",
+      "requestNew": "Get a new link",
+      "signedOutHint": "All devices will be signed out; afterwards, sign in with the new password."
+    }
   },
   "validation": {
     "required": "This field is required.",
@@ -905,7 +928,9 @@
       "LastTenantAdmin": "Someone has to stay admin of the organization. Make another member admin first.",
       "CannotRemoveSelf": "You cannot remove yourself.",
       "CannotRemoveAdmin": "The administrator of the installation cannot be removed here."
-    }
+    },
+    "sendByEmail": "Also send the invitation by email",
+    "emailSent": "Invitation sent to {email}."
   },
   "system": {
     "title": "System",
@@ -939,7 +964,19 @@
     "limitFor": "Mailbox limit for {name}",
     "unlimited": "Unlimited",
     "limitSaved": "Limit for {name} saved.",
-    "created": "Created"
+    "created": "Created",
+    "email": {
+      "title": "Email",
+      "description": "For password reset links, invitations and security notices.",
+      "server": "Mail server",
+      "sendsAs": "Sends as {from}",
+      "notConfigured": "Not set up: no emails are sent.",
+      "publicUrl": "Public address",
+      "publicUrlMissing": "Not set: emails with links (password reset, invitations) are not sent.",
+      "sendTest": "Send a test email to me",
+      "testSent": "Test email sent. Check your inbox.",
+      "configHint": "Settings: Mailnix__Email__* and Mailnix__PublicUrl (see README)."
+    }
   },
   "settings": {
     "title": "Settings",

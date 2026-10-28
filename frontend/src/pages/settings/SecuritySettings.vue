@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ApiError } from '@/api/client'
 import FormField from '@/components/common/FormField.vue'
+import PasswordStrength from '@/components/common/PasswordStrength.vue'
 import PasswordPromptDialog from '@/components/settings/PasswordPromptDialog.vue'
 import RecoveryCodes from '@/components/settings/RecoveryCodes.vue'
 import TwoFactorSetupDialog from '@/components/settings/TwoFactorSetupDialog.vue'
@@ -21,7 +22,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { useConnectionErrors } from '@/lib/connectionErrors'
-import { passwordStrength } from '@/lib/passwordStrength'
 import { useAuthStore } from '@/stores/auth'
 import { type Profile, useProfileStore } from '@/stores/profile'
 import { KeyRoundIcon, Loader2Icon, LogOutIcon, ShieldAlertIcon, ShieldCheckIcon, SmartphoneIcon, TriangleAlertIcon } from '@lucide/vue'
@@ -52,7 +52,6 @@ const next = ref('')
 const repeat = ref('')
 const passwordErrors = ref<{ current?: string; next?: string; repeat?: string }>({})
 const changingPassword = ref(false)
-const strength = computed(() => passwordStrength(next.value))
 
 async function changePassword() {
   passwordErrors.value = {
@@ -140,17 +139,7 @@ async function deleteAccount(password: string) {
           <FormField id="new-password" v-slot="aria" :label="$t('settings.security.newPassword')" :error="passwordErrors.next">
             <Input id="new-password" v-model="next" v-bind="aria" type="password" autocomplete="new-password" />
           </FormField>
-          <div v-if="next" class="-mt-2 grid gap-1" data-testid="password-strength">
-            <div class="flex gap-1" aria-hidden="true">
-              <span
-                v-for="level in 3"
-                :key="level"
-                class="h-1 flex-1 rounded-full transition-colors"
-                :class="level <= strength.level ? ['bg-destructive', 'bg-amber-500', 'bg-emerald-600'][strength.level - 1] : 'bg-muted'"
-              />
-            </div>
-            <span class="text-muted-foreground text-xs">{{ $t(`settings.security.strength.${strength.label}`) }}</span>
-          </div>
+          <PasswordStrength :password="next" />
           <FormField id="repeat-password" v-slot="aria" :label="$t('auth.confirmPassword')" :error="passwordErrors.repeat">
             <Input id="repeat-password" v-model="repeat" v-bind="aria" type="password" autocomplete="new-password" />
           </FormField>

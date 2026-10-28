@@ -1,15 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Mailnix.Api.Auth;
+using Mailnix.Api.Email;
 using Mailnix.Api.Hosting;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Infrastructure.Identity;
-using Mailnix.Infrastructure.OAuth;
 using Mailnix.Worker;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace Mailnix.Api.Team;
 
@@ -19,14 +18,17 @@ public sealed record TeamMember(Guid Id, string Email, string? DisplayName, bool
 
 public sealed record InvitationItem(Guid Id, string? Email, DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt);
 
-public sealed record TeamResponse(TenantInfo Tenant, IReadOnlyList<TeamMember> Users, IReadOnlyList<InvitationItem> Invitations);
+/// <param name="EmailAvailable">Invitations can be sent by email.</param>
+public sealed record TeamResponse(TenantInfo Tenant, IReadOnlyList<TeamMember> Users, IReadOnlyList<InvitationItem> Invitations, bool EmailAvailable);
 
 public sealed record RenameTenantRequest([Required, MaxLength(200)] string Name);
 
-public sealed record CreateInvitationRequest([EmailAddress, MaxLength(320)] string? Email = null);
+/// <param name="SendEmail">Also send the link to <paramref name="Email"/> (when email is set up).</param>
+public sealed record CreateInvitationRequest([EmailAddress, MaxLength(320)] string? Email = null, bool SendEmail = false);
 
 /// <param name="Url">The signup link with the token; shown only now.</param>
-public sealed record CreatedInvitation(InvitationItem Invitation, string Url);
+/// <param name="EmailSent">The link was also sent by email.</param>
+public sealed record CreatedInvitation(InvitationItem Invitation, string Url, bool EmailSent);
 
 public sealed record SetTenantAdminRequest(bool IsTenantAdmin);
 
@@ -47,7 +49,8 @@ internal static class TeamEndpoints
         return routes;
     }
 
-    private static async Task<Ok<TeamResponse>> Get(ClaimsPrincipal user, MailnixDbContext db, UserManager<AppUser> users, TimeProvider time, CancellationToken ct)
+    private static async Task<Ok<TeamResponse>> Get(
+        ClaimsPrincipal user, MailnixDbContext db, UserManager<AppUser> users, AccountEmails emails, TimeProvider time, CancellationToken ct)
     {
         var tenantId = user.GetTenantId(db);
         var tenant = await db.Tenants.SingleAsync(t => t.Id == tenantId, ct);
@@ -65,7 +68,7 @@ internal static class TeamEndpoints
             .OrderByDescending(i => i.CreatedAt)
             .Select(i => new InvitationItem(i.Id, i.Email, i.CreatedAt, i.ExpiresAt))
             .ToListAsync(ct);
-        return TypedResults.Ok(new TeamResponse(new TenantInfo(tenant.Id, tenant.Name, tenant.MaxAccounts, accounts.Values.Sum()), members, invitations));
+        return TypedResults.Ok(new TeamResponse(new TenantInfo(tenant.Id, tenant.Name, tenant.MaxAccounts, accounts.Values.Sum()), members, invitations, emails.CanSendLinks));
     }
 
     private static async Task<NoContent> Rename(RenameTenantRequest request, ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
@@ -81,7 +84,9 @@ internal static class TeamEndpoints
         ClaimsPrincipal user,
         HttpRequest http,
         MailnixDbContext db,
-        IOptions<OAuthOptions> oauth,
+        UserManager<AppUser> users,
+        PublicLinks links,
+        AccountEmails emails,
         TimeProvider time,
         CancellationToken ct)
     {
@@ -100,10 +105,18 @@ internal static class TeamEndpoints
         db.Invitations.Add(invitation);
         await db.SaveChangesAsync(ct);
 
-        var baseUrl = oauth.Value.RedirectBaseUrl?.TrimEnd('/') ?? $"{http.Scheme}://{http.Host}";
+        // The link shown to the admin may use the address they are on; an emailed link only the configured one.
+        var url = $"{links.BaseUrl ?? $"{http.Scheme}://{http.Host}"}/register?invite={Uri.EscapeDataString(token)}";
+        var emailSent = false;
+        if (request.SendEmail && invitation.Email is { } to && await users.GetUserAsync(user) is { } inviter)
+        {
+            var organization = await db.Tenants.Where(t => t.Id == invitation.TenantId).Select(t => t.Name).SingleAsync(ct);
+            emailSent = links.IsConfigured
+                && emails.Invitation(to, inviter, organization, links.For("/register", new Dictionary<string, string> { ["invite"] = token }), invitation.ExpiresAt);
+        }
+
         return TypedResults.Ok(new CreatedInvitation(
-            new InvitationItem(invitation.Id, invitation.Email, invitation.CreatedAt, invitation.ExpiresAt),
-            $"{baseUrl}/register?invite={Uri.EscapeDataString(token)}"));
+            new InvitationItem(invitation.Id, invitation.Email, invitation.CreatedAt, invitation.ExpiresAt), url, emailSent));
     }
 
     private static async Task<Results<NoContent, NotFound>> Revoke(Guid id, ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)

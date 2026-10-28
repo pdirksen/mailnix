@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
+using Mailnix.Api.Email;
 using Mailnix.Api.Hosting;
 using Mailnix.Api.Team;
 using Mailnix.Infrastructure.Data;
@@ -119,7 +120,7 @@ internal static class ProfileEndpoints
     }
 
     private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult, UnauthorizedHttpResult>> ChangePassword(
-        ChangePasswordRequest request, ClaimsPrincipal principal, UserManager<AppUser> users, SignInManager<AppUser> signIn)
+        ChangePasswordRequest request, ClaimsPrincipal principal, UserManager<AppUser> users, SignInManager<AppUser> signIn, AccountEmails emails)
     {
         if (await users.GetUserAsync(principal) is not { } user)
         {
@@ -136,6 +137,7 @@ internal static class ProfileEndpoints
 
         // A new security stamp signs out other devices; this one stays signed in.
         await signIn.RefreshSignInAsync(user);
+        emails.PasswordChanged(user);
         return TypedResults.NoContent();
     }
 
@@ -162,7 +164,7 @@ internal static class ProfileEndpoints
     }
 
     private static async Task<Results<Ok<RecoveryCodesResponse>, ProblemHttpResult, UnauthorizedHttpResult>> EnableTwoFactor(
-        EnableTwoFactorRequest request, ClaimsPrincipal principal, UserManager<AppUser> users, SignInManager<AppUser> signIn)
+        EnableTwoFactorRequest request, ClaimsPrincipal principal, UserManager<AppUser> users, SignInManager<AppUser> signIn, AccountEmails emails)
     {
         if (await users.GetUserAsync(principal) is not { } user)
         {
@@ -187,11 +189,12 @@ internal static class ProfileEndpoints
         await users.SetTwoFactorEnabledAsync(user, true);
         var codes = await users.GenerateNewTwoFactorRecoveryCodesAsync(user, RecoveryCodeCount);
         await signIn.RefreshSignInAsync(user);
+        emails.TwoFactorChanged(user, enabled: true);
         return TypedResults.Ok(new RecoveryCodesResponse([.. codes ?? []]));
     }
 
     private static async Task<Results<NoContent, ProblemHttpResult, UnauthorizedHttpResult>> DisableTwoFactor(
-        PasswordConfirmation request, ClaimsPrincipal principal, UserManager<AppUser> users, SignInManager<AppUser> signIn)
+        PasswordConfirmation request, ClaimsPrincipal principal, UserManager<AppUser> users, SignInManager<AppUser> signIn, AccountEmails emails)
     {
         if (await users.GetUserAsync(principal) is not { } user)
         {
@@ -207,6 +210,7 @@ internal static class ProfileEndpoints
         await users.ResetAuthenticatorKeyAsync(user);
         await users.GenerateNewTwoFactorRecoveryCodesAsync(user, 0);
         await signIn.RefreshSignInAsync(user);
+        emails.TwoFactorChanged(user, enabled: false);
         return TypedResults.NoContent();
     }
 

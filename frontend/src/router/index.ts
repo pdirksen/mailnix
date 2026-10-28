@@ -157,6 +157,19 @@ export const routes: RouteRecordRaw[] = [
         component: () => import('@/pages/auth/RegisterPage.vue'),
         meta: { titleKey: 'auth.register' },
       },
+      {
+        path: 'forgot-password',
+        name: 'forgot-password',
+        component: () => import('@/pages/auth/ForgotPasswordPage.vue'),
+        meta: { titleKey: 'auth.forgot.title' },
+      },
+      {
+        // The link in the reset email (?email=…&token=…).
+        path: 'reset-password',
+        name: 'reset-password',
+        component: () => import('@/pages/auth/ResetPasswordPage.vue'),
+        meta: { titleKey: 'auth.reset.title' },
+      },
     ],
   },
   {

@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Mailnix.Api.Accounts;
 using Mailnix.Api.Assistant;
 using Mailnix.Api.Auth;
+using Mailnix.Api.Email;
 using Mailnix.Api.Hosting;
 using Mailnix.Api.Lists;
 using Mailnix.Api.Profile;
@@ -67,9 +68,16 @@ builder.Services.ConfigureHttpJsonOptions(json =>
 });
 builder.Services.AddScoped<RuleService>();
 builder.Services.AddSingleton<MessageSampler>();
+builder.Services.AddSingleton<PublicLinks>();
+builder.Services.AddSingleton<EmailOutbox>();
+builder.Services.AddSingleton<AccountEmails>();
 if (hostOptions.ServesApi)
 {
     builder.Services.AddSignalR().AddJsonProtocol(json => RuleJson.Configure(json.PayloadSerializerOptions));
+    if (!isOpenApiGeneration)
+    {
+        builder.Services.AddHostedService<EmailDispatcher>();
+    }
 }
 
 // Live events: straight to the hub in one process; through the database between worker and API processes.

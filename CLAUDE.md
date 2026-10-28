@@ -133,6 +133,9 @@ step; see `docker/compose.saas.yml`.
   `Single`/`Multi` (CA1720) or type names ending in `Flag` (CA1711).
 - **Non-GET `/api` requests** need the header `X-Requested-With: mailnix` (CSRF). The auth cookie is
   `SameSite=Strict`, so OAuth providers redirect to the SPA route `/oauth/callback`, which then posts to the API.
+- **Email:** mailnix's own emails go through `AccountEmails` (queued, sent by `EmailDispatcher`) and `IEmailSender`
+  (SMTP via MailKit). Links in emails come only from `PublicLinks` (`Mailnix:PublicUrl`), never from the request's
+  Host header (reset links would be poisonable). Without SMTP settings every email feature is off.
 - **Error responses** are problem details with an `errorCode` extension. The frontend translates known codes through
   i18n and falls back to the server's title.
 - **Licenses:** all dependencies must be MIT-compatible: MIT, ISC, BSD, 0BSD, Apache-2.0, PostgreSQL, Unlicense or
