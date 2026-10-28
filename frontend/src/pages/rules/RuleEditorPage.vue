@@ -26,7 +26,7 @@ import { type ConditionField, type FieldDefinition, newCondition, newGroup, type
 import { type Account, useAccountsStore } from '@/stores/accounts'
 import { useListsStore } from '@/stores/lists'
 import { type RuleDraft, useRulesStore } from '@/stores/rules'
-import { ArrowLeftIcon, CircleAlertIcon, Loader2Icon, PlayIcon, Undo2Icon } from '@lucide/vue'
+import { ArrowLeftIcon, BotIcon, CircleAlertIcon, Loader2Icon, PlayIcon, Undo2Icon } from '@lucide/vue'
 import { useDebounceFn } from '@vueuse/core'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -69,6 +69,8 @@ const labels = computed(() => account.value?.provider === 'Google')
 provideRuleEditor({ catalog, lists: listsRef, rules: referencableRules, errors: visibleErrors, folders, delimiter, labels })
 
 const dirty = computed(() => draft.value !== null && JSON.stringify(draft.value) !== savedSnapshot.value)
+/** An AI assistant (MCP) made the last change; saving here makes it the user's own. */
+const origin = ref<string | null>(null)
 
 onMounted(async () => {
   try {
@@ -79,6 +81,7 @@ onMounted(async () => {
     if (props.id) {
       const rule = await rulesStore.fetchOne(props.id)
       accountId = rule.accountId
+      origin.value = rule.origin
       draft.value = toDraft(rule)
     } else {
       accountId = typeof route.query.account === 'string' ? route.query.account : accountsStore.accounts[0]?.id
@@ -168,6 +171,7 @@ async function save() {
       ruleId.value = (await rulesStore.create(account.value.id, draft.value)).id
     }
     savedSnapshot.value = JSON.stringify(draft.value)
+    origin.value = null
     // Switch to the rule's own URL before announcing success, so a click right after saving is not overridden.
     if (isNew) await router.replace({ name: 'rule-edit', params: { id: ruleId.value } })
     toast.success(isNew ? t('rules.created') : t('rules.saved'))
@@ -204,6 +208,9 @@ onBeforeRouteLeave((to) => {
           <h2 class="text-2xl font-semibold tracking-tight">{{ ruleId ? $t('rules.editor.editTitle') : $t('rules.editor.newTitle') }}</h2>
           <Badge variant="secondary">{{ account.name }}</Badge>
           <Badge v-if="dirty" variant="outline" class="border-warning text-warning">{{ $t('lists.unsaved') }}</Badge>
+          <Badge v-if="origin" variant="outline" :title="$t('rules.originHint')" data-testid="rule-origin">
+            <BotIcon />{{ $t('rules.origin', { name: origin }) }}
+          </Badge>
         </div>
         <div class="flex flex-wrap gap-2">
           <Button

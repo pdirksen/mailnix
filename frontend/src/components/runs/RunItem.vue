@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useConnectionErrors } from '@/lib/connectionErrors'
 import { formatDateTime, formatRelative } from '@/lib/format'
 import { type RunDetail, type RunSummary, useRunsStore } from '@/stores/runs'
-import { ChevronRightIcon, ShieldAlertIcon, Undo2Icon } from '@lucide/vue'
+import { BotIcon, ChevronRightIcon, ShieldAlertIcon, Undo2Icon } from '@lucide/vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -59,6 +60,7 @@ const isUndo = computed(() => props.run.trigger === 'Undo')
         <div class="flex flex-wrap items-center gap-2">
           <span class="font-medium">{{ $t(`activity.triggers.${run.trigger}`) }}</span>
           <RunStateBadge :state="run.state" :undone="!!run.undoneByRunId" />
+          <Badge v-if="run.origin" variant="outline" :title="$t('activity.originHint')"><BotIcon />{{ $t('activity.origin', { name: run.origin }) }}</Badge>
           <span class="text-muted-foreground text-sm">{{ run.accountName }} · {{ run.folder }}</span>
         </div>
         <p class="text-muted-foreground text-sm">

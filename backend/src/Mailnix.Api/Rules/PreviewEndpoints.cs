@@ -28,7 +28,7 @@ internal static class PreviewEndpoints
         return routes;
     }
 
-    private static async Task<Results<Ok<PreviewResponse>, NotFound, ValidationProblem, ProblemHttpResult>> Preview(
+    internal static async Task<Results<Ok<PreviewResponse>, NotFound, ValidationProblem, ProblemHttpResult>> Preview(
         Guid id,
         PreviewRequest request,
         ClaimsPrincipal user,
@@ -140,12 +140,12 @@ internal static class PreviewEndpoints
             messages));
     }
 
-    private static Ok<List<RuleTemplateInfo>> ListTemplates() =>
+    internal static Ok<List<RuleTemplateInfo>> ListTemplates() =>
         TypedResults.Ok(RuleTemplates.All
             .Select(t => new RuleTemplateInfo(t.Id, [.. t.Parameters.Select(p => new TemplateParameterInfo(p.Name, p.Type, p.Default))]))
             .ToList());
 
-    private static async Task<Results<Ok<RuleDraftResponse>, NotFound, ValidationProblem>> Draft(
+    internal static async Task<Results<Ok<RuleDraftResponse>, NotFound, ValidationProblem>> Draft(
         string templateId,
         RuleDraftRequest request,
         ClaimsPrincipal user,

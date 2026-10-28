@@ -100,6 +100,9 @@ public class RuleRun
 
     /// <summary>Set when this run was reverted.</summary>
     public Guid? UndoneByRunId { get; set; }
+
+    /// <summary>Who started it outside the app (e.g. an MCP client); null when started in the app or automatically.</summary>
+    public string? Origin { get; set; }
 }
 
 /// <summary>One action on one message. Keeps what undo needs to put things back.</summary>

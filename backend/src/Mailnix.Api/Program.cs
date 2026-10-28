@@ -7,6 +7,7 @@ using Mailnix.Api.Auth;
 using Mailnix.Api.Email;
 using Mailnix.Api.Hosting;
 using Mailnix.Api.Lists;
+using Mailnix.Api.Mcp;
 using Mailnix.Api.Profile;
 using Mailnix.Api.Rules;
 using Mailnix.Api.Runs;
@@ -61,6 +62,7 @@ builder.Services.AddMailnixInfrastructure(builder.Configuration, persistDataProt
 builder.Services.AddMailnixMail(builder.Configuration);
 builder.Services.AddMailnixAuth(builder.Configuration);
 builder.Services.AddMailnixRateLimiting(builder.Configuration);
+builder.Services.AddMailnixMcp();
 builder.Services.ConfigureHttpJsonOptions(json =>
 {
     RuleJson.Configure(json.SerializerOptions);
@@ -144,6 +146,7 @@ if (hostOptions.ServesApi)
     });
 }
 
+app.UseMcpCors();
 app.UseAuthentication();
 app.UseMiddleware<TenantScopeMiddleware>();
 app.UseAuthorization();
@@ -174,7 +177,10 @@ if (hostOptions.ServesApi)
     api.MapTeamEndpoints();
     api.MapSystemEndpoints();
     api.MapProfileEndpoints();
+    api.MapApiTokenEndpoints();
+    api.MapConnectEndpoints();
     app.MapHub<LiveHub>("/hubs/live");
+    app.MapMailnixMcp();
     api.MapFallback("{**path}", () => TypedResults.NotFound()).AllowAnonymous();
 
     app.MapFallbackToFile("index.html", new StaticFileOptions

@@ -59,6 +59,9 @@ public class MailRule
 
     public DateTimeOffset UpdatedAt { get; set; }
 
+    /// <summary>Who made the last change outside the app (e.g. an MCP client); null when it was made in the app.</summary>
+    public string? Origin { get; set; }
+
     public List<RuleReference> References { get; set; } = [];
 
     public List<RuleListReference> ListReferences { get; set; } = [];

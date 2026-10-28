@@ -26,10 +26,10 @@ internal static class RuleEndpoints
         return group;
     }
 
-    private static Ok<FieldCatalogResponse> FieldCatalogInfo() =>
+    internal static Ok<FieldCatalogResponse> FieldCatalogInfo() =>
         TypedResults.Ok(new FieldCatalogResponse(FieldCatalog.All, FolderTemplate.Placeholders));
 
-    private static async Task<Ok<List<RuleResponse>>> List(ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct, Guid? accountId = null)
+    internal static async Task<Ok<List<RuleResponse>>> List(ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct, Guid? accountId = null)
     {
         var userId = user.GetUserId();
         var rules = await db.Rules
@@ -41,7 +41,7 @@ internal static class RuleEndpoints
         return TypedResults.Ok(rules.Select(r => RuleResponse.From(r, [.. usedBy[r.Id]], zone)).ToList());
     }
 
-    private static async Task<Results<Ok<RuleResponse>, NotFound>> Get(Guid id, ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
+    internal static async Task<Results<Ok<RuleResponse>, NotFound>> Get(Guid id, ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
     {
         if (await FindOwnedAsync(db, id, user, ct) is not { } rule)
         {
@@ -51,7 +51,7 @@ internal static class RuleEndpoints
         return TypedResults.Ok(RuleResponse.From(rule, [.. (await UsedByAsync(db, [rule.Id], ct))[rule.Id]], await ZoneAsync(db, rule.UserId, ct)));
     }
 
-    private static async Task<Results<Created<RuleResponse>, ValidationProblem, NotFound>> Create(
+    internal static async Task<Results<Created<RuleResponse>, ValidationProblem, NotFound>> Create(
         CreateRuleRequest request,
         ClaimsPrincipal user,
         MailnixDbContext db,
@@ -109,7 +109,7 @@ internal static class RuleEndpoints
         return rule;
     }
 
-    private static async Task<Results<Ok<RuleResponse>, ValidationProblem, NotFound>> Update(
+    internal static async Task<Results<Ok<RuleResponse>, ValidationProblem, NotFound>> Update(
         Guid id,
         UpdateRuleRequest request,
         ClaimsPrincipal user,
@@ -141,6 +141,7 @@ internal static class RuleEndpoints
         rule.ConditionsJson = RuleService.Serialize(request.Conditions);
         rule.ActionsJson = RuleService.Serialize(request.Actions);
         rule.UpdatedAt = time.GetUtcNow();
+        rule.Origin = null;
         RuleService.SyncReferences(rule, request.Conditions);
         await db.SaveChangesAsync(ct);
 
@@ -232,6 +233,7 @@ internal static class RuleEndpoints
         {
             rule.DryRun = request.DryRun;
             rule.UpdatedAt = now;
+            rule.Origin = null;
         }
 
         await db.SaveChangesAsync(ct);

@@ -192,6 +192,29 @@ the Docker image. Administrators see the version on the *System* page, and mailn
 Each installation registers its own OAuth app with Google and/or Microsoft; see [docs/oauth-setup.md](docs/oauth-setup.md)
 for the steps and the settings. Until then, those providers show as "Not set up" when adding an account.
 
+## AI assistants (MCP)
+
+mailnix is an [MCP](https://modelcontextprotocol.io) server at `/mcp` (Streamable HTTP), so AI assistants such as
+Claude can work with a user's mailboxes: explain the rules, try new ones on real mail (preview), draft them, look at
+statistics, activity and runs, start runs and undo them. *Settings → AI assistants* shows the address and manages the
+access.
+
+- **Claude.ai and Claude Desktop:** add a custom connector with the address (e.g. `https://mail.example.com/mcp`).
+  Claude registers itself, the user signs in to mailnix and agrees on the page `/connect` (read only, or also drafting
+  rules and runs). mailnix is its own OAuth 2.1 authorization server for this: metadata under
+  `/.well-known/oauth-protected-resource` and `/.well-known/oauth-authorization-server`, dynamic client registration,
+  authorization codes with PKCE, access tokens for one hour and rotating refresh tokens for 60 days. The connector must
+  be able to reach mailnix, so this needs a public address (`Mailnix__PublicUrl`) with https.
+- **Claude Code, VS Code and others:** create a personal access token (read only or read and draft, optional expiry);
+  the settings page shows the token once, with the configuration for these clients, e.g.
+  `claude mcp add --transport http mailnix https://mail.example.com/mcp --header "Authorization: Bearer mnx_pat_…"`.
+
+What assistants cannot do, whatever the access: switch a rule live (rules they create or change stay disabled or in
+dry run until the user enables them in the app; live rules cannot be changed through MCP), confirm runs that stopped
+at the account's threshold, delete rules, accounts or mail, see passwords, or run the Trash purge. Rules and runs show
+which token or app changed or started them. Tokens are stored as hashes; changing the password, resetting it and
+*Sign out other devices* revoke all tokens and connections.
+
 ## Running with Docker
 
 ```bash
@@ -239,7 +262,7 @@ All settings can be given as environment variables (`__` separates sections).
 | Setting | Default | Description |
 |---|---|---|
 | `Mailnix__Mode` | `AllInOne` | `AllInOne`, `Api` (API + UI only) or `Worker` (mailbox processing only) |
-| `Mailnix__PublicUrl` | – | Public address of mailnix (e.g. `https://mail.example.com`), used for links in emails (password reset, invitations). Links in emails never use the request's host name, so without this setting (or `Mailnix__OAuth__RedirectBaseUrl`) no password-reset emails are sent |
+| `Mailnix__PublicUrl` | – | Public address of mailnix (e.g. `https://mail.example.com`), used for links in emails (password reset, invitations). Links in emails never use the request's host name, so without this setting (or `Mailnix__OAuth__RedirectBaseUrl`) no password-reset emails are sent. Also the address MCP clients are told to use (`<PublicUrl>/mcp`, and the OAuth issuer); without it, the address the request came to |
 | `Mailnix__Email__Host` / `Port` | – / by security | SMTP server for mailnix's own emails (password reset, invitations, security notices). Port defaults to 587 (`StartTls`), 465 (`SslOnConnect`) or 25 (`None`). Without a host, every email feature is off and "Forgot password?" is hidden |
 | `Mailnix__Email__Security` | `StartTls` | `StartTls`, `SslOnConnect` or `None` (e.g. a relay on the local network) |
 | `Mailnix__Email__Username` / `Password` | – | SMTP sign-in; leave empty for relays that need none |
@@ -267,6 +290,7 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__RateLimits__PreviewsPerMinute` | `60` | Per-user limit for rule previews |
 | `Mailnix__RateLimits__AuthPerMinute` | `30` | Sign-in and signup attempts per IP address (behind a proxy, set `ASPNETCORE_FORWARDEDHEADERS_ENABLED` so the client's address is used) |
 | `Mailnix__RateLimits__ApiRequestsPerMinute` | `600` | All API requests per user (or IP address when signed out) |
+| `Mailnix__RateLimits__McpRequestsPerMinute` | `120` | Requests to the MCP endpoint per token or connected app |
 | `Mailnix__Worker__Enabled` | `true` | Watch mailboxes and execute rules (modes `AllInOne` and `Worker`) |
 | `Mailnix__Worker__IdleTimeout` | `00:09:00` | Re-issue IMAP IDLE after this time |
 | `Mailnix__Worker__PollInterval` | `00:02:00` | Check interval for servers without IDLE |

@@ -90,14 +90,14 @@ internal static class TeamEndpoints
         TimeProvider time,
         CancellationToken ct)
     {
-        var token = InvitationTokens.Create();
+        var token = SecretTokens.Create();
         var now = time.GetUtcNow();
         var invitation = new Invitation
         {
             Id = Guid.CreateVersion7(),
             TenantId = user.GetTenantId(db),
             Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
-            TokenHash = InvitationTokens.Hash(token),
+            TokenHash = SecretTokens.Hash(token),
             CreatedByUserId = user.GetUserId(),
             CreatedAt = now,
             ExpiresAt = now + InvitationLifetime,

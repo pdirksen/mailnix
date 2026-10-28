@@ -3184,6 +3184,184 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ApiTokenListResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateApiTokenRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CreatedApiTokenResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tokens/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/connect/app": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    clientId: string;
+                    redirectUri: string;
+                    scope?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConnectAppResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/connect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ConnectRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConnectResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3284,6 +3462,29 @@ export interface components {
         };
         /** @enum {unknown} */
         ActionType: "MarkRead" | "MarkUnread" | "Flag" | "Unflag" | "AddKeyword" | "RemoveKeyword" | "CopyTo" | "MoveTo" | "Delete" | "MarkAsSpam" | "Archive" | "Purge";
+        /** @enum {unknown} */
+        ApiScope: "Read" | "ReadWrite";
+        /** @enum {unknown} */
+        ApiTokenKind: "Personal" | "Connection";
+        ApiTokenListResponse: {
+            mcpUrl: string;
+            tokens: components["schemas"]["ApiTokenResponse"][];
+        };
+        ApiTokenResponse: {
+            /** Format: uuid */
+            id: string;
+            kind: components["schemas"]["ApiTokenKind"];
+            name: string;
+            scope: components["schemas"]["ApiScope"];
+            tokenHint: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            lastUsedAt: null | string;
+            /** Format: date-time */
+            expiresAt: null | string;
+            expired: boolean;
+        };
         AssistantAnalyzeRequest: {
             selection: components["schemas"]["AssistantSelection"];
             /**
@@ -3445,6 +3646,11 @@ export interface components {
         };
         /** @enum {unknown} */
         ConditionOperator: "Equals" | "NotEquals" | "Contains" | "NotContains" | "StartsWith" | "EndsWith" | "Regex" | "DomainMatches" | "InList" | "NotInList" | "Exists" | "NotExists" | "GreaterThan" | "LessThan" | "Before" | "After" | "IsTrue" | "IsFalse" | "Matches" | "NotMatches";
+        ConnectAppResponse: {
+            name: string;
+            redirectHost: string;
+            requestedScope: components["schemas"]["ApiScope"];
+        };
         /** @enum {unknown} */
         ConnectionErrorCode: "HostNotFound" | "ConnectionRefused" | "ConnectionFailed" | "Timeout" | "TlsFailed" | "AuthenticationFailed" | "ProtocolError" | "InsecureConnectionNotAllowed" | "AddressNotAllowed" | "ReconnectRequired" | "Unknown" | null;
         ConnectionTestResponse: {
@@ -3452,6 +3658,20 @@ export interface components {
             errorCode: null | components["schemas"]["ConnectionErrorCode"];
             errorMessage: null | string;
             mailbox: null | components["schemas"]["MailboxOverview"];
+        };
+        ConnectRequest: {
+            clientId: string;
+            redirectUri: string;
+            responseType: null | string;
+            codeChallenge: null | string;
+            codeChallengeMethod: null | string;
+            state: null | string;
+            resource: null | string;
+            approve: boolean;
+            allowChanges: boolean;
+        };
+        ConnectResponse: {
+            redirectUrl: string;
         };
         CreateAccountRequest: {
             name: string;
@@ -3470,6 +3690,20 @@ export interface components {
             blastRadiusLimit: number;
             /** Format: int32 */
             purgeTrashAfterDays?: null | number;
+        };
+        CreateApiTokenRequest: {
+            name: string;
+            scope?: components["schemas"]["ApiScope"];
+            /**
+             * Format: int32
+             * @default 90
+             */
+            expiresInDays: null | number;
+        };
+        CreatedApiTokenResponse: {
+            token: components["schemas"]["ApiTokenResponse"];
+            secret: string;
+            mcpUrl: string;
         };
         CreatedInvitation: {
             invitation: components["schemas"]["InvitationItem"];
@@ -3962,6 +4196,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            origin: null | string;
         };
         RuleStatsResponse: {
             /** Format: date */
@@ -4064,6 +4299,7 @@ export interface components {
             /** Format: uuid */
             undoRuleId: null | string;
             canUndo: boolean;
+            origin: null | string;
         };
         /** @enum {unknown} */
         RunTrigger: "NewMail" | "Manual" | "Scheduled" | "Undo" | "Purge";

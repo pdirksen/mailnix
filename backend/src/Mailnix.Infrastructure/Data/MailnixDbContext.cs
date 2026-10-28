@@ -56,6 +56,12 @@ public abstract class MailnixDbContext(DbContextOptions options)
 
     public DbSet<Invitation> Invitations => Set<Invitation>();
 
+    public DbSet<ApiToken> ApiTokens => Set<ApiToken>();
+
+    public DbSet<ConnectedApp> ConnectedApps => Set<ConnectedApp>();
+
+    public DbSet<AuthorizationCode> AuthorizationCodes => Set<AuthorizationCode>();
+
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -111,6 +117,7 @@ public abstract class MailnixDbContext(DbContextOptions options)
             e.Property(r => r.Description).HasMaxLength(2000);
             e.Property(r => r.Trigger).HasConversion<string>().HasMaxLength(20);
             e.Property(r => r.Schedule).HasMaxLength(100);
+            e.Property(r => r.Origin).HasMaxLength(200);
             e.HasMany(r => r.References).WithOne().HasForeignKey(x => x.RuleId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(r => r.ListReferences).WithOne().HasForeignKey(x => x.RuleId).OnDelete(DeleteBehavior.Cascade);
         });
@@ -152,6 +159,7 @@ public abstract class MailnixDbContext(DbContextOptions options)
             e.Property(r => r.Folder).HasMaxLength(500);
             e.Property(r => r.Error).HasMaxLength(2000);
             e.Property(r => r.SearchFilter).HasMaxLength(2000);
+            e.Property(r => r.Origin).HasMaxLength(200);
         });
 
         builder.Entity<ActionLogEntry>(e =>
@@ -236,6 +244,40 @@ public abstract class MailnixDbContext(DbContextOptions options)
             e.HasOne<Tenant>().WithMany().HasForeignKey(i => i.TenantId).OnDelete(DeleteBehavior.Cascade);
             e.Property(i => i.Email).HasMaxLength(320);
             e.Property(i => i.TokenHash).HasMaxLength(100);
+        });
+
+        builder.Entity<ApiToken>(e =>
+        {
+            e.HasOne<AppUser>().WithMany().HasForeignKey(t => t.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<ConnectedApp>().WithMany().HasForeignKey(t => t.ClientId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(t => t.TokenHash).IsUnique();
+            e.HasIndex(t => t.RefreshTokenHash).IsUnique();
+            e.HasIndex(t => t.UserId);
+            e.Property(t => t.Kind).HasConversion<string>().HasMaxLength(20);
+            e.Property(t => t.Scope).HasConversion<string>().HasMaxLength(20);
+            e.Property(t => t.Name).HasMaxLength(200);
+            e.Property(t => t.TokenHash).HasMaxLength(100);
+            e.Property(t => t.TokenHint).HasMaxLength(20);
+            e.Property(t => t.RefreshTokenHash).HasMaxLength(100);
+        });
+
+        builder.Entity<ConnectedApp>(e =>
+        {
+            e.Property(c => c.Name).HasMaxLength(200);
+            e.PrimitiveCollection(c => c.RedirectUris);
+        });
+
+        builder.Entity<AuthorizationCode>(e =>
+        {
+            e.HasOne<ConnectedApp>().WithMany().HasForeignKey(c => c.ClientId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<AppUser>().WithMany().HasForeignKey(c => c.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(c => c.CodeHash).IsUnique();
+            e.HasIndex(c => c.ExpiresAt);
+            e.Property(c => c.CodeHash).HasMaxLength(100);
+            e.Property(c => c.RedirectUri).HasMaxLength(2000);
+            e.Property(c => c.CodeChallenge).HasMaxLength(100);
+            e.Property(c => c.Scope).HasConversion<string>().HasMaxLength(20);
+            e.Property(c => c.Resource).HasMaxLength(2000);
         });
 
         builder.Entity<TrashObservation>(e =>

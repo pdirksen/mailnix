@@ -106,6 +106,18 @@ step; see `docker/compose.saas.yml`.
 - `Worker`: `OutboxLiveNotifier` writes `LiveEventRecord` rows.
 - `Api`: `LiveEventRelay` polls those rows and sends them to its own SignalR connections.
 
+**MCP server** (`Mailnix.Api/Mcp`, SDK `ModelContextProtocol.AspNetCore`):
+- `/mcp`, stateless Streamable HTTP. A policy scheme authenticates `/mcp` with bearer tokens only
+  (`ApiTokenAuthenticationHandler`, `ApiToken` rows looked up by SHA-256 hash) and everything else with the cookie.
+- The tools (`MailnixTools`) call the endpoint handlers (made `internal`) with the token's principal and unwrap their
+  `Results` (`McpResults`); they set `db.TenantFilter` themselves because the SDK runs each call in its own DI scope.
+  Request records are validated with the endpoints' generated validation (`McpValidation`).
+- Write tools carry `[Authorize(Policy = McpPolicies.Write)]` and are hidden from read-only tokens. Rules created or
+  changed through MCP are always disabled or dry run; live rules are refused. `Origin` on rules and runs records the
+  token or app; the app clears it when the user saves the rule.
+- OAuth 2.1 for connectors (`OAuthServerEndpoints`, `ConnectEndpoints`): DCR, `/oauth2/authorize` redirects to the SPA
+  page `/connect`, PKCE S256 codes, rotating refresh tokens.
+
 **Tenancy:**
 - `MailnixDbContext.TenantFilter` drives global query filters on accounts, rules, lists and runs.
   `TenantScopeMiddleware` sets it from the `mailnix:tenant` cookie claim.

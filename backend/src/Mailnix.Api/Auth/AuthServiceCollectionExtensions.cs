@@ -25,11 +25,17 @@ public static class Policies
 
 internal static class AuthServiceCollectionExtensions
 {
+    private const string DefaultScheme = "mailnix";
+
     public static IServiceCollection AddMailnixAuth(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<AuthOptions>().Bind(configuration.GetSection(AuthOptions.Section));
 
-        services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
+        // The cookie everywhere, except on the MCP endpoint: there only bearer tokens count (see Mcp/McpSetup).
+        services.AddAuthentication(DefaultScheme)
+            .AddPolicyScheme(DefaultScheme, DefaultScheme, scheme => scheme.ForwardDefaultSelector = context =>
+                context.Request.Path.StartsWithSegments(Mcp.McpSetup.Path) ? Mcp.ApiTokenAuthenticationHandler.SchemeName : IdentityConstants.ApplicationScheme)
+            .AddIdentityCookies();
         services.ConfigureApplicationCookie(cookie =>
         {
             cookie.Cookie.Name = "mailnix.auth";

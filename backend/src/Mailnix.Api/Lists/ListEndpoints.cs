@@ -30,7 +30,7 @@ internal static class ListEndpoints
         return group;
     }
 
-    private static async Task<Ok<List<ListSummaryResponse>>> List(ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
+    internal static async Task<Ok<List<ListSummaryResponse>>> List(ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
     {
         var userId = user.GetUserId();
         var lists = await db.NamedLists

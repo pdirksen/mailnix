@@ -124,6 +124,7 @@ export const routes: RouteRecordRaw[] = [
           { path: 'preferences', name: 'settings-preferences', component: () => import('@/pages/settings/PreferencesSettings.vue') },
           { path: 'addresses', name: 'settings-addresses', component: () => import('@/pages/settings/AddressesSettings.vue') },
           { path: 'security', name: 'settings-security', component: () => import('@/pages/settings/SecuritySettings.vue') },
+          { path: 'assistants', name: 'settings-assistants', component: () => import('@/pages/settings/AssistantsSettings.vue') },
         ],
       },
       {
@@ -169,6 +170,20 @@ export const routes: RouteRecordRaw[] = [
         name: 'reset-password',
         component: () => import('@/pages/auth/ResetPasswordPage.vue'),
         meta: { titleKey: 'auth.reset.title' },
+      },
+    ],
+  },
+  {
+    // An AI app connecting through OAuth (/oauth2/authorize sends the browser here): sign in, then agree.
+    path: '/',
+    component: () => import('@/layouts/AuthLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: 'connect',
+        name: 'connect',
+        component: () => import('@/pages/connect/ConnectPage.vue'),
+        meta: { titleKey: 'connect.title' },
       },
     ],
   },

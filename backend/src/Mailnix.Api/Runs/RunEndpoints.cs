@@ -28,7 +28,7 @@ internal static class RunEndpoints
         return routes;
     }
 
-    private static async Task<Ok<List<RunSummary>>> List(
+    internal static async Task<Ok<List<RunSummary>>> List(
         ClaimsPrincipal user,
         MailnixDbContext db,
         CancellationToken ct,
@@ -46,7 +46,7 @@ internal static class RunEndpoints
         return TypedResults.Ok(runs.Select(x => RunSummary.From(x.Run, x.Name)).ToList());
     }
 
-    private static async Task<Results<Ok<RunDetail>, NotFound>> Get(Guid id, ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
+    internal static async Task<Results<Ok<RunDetail>, NotFound>> Get(Guid id, ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
     {
         if (await FindAsync(db, id, user, ct) is not { } found)
         {
@@ -62,7 +62,7 @@ internal static class RunEndpoints
         return TypedResults.Ok(new RunDetail(RunSummary.From(found.Run, found.AccountName), [.. actions.Select(ActionLogItem.Create)], pending));
     }
 
-    private static async Task<Results<Accepted<RunSummary>, NotFound, ProblemHttpResult>> Start(
+    internal static async Task<Results<Accepted<RunSummary>, NotFound, ProblemHttpResult>> Start(
         Guid id,
         StartRunRequest request,
         ClaimsPrincipal user,
@@ -109,7 +109,7 @@ internal static class RunEndpoints
         return TypedResults.Ok(RunSummary.From(run, found.AccountName));
     }
 
-    private static async Task<Results<Ok<RunSummary>, NotFound, ProblemHttpResult>> Cancel(Guid id, ClaimsPrincipal user, MailnixDbContext db, TimeProvider time, CancellationToken ct)
+    internal static async Task<Results<Ok<RunSummary>, NotFound, ProblemHttpResult>> Cancel(Guid id, ClaimsPrincipal user, MailnixDbContext db, TimeProvider time, CancellationToken ct)
     {
         if (await FindAsync(db, id, user, ct) is not { } found)
         {
@@ -129,7 +129,7 @@ internal static class RunEndpoints
         return TypedResults.Ok(RunSummary.From(run, found.AccountName));
     }
 
-    private static async Task<Results<Accepted<RunSummary>, NotFound, ProblemHttpResult>> Undo(
+    internal static async Task<Results<Accepted<RunSummary>, NotFound, ProblemHttpResult>> Undo(
         Guid id,
         ClaimsPrincipal user,
         MailnixDbContext db,
@@ -163,7 +163,7 @@ internal static class RunEndpoints
         return await QueueAsync(db, signals, run, account, ct);
     }
 
-    private static async Task<Results<Accepted<RunSummary>, NotFound, ProblemHttpResult>> UndoRule(
+    internal static async Task<Results<Accepted<RunSummary>, NotFound, ProblemHttpResult>> UndoRule(
         Guid id,
         UndoRuleRequest request,
         ClaimsPrincipal user,

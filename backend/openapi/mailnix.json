@@ -2716,6 +2716,151 @@
           }
         }
       }
+    },
+    "/api/tokens": {
+      "get": {
+        "tags": [
+          "Tokens"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTokenListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tokens"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApiTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatedApiTokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokens/{id}": {
+      "delete": {
+        "tags": [
+          "Tokens"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/connect/app": {
+      "get": {
+        "tags": [
+          "Tokens"
+        ],
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "redirectUri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectAppResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connect": {
+      "post": {
+        "tags": [
+          "Tokens"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3129,6 +3274,92 @@
           "Archive",
           "Purge"
         ]
+      },
+      "ApiScope": {
+        "enum": [
+          "Read",
+          "ReadWrite"
+        ]
+      },
+      "ApiTokenKind": {
+        "enum": [
+          "Personal",
+          "Connection"
+        ]
+      },
+      "ApiTokenListResponse": {
+        "required": [
+          "mcpUrl",
+          "tokens"
+        ],
+        "type": "object",
+        "properties": {
+          "mcpUrl": {
+            "type": "string"
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiTokenResponse"
+            }
+          }
+        }
+      },
+      "ApiTokenResponse": {
+        "required": [
+          "id",
+          "kind",
+          "name",
+          "scope",
+          "tokenHint",
+          "createdAt",
+          "lastUsedAt",
+          "expiresAt",
+          "expired"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ApiTokenKind"
+          },
+          "name": {
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/ApiScope"
+          },
+          "tokenHint": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUsedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "expired": {
+            "type": "boolean"
+          }
+        }
       },
       "AssistantAnalyzeRequest": {
         "required": [
@@ -3818,6 +4049,25 @@
           "NotMatches"
         ]
       },
+      "ConnectAppResponse": {
+        "required": [
+          "name",
+          "redirectHost",
+          "requestedScope"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "redirectHost": {
+            "type": "string"
+          },
+          "requestedScope": {
+            "$ref": "#/components/schemas/ApiScope"
+          }
+        }
+      },
       "ConnectionErrorCode": {
         "enum": [
           "HostNotFound",
@@ -3871,6 +4121,75 @@
                 "$ref": "#/components/schemas/MailboxOverview"
               }
             ]
+          }
+        }
+      },
+      "ConnectRequest": {
+        "required": [
+          "clientId",
+          "redirectUri",
+          "responseType",
+          "codeChallenge",
+          "codeChallengeMethod",
+          "state",
+          "resource",
+          "approve",
+          "allowChanges"
+        ],
+        "type": "object",
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "redirectUri": {
+            "type": "string"
+          },
+          "responseType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "codeChallenge": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "codeChallengeMethod": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "state": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "resource": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "approve": {
+            "type": "boolean"
+          },
+          "allowChanges": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ConnectResponse": {
+        "required": [
+          "redirectUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "redirectUrl": {
+            "type": "string"
           }
         }
       },
@@ -3932,6 +4251,47 @@
               "integer"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "CreateApiTokenRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/ApiScope"
+          },
+          "expiresInDays": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32",
+            "default": 90
+          }
+        }
+      },
+      "CreatedApiTokenResponse": {
+        "required": [
+          "token",
+          "secret",
+          "mcpUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "$ref": "#/components/schemas/ApiTokenResponse"
+          },
+          "secret": {
+            "type": "string"
+          },
+          "mcpUrl": {
+            "type": "string"
           }
         }
       },
@@ -5784,7 +6144,8 @@
           "lastScheduledAt",
           "nextRunAt",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "origin"
         ],
         "type": "object",
         "properties": {
@@ -5869,6 +6230,12 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "origin": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -6125,7 +6492,8 @@
           "undoneByRunId",
           "undoRunId",
           "undoRuleId",
-          "canUndo"
+          "canUndo",
+          "origin"
         ],
         "type": "object",
         "properties": {
@@ -6229,6 +6597,12 @@
           },
           "canUndo": {
             "type": "boolean"
+          },
+          "origin": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -7296,6 +7670,9 @@
     },
     {
       "name": "Profile"
+    },
+    {
+      "name": "Tokens"
     }
   ]
 }

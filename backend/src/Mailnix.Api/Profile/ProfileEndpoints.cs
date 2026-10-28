@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Mailnix.Api.Email;
 using Mailnix.Api.Hosting;
+using Mailnix.Api.Mcp;
 using Mailnix.Api.Team;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Infrastructure.Identity;
@@ -106,8 +107,12 @@ internal static class ProfileEndpoints
         return TypedResults.Ok(await ToResponseAsync(user, db, users, tenancy.Value, ct));
     }
 
-    /// <summary>Other browsers and devices are signed out within a minute (when their cookie is next checked).</summary>
-    private static async Task<Results<NoContent, UnauthorizedHttpResult>> SignOutOthers(ClaimsPrincipal principal, UserManager<AppUser> users, SignInManager<AppUser> signIn)
+    /// <summary>
+    /// Other browsers and devices are signed out within a minute (when their cookie is next checked); MCP tokens and
+    /// connected apps stop working at once.
+    /// </summary>
+    private static async Task<Results<NoContent, UnauthorizedHttpResult>> SignOutOthers(
+        ClaimsPrincipal principal, UserManager<AppUser> users, SignInManager<AppUser> signIn, MailnixDbContext db, CancellationToken ct)
     {
         if (await users.GetUserAsync(principal) is not { } user)
         {
@@ -116,11 +121,18 @@ internal static class ProfileEndpoints
 
         await users.UpdateSecurityStampAsync(user);
         await signIn.RefreshSignInAsync(user);
+        await ApiTokenEndpoints.RevokeAllAsync(db, user.Id, ct);
         return TypedResults.NoContent();
     }
 
     private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult, UnauthorizedHttpResult>> ChangePassword(
-        ChangePasswordRequest request, ClaimsPrincipal principal, UserManager<AppUser> users, SignInManager<AppUser> signIn, AccountEmails emails)
+        ChangePasswordRequest request,
+        ClaimsPrincipal principal,
+        UserManager<AppUser> users,
+        SignInManager<AppUser> signIn,
+        MailnixDbContext db,
+        AccountEmails emails,
+        CancellationToken ct)
     {
         if (await users.GetUserAsync(principal) is not { } user)
         {
@@ -135,8 +147,9 @@ internal static class ProfileEndpoints
                 : TypedResults.ValidationProblem(result.Errors.GroupBy(e => e.Code).ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToArray()));
         }
 
-        // A new security stamp signs out other devices; this one stays signed in.
+        // A new security stamp signs out other devices (and the MCP tokens); this one stays signed in.
         await signIn.RefreshSignInAsync(user);
+        await ApiTokenEndpoints.RevokeAllAsync(db, user.Id, ct);
         emails.PasswordChanged(user);
         return TypedResults.NoContent();
     }

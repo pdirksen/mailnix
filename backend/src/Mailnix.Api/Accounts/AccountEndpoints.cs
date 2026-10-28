@@ -32,7 +32,7 @@ internal static class AccountEndpoints
         return group;
     }
 
-    private static async Task<Ok<List<AccountResponse>>> List(ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
+    internal static async Task<Ok<List<AccountResponse>>> List(ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct)
     {
         var userId = user.GetUserId();
         var accounts = await db.MailAccounts.Where(a => a.UserId == userId).OrderBy(a => a.Name).ToListAsync(ct);
@@ -287,7 +287,7 @@ internal static class AccountEndpoints
         return TypedResults.Ok(response);
     }
 
-    private static async Task<Results<Ok<FolderListResponse>, NotFound, ProblemHttpResult>> Folders(
+    internal static async Task<Results<Ok<FolderListResponse>, NotFound, ProblemHttpResult>> Folders(
         Guid id,
         ClaimsPrincipal user,
         MailnixDbContext db,

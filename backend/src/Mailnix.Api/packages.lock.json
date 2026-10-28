@@ -32,6 +32,15 @@
           "Microsoft.EntityFrameworkCore.Relational": "10.0.13"
         }
       },
+      "ModelContextProtocol.AspNetCore": {
+        "type": "Direct",
+        "requested": "[2.2.0, )",
+        "resolved": "2.2.0",
+        "contentHash": "3JelDMuFIwFzXybsh6K30G6wXu5gmqKnuRnieqgBMuR0FkqqXRv4B+NYZuPgthSyNq5UwRyvv2U2VJBE3RD3PQ==",
+        "dependencies": {
+          "ModelContextProtocol": "[2.2.0]"
+        }
+      },
       "Scalar.AspNetCore": {
         "type": "Direct",
         "requested": "[2.18.3, )",
@@ -104,6 +113,11 @@
           "SQLitePCLRaw.core": "2.1.13"
         }
       },
+      "Microsoft.Extensions.AI.Abstractions": {
+        "type": "Transitive",
+        "resolved": "10.8.3",
+        "contentHash": "K0B05oApxmviWalNHPMBBcRC7erKiDATz3ENNR/jqTR9JwIwLRefgDhj2jCRwL1aca99pXUe0qyQC73/xIuZig=="
+      },
       "Microsoft.Extensions.DependencyModel": {
         "type": "Transitive",
         "resolved": "10.0.13",
@@ -113,6 +127,14 @@
         "type": "Transitive",
         "resolved": "2.12.2",
         "contentHash": "ZkT7qiJe0Kj0+DTZOZo+xrDy1kNmdsWFQVPIQLNx9ZJ0T9cB2LG7r+Bi60so8/+yg1nkS7QCPadrzsTG4VPKrA=="
+      },
+      "ModelContextProtocol.Core": {
+        "type": "Transitive",
+        "resolved": "2.2.0",
+        "contentHash": "FeBfXU6T8k+jw4afg4sfxdEX2rL/e5oKOk9ROOGztu9k47+7Bz08sdaToYt2XvMY1opNbwxYQOFMj6wH9TInhA==",
+        "dependencies": {
+          "Microsoft.Extensions.AI.Abstractions": "10.8.3"
+        }
       },
       "Npgsql": {
         "type": "Transitive",
@@ -224,8 +246,8 @@
         "type": "Project",
         "dependencies": {
           "Cronos": "[0.13.0, )",
-          "Mailnix.Core": "[1.0.0, )",
-          "Mailnix.Mail": "[1.0.0, )",
+          "Mailnix.Core": "[0.0.0-dev, )",
+          "Mailnix.Mail": "[0.0.0-dev, )",
           "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": "[10.0.13, )",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "[10.0.13, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[10.0.13, )",
@@ -236,15 +258,15 @@
         "type": "Project",
         "dependencies": {
           "MailKit": "[4.18.2, )",
-          "Mailnix.Core": "[1.0.0, )"
+          "Mailnix.Core": "[0.0.0-dev, )"
         }
       },
       "mailnix.worker": {
         "type": "Project",
         "dependencies": {
-          "Mailnix.Core": "[1.0.0, )",
-          "Mailnix.Infrastructure": "[1.0.0, )",
-          "Mailnix.Mail": "[1.0.0, )"
+          "Mailnix.Core": "[0.0.0-dev, )",
+          "Mailnix.Infrastructure": "[0.0.0-dev, )",
+          "Mailnix.Mail": "[0.0.0-dev, )"
         }
       },
       "MailKit": {
@@ -294,6 +316,15 @@
         "dependencies": {
           "BouncyCastle.Cryptography": "2.7.0",
           "System.Security.Cryptography.Pkcs": "10.0.13"
+        }
+      },
+      "ModelContextProtocol": {
+        "type": "CentralTransitive",
+        "requested": "[2.2.0, )",
+        "resolved": "2.2.0",
+        "contentHash": "4Pb9u02Nwsp0poueDsqNdyGRojFxOYpljB7zDBsq+aHL+Afou3OgxlBc3GWFVnsRMRJrUtWqDh3s6k2JgPzmrQ==",
+        "dependencies": {
+          "ModelContextProtocol.Core": "[2.2.0]"
         }
       },
       "Npgsql.EntityFrameworkCore.PostgreSQL": {

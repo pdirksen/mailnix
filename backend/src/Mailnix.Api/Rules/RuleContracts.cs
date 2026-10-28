@@ -63,7 +63,8 @@ public sealed record RuleResponse(
     DateTimeOffset? LastScheduledAt,
     DateTimeOffset? NextRunAt,
     DateTimeOffset CreatedAt,
-    DateTimeOffset UpdatedAt)
+    DateTimeOffset UpdatedAt,
+    string? Origin)
 {
     /// <param name="zone">The user's time zone, in which schedules run.</param>
     public static RuleResponse From(MailRule rule, IReadOnlyList<RuleSummary> usedBy, TimeZoneInfo zone) => new(
@@ -84,7 +85,8 @@ public sealed record RuleResponse(
         rule.LastScheduledAt,
         RuleSchedule.NextRun(rule, zone),
         rule.CreatedAt,
-        rule.UpdatedAt);
+        rule.UpdatedAt,
+        rule.Origin);
 }
 
 public sealed record FieldCatalogResponse(IReadOnlyList<FieldDefinition> Fields, IReadOnlyList<string> FolderPlaceholders);

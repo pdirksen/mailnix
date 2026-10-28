@@ -18,6 +18,9 @@ public sealed class RateLimitOptions
 
     /// <summary>API requests per user (or IP address) and minute, for all of the API.</summary>
     public int ApiRequestsPerMinute { get; set; } = 600;
+
+    /// <summary>Requests to the MCP endpoint per token and minute.</summary>
+    public int McpRequestsPerMinute { get; set; } = 120;
 }
 
 internal static class RateLimiting
@@ -28,6 +31,7 @@ internal static class RateLimiting
 
     public static IServiceCollection AddMailnixRateLimiting(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddOptions<RateLimitOptions>().Bind(configuration.GetSection(RateLimitOptions.Section));
         var options = configuration.GetSection(RateLimitOptions.Section).Get<RateLimitOptions>() ?? new RateLimitOptions();
 
         services.AddRateLimiter(limiter =>
@@ -37,11 +41,12 @@ internal static class RateLimiting
             limiter.AddPolicy(Previews, context => PerUser(context, options.PreviewsPerMinute));
             limiter.AddPolicy(Auth, context => PerIp(context, options.AuthPerMinute));
 
-            // Everything under /api, per user: keeps one client from monopolizing a shared (SaaS) server.
+            // Everything under /api, per user: keeps one client from monopolizing a shared (SaaS) server. The MCP
+            // endpoint per token, so one runaway assistant does not block the user's other clients.
             limiter.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-                context.Request.Path.StartsWithSegments("/api")
-                    ? PerUser(context, options.ApiRequestsPerMinute)
-                    : RateLimitPartition.GetNoLimiter("other"));
+                context.Request.Path.StartsWithSegments("/api") ? PerUser(context, options.ApiRequestsPerMinute)
+                : context.Request.Path.StartsWithSegments(Mcp.McpSetup.Path) ? PerToken(context, options.McpRequestsPerMinute)
+                : RateLimitPartition.GetNoLimiter("other"));
         });
         return services;
     }
@@ -49,6 +54,11 @@ internal static class RateLimiting
     private static RateLimitPartition<string> PerIp(HttpContext context, int perMinute) =>
         RateLimitPartition.GetFixedWindowLimiter(
             context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = perMinute, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 });
+
+    private static RateLimitPartition<string> PerToken(HttpContext context, int perMinute) =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            "token:" + (context.User.FindFirstValue(Mcp.McpClaims.Token) ?? context.Connection.RemoteIpAddress?.ToString() ?? "anonymous"),
             _ => new FixedWindowRateLimiterOptions { PermitLimit = perMinute, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 });
 
     private static RateLimitPartition<string> PerUser(HttpContext context, int perMinute) =>

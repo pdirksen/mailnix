@@ -7,6 +7,8 @@
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.13" />
     <PackageVersion Include="MimeKit" Version="4.18.2" />
     <PackageVersion Include="MailKit" Version="4.18.2" />
+    <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
     <!-- Windows installer and updates of the desktop app; vpk (backend/.config/dotnet-tools.json) packs releases -->
     <PackageVersion Include="Velopack" Version="1.2.161" />
     <PackageVersion Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.13" />

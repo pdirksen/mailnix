@@ -648,7 +648,9 @@
       "MoveTo": "In Label verschieben",
       "CopyTo": "Label hinzufügen",
       "Archive": "Archivieren (aus dem Posteingang entfernen)"
-    }
+    },
+    "origin": "Von {name}",
+    "originHint": "Von einem KI-Assistenten (MCP) angelegt oder zuletzt geändert. Prüfen Sie die Regel, bevor Sie sie scharf schalten; wenn Sie sie hier speichern, gehört sie Ihnen."
   },
   "activity": {
     "title": "Aktivität",
@@ -721,7 +723,9 @@
     "undoSelected": "1 Aktion rückgängig machen | {count} Aktionen rückgängig machen",
     "undoSelectedTitle": "1 Aktion rückgängig machen? | {count} Aktionen rückgängig machen?",
     "undoSelectedText": "Jede E-Mail wird als Ganzes zurückgesetzt: Alles, was ihr Lauf mit ihr gemacht hat, wird rückgängig gemacht, nicht nur die ausgewählte Aktion.",
-    "loadMore": "Mehr laden"
+    "loadMore": "Mehr laden",
+    "origin": "über {name}",
+    "originHint": "Von einem KI-Assistenten (MCP) gestartet."
   },
   "runNow": {
     "button": "Jetzt ausführen",
@@ -1057,6 +1061,71 @@
       "signOutOthersConfirm": "Alle anderen Browser und Geräte, die bei deinem Konto angemeldet sind, werden innerhalb einer Minute abgemeldet. Dieser bleibt angemeldet.",
       "othersSignedOut": "Andere Geräte werden innerhalb einer Minute abgemeldet."
     },
+    "assistants": {
+      "nav": "KI-Assistenten",
+      "title": "KI-Assistenten (MCP)",
+      "intro": "KI-Assistenten wie Claude können mit Ihren Postfächern arbeiten: Regeln erklären, neue an echter Post ausprobieren, Entwürfe anlegen und nachsehen, was passiert ist. mailnix spricht unter dieser Adresse das Model Context Protocol (MCP).",
+      "serverAddress": "Server-Adresse",
+      "copyAddress": "Server-Adresse kopieren",
+      "connectorTitle": "Claude.ai und Claude Desktop",
+      "connectorSteps": "Öffnen Sie in Claude Einstellungen → Konnektoren → Eigenen Konnektor hinzufügen und fügen Sie die Adresse ein. Claude schickt Sie dann zum Anmelden und Zustimmen hierher; ein Token ist nicht nötig.",
+      "safety": "Assistenten schalten nie eine Regel scharf: Regeln, die sie anlegen oder ändern, bleiben deaktiviert oder im Probelauf, bis Sie sie hier einschalten. Große Läufe warten weiter auf Ihre Bestätigung, Mails werden nie endgültig gelöscht, und alles lässt sich rückgängig machen.",
+      "accessTitle": "Tokens und verbundene Apps",
+      "accessHint": "Für Claude Code, VS Code und andere Clients legen Sie ein persönliches Zugriffstoken an. Per Anmeldung verbundene Apps stehen ebenfalls hier.",
+      "createToken": "Neues Token",
+      "empty": "Noch keine Tokens oder verbundenen Apps.",
+      "kinds": {
+        "Personal": "Token",
+        "Connection": "Verbundene App"
+      },
+      "scopes": {
+        "Read": "Nur lesen",
+        "ReadWrite": "Lesen und entwerfen"
+      },
+      "scopeHints": {
+        "Read": "Konten, Ordner, Regeln, Vorschauen, Statistik und Aktivität.",
+        "ReadWrite": "Außerdem Regelentwürfe anlegen und ändern, Läufe starten und rückgängig machen."
+      },
+      "expired": "Abgelaufen",
+      "lastUsed": "Zuletzt benutzt {time}",
+      "neverUsed": "Nie benutzt",
+      "expires": "läuft ab {time}",
+      "noExpiry": "läuft nicht ab",
+      "revoke": "Widerrufen",
+      "disconnect": "Trennen",
+      "revokeTitle": "„{name}“ widerrufen?",
+      "revokeConfirm": "Clients mit diesem Token verlieren sofort den Zugriff.",
+      "disconnectTitle": "„{name}“ trennen?",
+      "disconnectConfirm": "Die App verliert sofort den Zugriff. Um sie wieder zu nutzen, verbinden Sie sie in der App neu.",
+      "revoked": "Token „{name}“ widerrufen.",
+      "disconnected": "„{name}“ getrennt.",
+      "createTitle": "Neues persönliches Zugriffstoken",
+      "createHint": "Mit einem Token handelt ein MCP-Client für Sie. Geben Sie ihm einen Namen, den Sie später wiedererkennen.",
+      "namePlaceholder": "z. B. Claude Code auf dem Laptop",
+      "scopeLabel": "Zugriff",
+      "expiryLabel": "Läuft ab",
+      "expiry": {
+        "30": "in 30 Tagen",
+        "90": "in 90 Tagen",
+        "365": "in einem Jahr",
+        "never": "nie"
+      },
+      "createdTitle": "Token angelegt",
+      "createdHint": "Kopieren Sie das Token jetzt: mailnix speichert nur einen Fingerabdruck und kann es nicht noch einmal anzeigen.",
+      "copyToken": "Token kopieren",
+      "copySnippet": "Konfiguration kopieren",
+      "clients": {
+        "claudeCode": "Claude Code",
+        "vsCode": "VS Code",
+        "other": "Andere Clients"
+      },
+      "clientHints": {
+        "claudeCode": "In einem Terminal ausführen:",
+        "vsCode": "In .vscode/mcp.json (oder die Benutzerkonfiguration) eintragen:",
+        "other": "Die meisten anderen Clients (z. B. Cursor) lesen dieses Format:"
+      },
+      "done": "Fertig"
+    },
     "twoFactor": {
       "title": "Anmeldung in zwei Schritten",
       "description": "Zusätzlich zum Passwort fragt die Anmeldung nach einem Code aus einer Authenticator-App auf deinem Handy (z. B. Google Authenticator, Microsoft Authenticator, 1Password oder Aegis).",
@@ -1115,6 +1184,20 @@
       "TwoFactorSetupMissing": "Bitte starte die Einrichtung erneut.",
       "TwoFactorNotEnabled": "Die Anmeldung in zwei Schritten ist aus."
     }
+  },
+  "connect": {
+    "title": "App verbinden",
+    "question": "{app} möchte Ihr mailnix-Konto nutzen.",
+    "account": "Angemeldet als {email}.",
+    "returnsTo": "Nach Ihrer Entscheidung geht es zurück zu {host}.",
+    "canRead": "Ihre Konten, Ordner, Regeln, Statistik und Aktivität lesen und Regeln an Ihrer Post ausprobieren",
+    "canChange": "Regeln entwerfen (deaktiviert oder Probelauf), Läufe starten und rückgängig machen",
+    "never": "Niemals: Regeln scharf schalten, große Läufe bestätigen, Mails endgültig löschen oder Passwörter sehen",
+    "allowChanges": "Auch Regelentwürfe und Läufe erlauben",
+    "allowChangesHint": "Ohne diese Erlaubnis kann die App nur lesen.",
+    "allow": "Erlauben",
+    "deny": "Abbrechen",
+    "invalid": "Dieser Link ist unvollständig oder die App ist unbekannt. Starten Sie das Verbinden erneut in der App."
   },
   "assistant": {
     "open": "Einrichtungsassistent",

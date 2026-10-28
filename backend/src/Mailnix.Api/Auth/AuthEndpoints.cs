@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text;
 using Mailnix.Api.Email;
 using Mailnix.Api.Hosting;
+using Mailnix.Api.Mcp;
 using Mailnix.Api.Profile;
 using Mailnix.Api.Team;
 using Mailnix.Infrastructure.Data;
@@ -58,7 +59,7 @@ internal static class AuthEndpoints
 
     /// <summary>Sets the new password from a reset link. Signs out every device; the user then signs in normally (with two-factor sign-in, if on).</summary>
     private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> ResetPassword(
-        ResetPasswordRequest request, UserManager<AppUser> userManager, AccountEmails emails)
+        ResetPasswordRequest request, UserManager<AppUser> userManager, MailnixDbContext db, AccountEmails emails, CancellationToken ct)
     {
         string token;
         try
@@ -86,6 +87,7 @@ internal static class AuthEndpoints
         // Whoever got locked out by wrong guesses can sign in again with the new password.
         await userManager.SetLockoutEndDateAsync(user, null);
         await userManager.ResetAccessFailedCountAsync(user);
+        await ApiTokenEndpoints.RevokeAllAsync(db, user.Id, ct);
         emails.PasswordChanged(user);
         return TypedResults.NoContent();
     }
@@ -100,7 +102,7 @@ internal static class AuthEndpoints
 
     private static async Task<(Invitation Invitation, string TenantName)?> FindInvitationAsync(MailnixDbContext db, string token, TimeProvider time)
     {
-        var hash = InvitationTokens.Hash(token);
+        var hash = SecretTokens.Hash(token);
         var found = await db.Invitations
             .Where(i => i.TokenHash == hash && i.AcceptedAt == null)
             .Join(db.Tenants, i => i.TenantId, t => t.Id, (i, t) => new { Invitation = i, t.Name })

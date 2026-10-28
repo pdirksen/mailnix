@@ -35,7 +35,8 @@ public sealed record RunSummary(
     Guid? UndoneByRunId,
     Guid? UndoRunId,
     Guid? UndoRuleId,
-    bool CanUndo)
+    bool CanUndo,
+    string? Origin)
 {
     public static RunSummary From(RuleRun run, string accountName) => new(
         run.Id,
@@ -59,7 +60,8 @@ public sealed record RunSummary(
         run.UndoRunId,
         run.UndoRuleId,
         CanUndo: run.State is RunState.Completed or RunState.CompletedWithErrors
-            && run.Trigger is not (RunTrigger.Undo or RunTrigger.Purge) && run.UndoneByRunId is null && run.ExecutedActions > 0);
+            && run.Trigger is not (RunTrigger.Undo or RunTrigger.Purge) && run.UndoneByRunId is null && run.ExecutedActions > 0,
+        run.Origin);
 }
 
 public sealed record ActionLogItem(

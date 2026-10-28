@@ -33,6 +33,7 @@ import { countConditions, fromApi, toDraft } from '@/rules/model'
 import { useAccountsStore } from '@/stores/accounts'
 import { type Rule, useRulesStore } from '@/stores/rules'
 import {
+  BotIcon,
   CopyIcon,
   GripVerticalIcon,
   HistoryIcon,
@@ -256,6 +257,7 @@ function summary(rule: Rule) {
                 }}<template v-if="rule.nextRunAt"> · {{ $t('rules.nextRun', { time: formatRelative(rule.nextRunAt, locale) }) }}</template>
               </Badge>
               <Badge v-if="rule.dryRun" variant="outline">{{ $t('rules.dryRun') }}</Badge>
+              <Badge v-if="rule.origin" variant="outline" :title="$t('rules.originHint')"><BotIcon />{{ $t('rules.origin', { name: rule.origin }) }}</Badge>
               <Badge v-if="rule.actions.length === 0" variant="outline">{{ $t('rules.filterOnly') }}</Badge>
               <Badge v-if="rule.usedBy.length" variant="outline">{{ $t('rules.usedBy', { count: rule.usedBy.length }, rule.usedBy.length) }}</Badge>
             </div>

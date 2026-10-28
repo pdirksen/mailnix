@@ -23,6 +23,7 @@ export function testRun(overrides: Partial<RunSummary> = {}): RunSummary {
     undoRunId: null,
     undoRuleId: null,
     canUndo: true,
+    origin: null,
     ...overrides,
   }
 }

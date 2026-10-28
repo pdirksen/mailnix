@@ -134,7 +134,7 @@ internal static class StatsEndpoints
             Sum(r => r.Metric == StatsMetrics.Failed));
     }
 
-    private static async Task<Ok<OverviewResponse>> Overview(ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct, Guid? accountId = null)
+    internal static async Task<Ok<OverviewResponse>> Overview(ClaimsPrincipal user, MailnixDbContext db, CancellationToken ct, Guid? accountId = null)
     {
         var userId = user.GetUserId();
         var range = await RangeAsync(db, userId, null, null, ct);

@@ -648,7 +648,9 @@
       "MoveTo": "Move to label",
       "CopyTo": "Add label",
       "Archive": "Archive (remove from Inbox)"
-    }
+    },
+    "origin": "From {name}",
+    "originHint": "Created or last changed by an AI assistant (MCP). Review it before you switch it live; saving it here makes it yours."
   },
   "activity": {
     "title": "Activity",
@@ -721,7 +723,9 @@
     "undoSelected": "Undo 1 action | Undo {count} actions",
     "undoSelectedTitle": "Undo 1 action? | Undo {count} actions?",
     "undoSelectedText": "Each message is put back as a whole: whatever its run did to it is undone, not only the selected action.",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "origin": "via {name}",
+    "originHint": "Started by an AI assistant (MCP)."
   },
   "runNow": {
     "button": "Run now",
@@ -1057,6 +1061,71 @@
       "signOutOthersConfirm": "Every other browser and device that is signed in to your account is signed out within a minute. This one stays signed in.",
       "othersSignedOut": "Other devices are signed out within a minute."
     },
+    "assistants": {
+      "nav": "AI assistants",
+      "title": "AI assistants (MCP)",
+      "intro": "Let AI assistants such as Claude work with your mailboxes: explain your rules, try out new ones on real mail, draft them and look at what happened. mailnix speaks the Model Context Protocol (MCP) at this address.",
+      "serverAddress": "Server address",
+      "copyAddress": "Copy the server address",
+      "connectorTitle": "Claude.ai and Claude Desktop",
+      "connectorSteps": "In Claude, open Settings → Connectors → Add custom connector and paste the address. Claude then sends you here to sign in and allow access; no token needed.",
+      "safety": "Assistants never switch a rule live: rules they create or change stay disabled or in dry run until you enable them here. Large runs still wait for your confirmation, mail is never deleted permanently, and everything can be undone.",
+      "accessTitle": "Tokens and connected apps",
+      "accessHint": "For Claude Code, VS Code and other clients, create a personal access token. Apps connected through sign-in are listed here too.",
+      "createToken": "New token",
+      "empty": "No tokens or connected apps yet.",
+      "kinds": {
+        "Personal": "Token",
+        "Connection": "Connected app"
+      },
+      "scopes": {
+        "Read": "Read only",
+        "ReadWrite": "Read and draft"
+      },
+      "scopeHints": {
+        "Read": "Accounts, folders, rules, previews, stats and activity.",
+        "ReadWrite": "Also create and change draft rules, start runs and undo them."
+      },
+      "expired": "Expired",
+      "lastUsed": "Last used {time}",
+      "neverUsed": "Never used",
+      "expires": "expires {time}",
+      "noExpiry": "does not expire",
+      "revoke": "Revoke",
+      "disconnect": "Disconnect",
+      "revokeTitle": "Revoke “{name}”?",
+      "revokeConfirm": "Clients using this token lose access at once.",
+      "disconnectTitle": "Disconnect “{name}”?",
+      "disconnectConfirm": "The app loses access at once. To use it again, connect it again from the app.",
+      "revoked": "Token “{name}” revoked.",
+      "disconnected": "“{name}” disconnected.",
+      "createTitle": "New personal access token",
+      "createHint": "A token lets one MCP client act for you. Give it a name you will recognize later.",
+      "namePlaceholder": "e.g. Claude Code on my laptop",
+      "scopeLabel": "Access",
+      "expiryLabel": "Expires",
+      "expiry": {
+        "30": "in 30 days",
+        "90": "in 90 days",
+        "365": "in a year",
+        "never": "never"
+      },
+      "createdTitle": "Token created",
+      "createdHint": "Copy the token now: mailnix keeps only a fingerprint of it and cannot show it again.",
+      "copyToken": "Copy the token",
+      "copySnippet": "Copy the configuration",
+      "clients": {
+        "claudeCode": "Claude Code",
+        "vsCode": "VS Code",
+        "other": "Other clients"
+      },
+      "clientHints": {
+        "claudeCode": "Run this in a terminal:",
+        "vsCode": "Put this into .vscode/mcp.json (or your user configuration):",
+        "other": "Most other clients (e.g. Cursor) read this format:"
+      },
+      "done": "Done"
+    },
     "twoFactor": {
       "title": "Two-factor sign-in",
       "description": "Besides your password, signing in asks for a code from an authenticator app on your phone (for example Google Authenticator, Microsoft Authenticator, 1Password or Aegis).",
@@ -1115,6 +1184,20 @@
       "TwoFactorSetupMissing": "Please start the setup again.",
       "TwoFactorNotEnabled": "Two-factor sign-in is off."
     }
+  },
+  "connect": {
+    "title": "Connect an app",
+    "question": "{app} wants to use your mailnix account.",
+    "account": "Signed in as {email}.",
+    "returnsTo": "After your decision you return to {host}.",
+    "canRead": "Read your accounts, folders, rules, statistics and activity, and try rules on your mail",
+    "canChange": "Draft rules (disabled or dry run), start runs and undo them",
+    "never": "Never: switch rules live, confirm large runs, delete mail permanently, or see passwords",
+    "allowChanges": "Also allow drafting rules and running them",
+    "allowChangesHint": "Without this, the app can only read.",
+    "allow": "Allow",
+    "deny": "Cancel",
+    "invalid": "This link is incomplete or the app is unknown. Start connecting again from the app."
   },
   "assistant": {
     "open": "Setup assistant",

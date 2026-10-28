@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useConnectionErrors } from '@/lib/connectionErrors'
 import { useProfileStore } from '@/stores/profile'
-import { AtSignIcon, ShieldCheckIcon, SlidersHorizontalIcon, UserRoundIcon } from '@lucide/vue'
+import { AtSignIcon, BotIcon, ShieldCheckIcon, SlidersHorizontalIcon, UserRoundIcon } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 
@@ -16,6 +16,7 @@ const sections = [
   { name: 'settings-preferences', key: 'preferences', icon: SlidersHorizontalIcon },
   { name: 'settings-addresses', key: 'addresses', icon: AtSignIcon },
   { name: 'settings-security', key: 'security', icon: ShieldCheckIcon },
+  { name: 'settings-assistants', key: 'assistants', icon: BotIcon },
 ] as const
 
 async function load() {

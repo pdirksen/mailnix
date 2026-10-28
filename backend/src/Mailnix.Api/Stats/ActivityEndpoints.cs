@@ -24,7 +24,7 @@ internal static class ActivityEndpoints
     /// <param name="from">First day (user's time zone).</param>
     /// <param name="to">Last day (user's time zone).</param>
     /// <param name="before">Paging: only entries older than this one (ids grow with time).</param>
-    private static async Task<Ok<ActionPage>> Actions(
+    internal static async Task<Ok<ActionPage>> Actions(
         ClaimsPrincipal user,
         MailnixDbContext db,
         CancellationToken ct,
