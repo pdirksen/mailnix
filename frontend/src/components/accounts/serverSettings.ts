@@ -16,8 +16,11 @@ export function emptyServerSettings(): ServerSettings {
 
 type Translate = (key: string, named?: Record<string, unknown>) => string
 
-/** Mirrors the API's validation; `passwordRequired` is false when editing (empty = keep the stored one). */
-export function serverSettingsSchema(t: Translate, { passwordRequired }: { passwordRequired: boolean }) {
+/**
+ * Mirrors the API's validation; `passwordRequired` is false when editing (empty = keep the stored one), unless the
+ * server or user changed (`passwordAgain`: the stored password only goes to the server it was entered for).
+ */
+export function serverSettingsSchema(t: Translate, { passwordRequired, passwordAgain = false }: { passwordRequired: boolean; passwordAgain?: boolean }) {
   const required = () => t('validation.required')
   return z.object({
     name: z.string().trim().min(1, { error: required }).max(200, { error: () => t('validation.maxLength', { max: 200 }) }),
@@ -28,7 +31,7 @@ export function serverSettingsSchema(t: Translate, { passwordRequired }: { passw
     security: z.enum(['SslOnConnect', 'StartTls', 'None']),
     username: z.string().trim().min(1, { error: required }).max(320, { error: () => t('validation.maxLength', { max: 320 }) }),
     password: passwordRequired
-      ? z.string().min(1, { error: required }).max(1024)
+      ? z.string().min(1, { error: passwordAgain ? () => t('accounts.fields.passwordAgain') : required }).max(1024)
       : z.string().max(1024),
   })
 }

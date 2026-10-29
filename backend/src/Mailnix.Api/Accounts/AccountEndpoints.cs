@@ -176,11 +176,21 @@ internal static class AccountEndpoints
             ? new ImapConnectionSettings(account.Host, account.Port, account.Security, account.Username, string.Empty)
             : new ImapConnectionSettings(request.Host.Trim(), request.Port, request.Security, request.Username.Trim(), request.Password ?? string.Empty);
         var newPassword = !oauth && !string.IsNullOrEmpty(request.Password);
-        var connectionChanged = newPassword
-            || settings.Host != account.Host
+        var serverChanged = settings.Host != account.Host
             || settings.Port != account.Port
             || settings.Security != account.Security
             || settings.Username != account.Username;
+        var connectionChanged = newPassword || serverChanged;
+
+        // The stored password only ever goes to the server it was entered for: otherwise whoever gets hold of a
+        // session could point the account at their own server and receive it.
+        if (!oauth && serverChanged && !newPassword)
+        {
+            return TypedResults.ValidationProblem(new Dictionary<string, string[]>
+            {
+                ["password"] = ["Enter the password again when you change the server, port, encryption or user name."],
+            });
+        }
         var watched = request.WatchedFolders.Distinct(StringComparer.Ordinal).ToList();
         var foldersChanged = !watched.SequenceEqual(account.WatchedFolders) || request.SpecialFolders != AccountResponse.From(account).SpecialFolders;
         var now = time.GetUtcNow();

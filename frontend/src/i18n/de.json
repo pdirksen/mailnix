@@ -60,6 +60,8 @@
     "register": "Konto erstellen",
     "registerTitle": "Konto erstellen",
     "registerSubtitle": "Das erste Konto wird Administrator.",
+    "setupCode": "Einrichtungscode",
+    "setupCodeHint": "mailnix schreibt ihn ins Server-Log, wenn es ohne Konto startet.",
     "noAccount": "Noch kein Konto?",
     "haveAccount": "Bereits ein Konto?",
     "logout": "Abmelden",
@@ -74,6 +76,7 @@
     "invitationInvalidHint": "Bitte um einen neuen Einladungslink.",
     "errors": {
       "InvitationInvalid": "Diese Einladung ist nicht mehr gültig.",
+      "SetupCodeInvalid": "Der Einrichtungscode stimmt nicht. Du findest ihn im Server-Log.",
       "InvitationForOtherEmail": "Diese Einladung gilt für eine andere E-Mail-Adresse.",
       "InvalidCode": "Dieser Code ist nicht gültig. Prüfe die Uhrzeit auf deinem Handy oder warte auf den nächsten Code.",
       "TwoFactorExpired": "Das hat zu lange gedauert. Bitte melde dich erneut mit deinem Passwort an.",
@@ -191,6 +194,7 @@
       "usernameHint": "Meist deine vollständige E-Mail-Adresse.",
       "password": "Passwort",
       "passwordKeep": "Leer lassen, um das aktuelle Passwort zu behalten.",
+      "passwordAgain": "Gib das Passwort erneut ein: Das gespeicherte geht nur an den Server, für den es eingegeben wurde.",
       "enabled": "Neue E-Mails verarbeiten",
       "enabledHint": "Pausieren stoppt alle Regeln für dieses Konto.",
       "provider": "Anbieter"
@@ -931,7 +935,8 @@
     "errors": {
       "LastTenantAdmin": "Jemand muss Admin der Organisation bleiben. Mache zuerst ein anderes Mitglied zum Admin.",
       "CannotRemoveSelf": "Du kannst dich nicht selbst entfernen.",
-      "CannotRemoveAdmin": "Der Admin der Installation kann hier nicht entfernt werden."
+      "CannotRemoveAdmin": "Der Admin der Installation kann hier nicht entfernt werden.",
+      "InvitationEmailLimit": "Deine Organisation hat heute schon so viele Einladungen per E-Mail verschickt wie erlaubt. Erstelle stattdessen einen Link und schick ihn selbst."
     },
     "sendByEmail": "Einladung auch per E-Mail senden",
     "emailSent": "Einladung an {email} gesendet."

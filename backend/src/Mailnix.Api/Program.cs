@@ -16,9 +16,11 @@ using Mailnix.Api.Team;
 using Mailnix.Core.Rules;
 using Mailnix.Infrastructure;
 using Mailnix.Infrastructure.Data;
+using Mailnix.Infrastructure.Options;
 using Mailnix.Mail;
 using Mailnix.Worker;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using Scalar.AspNetCore;
 using Serilog;
@@ -60,8 +62,14 @@ builder.Services.AddOptions<MailnixHostOptions>().Bind(builder.Configuration.Get
 
 builder.Services.AddMailnixInfrastructure(builder.Configuration, persistDataProtectionKeys: !isOpenApiGeneration);
 builder.Services.AddMailnixMail(builder.Configuration);
+
+// A multi-tenant installation serves strangers: unless configured otherwise, their mail servers must be on the internet.
+var multiTenant = builder.Configuration.GetSection(TenancyOptions.Section).Get<TenancyOptions>()?.Mode == TenancyMode.MultiTenant;
+builder.Services.PostConfigure<MailOptions>(mail => mail.BlockPrivateNetworks ??= multiTenant);
 builder.Services.AddMailnixAuth(builder.Configuration);
 builder.Services.AddMailnixRateLimiting(builder.Configuration);
+var trustedProxies = TrustedProxies.Parse(builder.Configuration[TrustedProxies.Key]);
+builder.Services.AddTrustedProxies(trustedProxies);
 builder.Services.AddMailnixMcp();
 builder.Services.ConfigureHttpJsonOptions(json =>
 {
@@ -111,6 +119,10 @@ builder.Services.AddHealthChecks().AddDbContextCheck<MailnixDbContext>();
 
 var app = builder.Build();
 Log.Information("mailnix {Version} ({Mode})", AppVersion.Current, hostOptions.Mode);
+if (trustedProxies.Count == 0 && app.Configuration.GetValue<bool>("FORWARDEDHEADERS_ENABLED"))
+{
+    Log.Warning("ASPNETCORE_FORWARDEDHEADERS_ENABLED trusts X-Forwarded-For from every sender: anyone who reaches this port directly can fake their address. Set {Setting} to the proxy's address instead", TrustedProxies.Key);
+}
 
 if (!isOpenApiGeneration)
 {
@@ -123,6 +135,18 @@ if (!isOpenApiGeneration)
         Log.Information("Database and keys are ready");
         return;
     }
+
+    var first = scope.ServiceProvider.GetRequiredService<FirstAccount>();
+    if (hostOptions.ServesApi && first.CodeRequired && !await scope.ServiceProvider.GetRequiredService<MailnixDbContext>().Users.AnyAsync())
+    {
+        var register = scope.ServiceProvider.GetRequiredService<PublicLinks>().BaseUrl is { } baseUrl ? $" ({baseUrl}/register?setup={first.Code})" : "";
+        Log.Warning("No account exists yet. Signing up the first account (the administrator) needs the setup code {SetupCode}{RegisterLink}", first.Code, register);
+    }
+}
+
+if (trustedProxies.Count > 0)
+{
+    app.UseForwardedHeaders();
 }
 
 app.UseMiddleware<SecurityHeadersMiddleware>();

@@ -5,7 +5,8 @@ namespace Mailnix.Api.Auth;
 /// <param name="RegistrationOpen">Anyone may sign up (invitations work regardless).</param>
 /// <param name="MultiTenant">Signing up creates an own tenant (SaaS).</param>
 /// <param name="PasswordResetAvailable">"Forgot password" works (email and the public address are configured).</param>
-public sealed record AuthConfigResponse(bool RegistrationOpen, bool MultiTenant, bool PasswordResetAvailable);
+/// <param name="SetupCodeRequired">No account exists yet, and the first sign-up needs the setup code from the server log.</param>
+public sealed record AuthConfigResponse(bool RegistrationOpen, bool MultiTenant, bool PasswordResetAvailable, bool SetupCodeRequired);
 
 /// <param name="Language">The UI language, for the email when the account has none chosen.</param>
 public sealed record ForgotPasswordRequest(
@@ -28,7 +29,8 @@ public sealed record RegisterRequest(
     [MaxLength(200)] string? OrganizationName = null,
     [MaxLength(200)] string? InviteToken = null,
     [MaxLength(100)] string? TimeZone = null,
-    [MaxLength(10)] string? Language = null);
+    [MaxLength(10)] string? Language = null,
+    [MaxLength(100)] string? SetupCode = null);
 
 public sealed record LoginRequest(
     [Required, EmailAddress, MaxLength(256)] string Email,

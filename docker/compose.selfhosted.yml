@@ -3,8 +3,10 @@
 #   mkdir -p docker/secrets && openssl rand -base64 32 > docker/secrets/mailnix_master_key   # once; back it up
 #   docker compose -f docker/compose.selfhosted.yml up -d --build
 #
-# Then open http://localhost:8080. Without a bootstrap admin, the first account you register becomes admin.
-# Put a TLS-terminating reverse proxy in front for anything beyond localhost (see FORWARDEDHEADERS below).
+# Then open http://localhost:8080. Without a bootstrap admin, the first account you register becomes admin; it needs
+# the setup code from `docker compose logs mailnix`.
+# The port is only published on this machine. Put a TLS-terminating reverse proxy in front for anything beyond it
+# (see MAILNIX_TRUSTED_PROXIES below), or set MAILNIX_BIND_ADDRESS=0.0.0.0 for plain HTTP in a trusted network.
 
 services:
   mailnix:
@@ -14,7 +16,7 @@ services:
     image: mailnix:latest
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "${MAILNIX_BIND_ADDRESS:-127.0.0.1}:8080:8080"
     volumes:
       - mailnix-data:/data
     # Encrypts the keys that protect stored mailbox passwords; kept outside the data volume (see README).
@@ -23,11 +25,13 @@ services:
     environment:
       Mailnix__DataProtection__MasterKeyFile: /run/secrets/mailnix_master_key
       Mailnix__Mode: AllInOne
-      Mailnix__Auth__AllowRegistration: ${MAILNIX_ALLOW_REGISTRATION:-true}
+      # Further users join by invitation (Admin > Team); true lets anyone who reaches the server sign up.
+      Mailnix__Auth__AllowRegistration: ${MAILNIX_ALLOW_REGISTRATION:-false}
       Mailnix__Bootstrap__AdminEmail: ${MAILNIX_ADMIN_EMAIL:-}
       Mailnix__Bootstrap__AdminPassword: ${MAILNIX_ADMIN_PASSWORD:-}
-      # Behind a reverse proxy: trust X-Forwarded-* so cookies are marked Secure on HTTPS.
-      ASPNETCORE_FORWARDEDHEADERS_ENABLED: ${MAILNIX_BEHIND_PROXY:-false}
+      # Behind a reverse proxy: its address (or network), whose X-Forwarded-* headers are trusted, so cookies are marked
+      # Secure on HTTPS and rate limits see the client's address. On the same host via Docker, e.g. 172.16.0.0/12.
+      Mailnix__TrustedProxies: ${MAILNIX_TRUSTED_PROXIES:-}
       # Allow plain-text IMAP (not recommended):
       # Mailnix__Mail__AllowInsecureConnections: "true"
       # Email for "forgot password", invitations and security notices (see README):

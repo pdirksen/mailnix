@@ -165,6 +165,24 @@ public sealed class EmailTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Invitation_emails_are_limited_per_organization_and_day()
+    {
+        await using var app = Create(publicUrl: PublicUrl).WithSetting("Mailnix:Email:InvitationsPerDay", "2");
+        var admin = app.CreateApiClient();
+        (await admin.RegisterAsync("admin@example.com")).EnsureSuccessStatusCode();
+        Task<HttpResponseMessage> InviteAsync(string? email, bool sendEmail) =>
+            admin.PostAsJsonAsync("/api/team/invitations", new { email, sendEmail }, Ct);
+
+        (await InviteAsync("one@example.com", true)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await InviteAsync("two@example.com", true)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        var refused = await InviteAsync("three@example.com", true);
+
+        refused.StatusCode.ShouldBe(HttpStatusCode.TooManyRequests);
+        (await refused.Content.ReadAsStringAsync(Ct)).ShouldContain("InvitationEmailLimit");
+        (await InviteAsync(null, false)).StatusCode.ShouldBe(HttpStatusCode.OK, "a link to pass on yourself sends no email");
+    }
+
+    [Fact]
     public async Task The_operator_can_send_a_test_email_and_sees_why_it_fails()
     {
         (await _admin.PostAsync("/api/system/test-email", null, Ct)).StatusCode.ShouldBe(HttpStatusCode.NoContent);

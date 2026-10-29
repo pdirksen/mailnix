@@ -3701,7 +3701,8 @@
         "required": [
           "registrationOpen",
           "multiTenant",
-          "passwordResetAvailable"
+          "passwordResetAvailable",
+          "setupCodeRequired"
         ],
         "type": "object",
         "properties": {
@@ -3712,6 +3713,9 @@
             "type": "boolean"
           },
           "passwordResetAvailable": {
+            "type": "boolean"
+          },
+          "setupCodeRequired": {
             "type": "boolean"
           }
         }
@@ -5761,6 +5765,12 @@
             ]
           },
           "language": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "setupCode": {
             "type": [
               "null",
               "string"

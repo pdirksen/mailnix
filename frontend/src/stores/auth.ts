@@ -20,6 +20,8 @@ export const useAuthStore = defineStore('auth', () => {
   const multiTenant = ref(false)
   /** "Forgot password" works: the server can send email with links. */
   const passwordResetAvailable = ref(false)
+  /** No account exists yet; signing up the first one needs the setup code from the server log. */
+  const setupCodeRequired = ref(false)
   const initialized = ref(false)
 
   const isAuthenticated = computed(() => user.value !== null)
@@ -39,6 +41,7 @@ export const useAuthStore = defineStore('auth', () => {
         registrationOpen.value = config.data?.registrationOpen ?? false
         multiTenant.value = config.data?.multiTenant ?? false
         passwordResetAvailable.value = config.data?.passwordResetAvailable ?? false
+        setupCodeRequired.value = config.data?.setupCodeRequired ?? false
       } catch {
         // Backend unreachable: treat as signed out; the login page reports errors on submit.
         user.value = null
@@ -73,7 +76,9 @@ export const useAuthStore = defineStore('auth', () => {
     // The browser's time zone and the current language, so dates and texts fit from the start.
     const body = { ...input, timeZone: browserTimeZone(), language: useUiStore().locale }
     setUser(unwrap(await api.POST('/api/auth/register', { body })))
-    registrationOpen.value = (await api.GET('/api/auth/config')).data?.registrationOpen ?? false
+    const config = (await api.GET('/api/auth/config')).data
+    registrationOpen.value = config?.registrationOpen ?? false
+    setupCodeRequired.value = config?.setupCodeRequired ?? false
   }
 
   async function logout() {
@@ -94,6 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
     registrationOpen,
     multiTenant,
     passwordResetAvailable,
+    setupCodeRequired,
     initialized,
     isAuthenticated,
     isAdmin,

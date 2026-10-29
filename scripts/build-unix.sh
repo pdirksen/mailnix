@@ -161,7 +161,9 @@ mailnix $runtime
 $(printf '%*s' "$((8 + ${#runtime}))" '' | tr ' ' '=')
 
 Start ./mailnix and open http://localhost:5000 in your browser.
-The first account you register becomes the administrator.
+The first account you register becomes the administrator. It needs the setup code that
+mailnix prints at startup; nobody else can sign up afterwards (invite further users
+under Team, or set Mailnix__Auth__AllowRegistration=true).
 $quarantine_note
 Data (SQLite database, encryption keys for stored mailbox passwords) is kept in the
 'data' folder next to the mailnix executable. Back it up, and keep it when updating:
@@ -182,7 +184,7 @@ Reachable from other computers (put a TLS reverse proxy in front for anything pu
 Settings can be changed in data/appsettings.json (same format as appsettings.json here;
 unlike the files next to the executable, it is kept on updates) or with environment
 variables, e.g.
-    Mailnix__Auth__AllowRegistration=false ./mailnix
+    Mailnix__Auth__AllowRegistration=true ./mailnix
 All settings are listed in the project README, section "Configuration".
 
 License: MIT (LICENSE). Third-party notices: wwwroot/THIRD-PARTY-NOTICES.md.

@@ -60,6 +60,8 @@
     "register": "Create account",
     "registerTitle": "Create your account",
     "registerSubtitle": "The first account becomes the administrator.",
+    "setupCode": "Setup code",
+    "setupCodeHint": "mailnix writes it to the server log when it starts without any account.",
     "noAccount": "No account yet?",
     "haveAccount": "Already have an account?",
     "logout": "Sign out",
@@ -74,6 +76,7 @@
     "invitationInvalidHint": "Ask for a new invitation link.",
     "errors": {
       "InvitationInvalid": "This invitation is no longer valid.",
+      "SetupCodeInvalid": "The setup code is not correct. You find it in the server log.",
       "InvitationForOtherEmail": "This invitation is for a different email address.",
       "InvalidCode": "This code is not valid. Check that the time on your phone is correct, or wait for the next code.",
       "TwoFactorExpired": "That took too long. Please sign in again with your password.",
@@ -191,6 +194,7 @@
       "usernameHint": "Usually your full email address.",
       "password": "Password",
       "passwordKeep": "Leave empty to keep the current password.",
+      "passwordAgain": "Enter the password again: the stored one is only ever sent to the server it was entered for.",
       "enabled": "Process new mail",
       "enabledHint": "Pause to stop all rules for this account.",
       "provider": "Provider"
@@ -931,7 +935,8 @@
     "errors": {
       "LastTenantAdmin": "Someone has to stay admin of the organization. Make another member admin first.",
       "CannotRemoveSelf": "You cannot remove yourself.",
-      "CannotRemoveAdmin": "The administrator of the installation cannot be removed here."
+      "CannotRemoveAdmin": "The administrator of the installation cannot be removed here.",
+      "InvitationEmailLimit": "Your organization has sent as many invitations by email today as allowed. Create a link instead and send it yourself."
     },
     "sendByEmail": "Also send the invitation by email",
     "emailSent": "Invitation sent to {email}."

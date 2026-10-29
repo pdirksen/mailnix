@@ -10,6 +10,8 @@ defineProps<{
   errors: Record<string, string>
   /** Editing an existing account: the password may stay empty. */
   passwordOptional?: boolean
+  /** Editing an existing account with another server or user: the password has to be entered again. */
+  passwordAgain?: boolean
 }>()
 
 const settings = defineModel<ServerSettings>({ required: true })
@@ -82,7 +84,7 @@ function setSecurity(value: unknown) {
       id="account-password"
       v-slot="aria"
       :label="$t('accounts.fields.password')"
-      :hint="passwordOptional ? $t('accounts.fields.passwordKeep') : undefined"
+      :hint="passwordOptional ? $t('accounts.fields.passwordKeep') : passwordAgain ? $t('accounts.fields.passwordAgain') : undefined"
       :error="errors.password"
     >
       <!-- "new-password" stops browsers from filling in the mailnix login password. -->

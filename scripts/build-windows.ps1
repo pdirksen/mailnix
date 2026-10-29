@@ -37,7 +37,12 @@ param(
     [switch] $Zip,
 
     # Skip the frontend license gate (e.g. offline experiments). Release builds should not use this.
-    [switch] $SkipLicenseCheck
+    [switch] $SkipLicenseCheck,
+
+    # Code signing for mailnix.exe (and mailnix-desktop.exe), before anything is packed: a command in which {{file}}
+    # stands for the quoted path, e.g. 'signtool sign /a /fd sha256 /tr http://timestamp.digicert.com /td sha256 {{file}}'.
+    # The same format as vpk --signTemplate (release.ps1 passes it to both).
+    [string] $SignTemplate
 )
 
 $ErrorActionPreference = 'Stop'
@@ -147,7 +152,9 @@ mailnix $Runtime
 ================
 
 Start mailnix.exe and open http://localhost:5000 in your browser.
-The first account you register becomes the administrator.
+The first account you register becomes the administrator. It needs the setup code that
+mailnix shows in its console window at startup; nobody else can sign up afterwards
+(invite further users under Team, or set Mailnix__Auth__AllowRegistration=true).
 
 Data (SQLite database, encryption keys for stored mailbox passwords) is kept in the
 'data' folder next to mailnix.exe. Back it up, and keep it when updating: replace
@@ -166,11 +173,27 @@ Reachable from other computers (put a TLS reverse proxy in front for anything pu
 Settings can be changed in data\appsettings.json (same format as appsettings.json here;
 unlike the files next to mailnix.exe, it is kept on updates) or with environment
 variables, e.g.
-    set Mailnix__Auth__AllowRegistration=false
+    set Mailnix__Auth__AllowRegistration=true
 All settings are listed in the project README, section "Configuration".
 
 License: MIT (LICENSE). Third-party notices: wwwroot\THIRD-PARTY-NOTICES.md.
 "@ | Set-Content (Join-Path $Output 'README.txt') -Encoding utf8
+}
+
+if ($SignTemplate) {
+    foreach ($exe in Get-ChildItem $Output -File | Where-Object Name -in 'mailnix.exe', 'mailnix-desktop.exe') {
+        # Through a .cmd file, so the command line reaches the signing tool exactly as written.
+        $script = Join-Path ([System.IO.Path]::GetTempPath()) "mailnix-sign-$([guid]::NewGuid().ToString('N')).cmd"
+        Set-Content $script ('@' + $SignTemplate.Replace('{{file}}', "`"$($exe.FullName)`"")) -Encoding oem
+        try {
+            & cmd.exe /d /c $script
+            if ($LASTEXITCODE -ne 0) { throw "Signing $($exe.Name) failed (exit code $LASTEXITCODE)." }
+        }
+        finally {
+            Remove-Item $script -Force
+        }
+        Write-Host "Signed: $($exe.Name)"
+    }
 }
 
 if ($Zip) {

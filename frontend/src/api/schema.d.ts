@@ -3581,6 +3581,7 @@ export interface components {
             registrationOpen: boolean;
             multiTenant: boolean;
             passwordResetAvailable: boolean;
+            setupCodeRequired: boolean;
         };
         AuthenticatorSetup: {
             sharedKey: string;
@@ -4077,6 +4078,7 @@ export interface components {
             inviteToken?: null | string;
             timeZone?: null | string;
             language?: null | string;
+            setupCode?: null | string;
         };
         ReliabilityResponse: {
             runsByState: components["schemas"]["RunStateCount"][];

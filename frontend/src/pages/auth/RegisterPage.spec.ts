@@ -17,12 +17,13 @@ vi.mock('@/api/client', async (importOriginal) => ({
 interface Setup {
   registrationOpen?: boolean
   multiTenant?: boolean
+  setupCodeRequired?: boolean
   invitation?: { tenantName: string; email: string | null } | null
 }
 
 /** The server settings (as loaded by the router guard); the invitation lookup answers 404 for `invitation: null`. */
-function serve({ registrationOpen = true, multiTenant = false, invitation }: Setup) {
-  Object.assign(useAuthStore(), { registrationOpen, multiTenant, initialized: true })
+function serve({ registrationOpen = true, multiTenant = false, setupCodeRequired = false, invitation }: Setup) {
+  Object.assign(useAuthStore(), { registrationOpen, multiTenant, setupCodeRequired, initialized: true })
   apiMock.GET.mockImplementation((path: string) => {
     if (path === '/api/auth/invitations/{token}') {
       return Promise.resolve(invitation ? apiResult(200, invitation) : apiResult(404))
@@ -66,9 +67,38 @@ describe('RegisterPage', () => {
 
     await vi.waitFor(() =>
       expect(apiMock.POST).toHaveBeenCalledWith('/api/auth/register', {
-        body: { email: 'founder@acme.test', password: 'correct horse battery', displayName: null, organizationName: 'Acme', inviteToken: null, timeZone: expect.any(String), language: 'en' },
+        body: { email: 'founder@acme.test', password: 'correct horse battery', displayName: null, organizationName: 'Acme', inviteToken: null, setupCode: null, timeZone: expect.any(String), language: 'en' },
       }),
     )
+  })
+
+  it('asks for the setup code for the first account, prefilled from the link in the server log', async () => {
+    serve({ setupCodeRequired: true })
+    apiMock.POST.mockResolvedValue(apiResult(200, testUser))
+    const { wrapper } = await mountRegister('?setup=ABCD-EFGH-JKMN')
+
+    expect((wrapper.find('#setup-code').element as HTMLInputElement).value).toBe('ABCD-EFGH-JKMN')
+    await submit(wrapper, 'owner@example.com')
+
+    await vi.waitFor(() =>
+      expect(apiMock.POST).toHaveBeenCalledWith('/api/auth/register', {
+        body: expect.objectContaining({ email: 'owner@example.com', setupCode: 'ABCD-EFGH-JKMN' }),
+      }),
+    )
+  })
+
+  it('translates a wrong setup code and needs none once accounts exist', async () => {
+    serve({ setupCodeRequired: true })
+    apiMock.POST.mockResolvedValue(apiResult(403, { title: 'Forbidden', errorCode: 'SetupCodeInvalid' }))
+    const { wrapper } = await mountRegister()
+    await wrapper.find('#setup-code').setValue('WRONG')
+    await submit(wrapper, 'owner@example.com')
+
+    await vi.waitFor(() => expect(wrapper.find('[data-testid=register-error]').text()).toContain('The setup code is not correct'))
+
+    setActivePinia(createPinia())
+    serve({ setupCodeRequired: false })
+    expect((await mountRegister()).wrapper.find('#setup-code').exists()).toBe(false)
   })
 
   it('does not ask for an organization on a self-hosted installation', async () => {
@@ -94,7 +124,7 @@ describe('RegisterPage', () => {
 
     await vi.waitFor(() =>
       expect(apiMock.POST).toHaveBeenCalledWith('/api/auth/register', {
-        body: { email: 'carol@acme.test', password: 'correct horse battery', displayName: null, organizationName: null, inviteToken: 'tok3n', timeZone: expect.any(String), language: 'en' },
+        body: { email: 'carol@acme.test', password: 'correct horse battery', displayName: null, organizationName: null, inviteToken: 'tok3n', setupCode: null, timeZone: expect.any(String), language: 'en' },
       }),
     )
   })

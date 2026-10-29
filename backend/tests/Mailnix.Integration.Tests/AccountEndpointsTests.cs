@@ -191,6 +191,58 @@ public sealed class AccountEndpointsTests : IAsyncLifetime
         updated.PurgeTrashAfterDays.ShouldBe(30);
     }
 
+    [Theory]
+    [InlineData(null, true)]
+    [InlineData("false", false)]
+    public async Task Multi_tenant_installations_refuse_mail_servers_on_the_internal_network(string? block, bool refused)
+    {
+        await using var app = new MailnixAppFactory()
+            .WithSetting("Mailnix:Tenancy:Mode", "MultiTenant")
+            .WithSetting("Mailnix:Mail:AllowInsecureConnections", "true")
+            .WithSetting("Mailnix:Mail:BlockPrivateNetworks", block);
+        var client = app.CreateApiClient();
+        (await client.RegisterAsync("owner@example.com")).EnsureSuccessStatusCode();
+
+        var result = await (await client.PostAsJsonAsync("/api/accounts/test", CreateRequest(), Ct)).Content.ReadFromJsonAsync<ConnectionTestResponse>(Json, Ct);
+
+        result!.Success.ShouldBe(!refused);
+        if (refused)
+        {
+            result.ErrorCode.ShouldBe(ConnectionErrorCode.AddressNotAllowed);
+        }
+    }
+
+    [Fact]
+    public async Task A_new_server_needs_the_password_again()
+    {
+        var account = await CreateAccountAsync();
+        var attempts = _imap.LoginAttempts;
+        object Update(string host, string? password) => new
+        {
+            name = "Work",
+            host,
+            port = account.Port,
+            security = "None",
+            username = account.Username,
+            password,
+            watchedFolders = new[] { "INBOX" },
+            specialFolders = new { trash = "Trash", junk = "Junk" },
+            enabled = true,
+            blastRadiusLimit = 200,
+        };
+
+        // The stored password must not be sent to another server (it could be the attacker's).
+        var refused = await _client.PutAsJsonAsync($"/api/accounts/{account.Id}", Update("localhost", null), Ct);
+
+        refused.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (await refused.Content.ReadAsStringAsync(Ct)).ShouldContain("\"password\"");
+        _imap.LoginAttempts.ShouldBe(attempts);
+
+        var accepted = await _client.PutAsJsonAsync($"/api/accounts/{account.Id}", Update("localhost", _imap.Password), Ct);
+        accepted.StatusCode.ShouldBe(HttpStatusCode.OK, await accepted.Content.ReadAsStringAsync(Ct));
+        (await accepted.Content.ReadFromJsonAsync<AccountResponse>(Json, Ct))!.Host.ShouldBe("localhost");
+    }
+
     [Fact]
     public async Task Renaming_does_not_need_the_server()
     {

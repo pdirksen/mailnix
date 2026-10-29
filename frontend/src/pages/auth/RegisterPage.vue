@@ -28,9 +28,12 @@ const inviteToken = typeof route.query.invite === 'string' ? route.query.invite 
 const invitation = ref<Schemas['InvitationInfo']>()
 const invitationInvalid = ref(false)
 const askOrganization = computed(() => auth.multiTenant && !inviteToken)
+/** The first account needs the setup code from the server log; links in the log carry it (?setup=…). */
+const askSetupCode = computed(() => auth.setupCodeRequired && !inviteToken)
 
 const schema = z
   .object({
+    setupCode: z.string().refine((value) => !askSetupCode.value || value.trim().length > 0, { error: () => t('validation.required') }),
     email: z.email({ error: () => t('validation.email') }).max(256, { error: () => t('validation.maxLength', { max: 256 }) }),
     displayName: z.string().max(200, { error: () => t('validation.maxLength', { max: 200 }) }),
     organizationName: z.string().max(200, { error: () => t('validation.maxLength', { max: 200 }) }),
@@ -47,8 +50,16 @@ const schema = z
 
 const { defineField, handleSubmit, errors, isSubmitting } = useForm({
   validationSchema: toTypedSchema(schema),
-  initialValues: { email: '', displayName: '', organizationName: '', password: '', confirmPassword: '' },
+  initialValues: {
+    setupCode: typeof route.query.setup === 'string' ? route.query.setup : '',
+    email: '',
+    displayName: '',
+    organizationName: '',
+    password: '',
+    confirmPassword: '',
+  },
 })
+const [setupCode, setupCodeAttrs] = defineField('setupCode')
 const [email, emailAttrs] = defineField('email')
 const [displayName, displayNameAttrs] = defineField('displayName')
 const [organizationName, organizationNameAttrs] = defineField('organizationName')
@@ -68,7 +79,7 @@ onMounted(async () => {
 
 const failure = ref<string[]>([])
 
-const onSubmit = handleSubmit(async ({ email, displayName, organizationName, password }) => {
+const onSubmit = handleSubmit(async ({ setupCode, email, displayName, organizationName, password }) => {
   failure.value = []
   try {
     await auth.register({
@@ -77,6 +88,7 @@ const onSubmit = handleSubmit(async ({ email, displayName, organizationName, pas
       displayName: displayName.trim() || null,
       organizationName: askOrganization.value ? organizationName.trim() || null : null,
       inviteToken: inviteToken ?? null,
+      setupCode: askSetupCode.value ? setupCode.trim() : null,
     })
     await router.replace({ name: 'dashboard' })
   } catch (error) {
@@ -118,6 +130,23 @@ const onSubmit = handleSubmit(async ({ email, displayName, organizationName, pas
           <AlertDescription>{{ $t('auth.invitationInvalidHint') }}</AlertDescription>
         </Alert>
 
+        <FormField
+          v-if="askSetupCode"
+          id="setup-code"
+          v-slot="aria"
+          :label="$t('auth.setupCode')"
+          :hint="$t('auth.setupCodeHint')"
+          :error="errors.setupCode"
+        >
+          <Input
+            id="setup-code"
+            v-model="setupCode"
+            v-bind="{ ...setupCodeAttrs, ...aria }"
+            autocomplete="off"
+            spellcheck="false"
+            class="font-mono uppercase"
+          />
+        </FormField>
         <FormField id="email" v-slot="aria" :label="$t('auth.email')" :error="errors.email">
           <Input
             id="email"

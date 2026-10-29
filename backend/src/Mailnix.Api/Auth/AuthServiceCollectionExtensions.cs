@@ -10,8 +10,17 @@ public sealed class AuthOptions
 {
     public const string Section = "Mailnix:Auth";
 
-    /// <summary>Allow self-service signup. The very first user can always register (and becomes admin).</summary>
-    public bool AllowRegistration { get; set; } = true;
+    /// <summary>
+    /// Allow self-service signup. Off by default: further users join by invitation. The very first user can always
+    /// register (and becomes admin), with the setup code (see <see cref="FirstAccount"/>).
+    /// </summary>
+    public bool AllowRegistration { get; set; }
+
+    /// <summary>The first sign-up needs the setup code. Off only where nobody else can reach the server (the desktop app).</summary>
+    public bool RequireSetupCode { get; set; } = true;
+
+    /// <summary>A fixed setup code (several API processes must agree on one); otherwise a random one is logged at startup.</summary>
+    public string? SetupCode { get; set; }
 }
 
 public static class Policies
@@ -30,6 +39,7 @@ internal static class AuthServiceCollectionExtensions
     public static IServiceCollection AddMailnixAuth(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<AuthOptions>().Bind(configuration.GetSection(AuthOptions.Section));
+        services.AddSingleton<FirstAccount>();
 
         // The cookie everywhere, except on the MCP endpoint: there only bearer tokens count (see Mcp/McpSetup).
         services.AddAuthentication(DefaultScheme)

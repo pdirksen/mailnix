@@ -48,7 +48,15 @@ const safety = ref<SafetySettings>({
 const oauthProvider = computed(() => (props.account.provider === 'Imap' ? null : (props.account.provider as OAuthProvider)))
 const nameError = ref<string>()
 
-const serverValidation = useSchemaValidation(computed(() => serverSettingsSchema(t, { passwordRequired: false })))
+// Another server or user needs the password again: the stored one only ever goes to the server it was entered for.
+const serverChanged = computed(
+  () =>
+    server.value.host.trim() !== props.account.host ||
+    server.value.port !== props.account.port ||
+    server.value.security !== props.account.security ||
+    server.value.username.trim() !== props.account.username,
+)
+const serverValidation = useSchemaValidation(computed(() => serverSettingsSchema(t, { passwordRequired: serverChanged.value, passwordAgain: serverChanged.value })))
 const safetyValidation = useSchemaValidation(computed(() => safetySchema(t)))
 const watchedError = ref<string>()
 
@@ -128,7 +136,7 @@ async function save() {
         </div>
       </CardContent>
       <CardContent v-else>
-        <ServerSettingsFields v-model="server" :errors="serverValidation.errors.value" password-optional />
+        <ServerSettingsFields v-model="server" :errors="serverValidation.errors.value" :password-optional="!serverChanged" :password-again="serverChanged" />
       </CardContent>
     </Card>
 

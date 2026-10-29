@@ -37,6 +37,53 @@ public sealed class AuthEndpointsTests
     }
 
     [Fact]
+    public async Task Simultaneous_first_sign_ups_make_only_one_administrator()
+    {
+        await using var app = new MailnixAppFactory();
+        var clients = Enumerable.Range(0, 6).Select(_ => app.CreateApiClient()).ToList();
+
+        var responses = await Task.WhenAll(clients.Select((client, i) => client.RegisterAsync($"user{i}@example.com")));
+
+        responses.ShouldAllBe(r => r.StatusCode == HttpStatusCode.OK);
+        var roles = await Task.WhenAll(responses.Select(async r => (await r.Content.ReadFromJsonAsync<MeResponse>(Ct))!.Roles));
+        roles.Count(r => r.Contains("Admin")).ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task The_first_sign_up_needs_the_setup_code()
+    {
+        await using var app = new MailnixAppFactory()
+            .WithSetting("Mailnix:Auth:RequireSetupCode", "true")
+            .WithSetting("Mailnix:Auth:SetupCode", "ABCD-EFGH-JKMN");
+        var client = app.CreateApiClient();
+        (await client.GetFromJsonAsync<AuthConfigResponse>("/api/auth/config", Ct))!.SetupCodeRequired.ShouldBeTrue();
+
+        async Task<HttpResponseMessage> SignUpAsync(string? code) =>
+            await client.PostAsJsonAsync("/api/auth/register", new { email = "owner@example.com", password = HttpClientAuthExtensions.DefaultPassword, setupCode = code }, Ct);
+
+        var missing = await SignUpAsync(null);
+        missing.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        (await missing.Content.ReadAsStringAsync(Ct)).ShouldContain("SetupCodeInvalid");
+        (await SignUpAsync("ABCD-EFGH-JKMP")).StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+
+        // Typed without dashes and in lowercase is fine.
+        (await SignUpAsync("abcdefghjkmn")).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.GetFromJsonAsync<AuthConfigResponse>("/api/auth/config", Ct))!.SetupCodeRequired.ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Later_sign_ups_need_no_setup_code()
+    {
+        await using var app = new MailnixAppFactory()
+            .WithSetting("Mailnix:Auth:RequireSetupCode", "true")
+            .WithSetting("Mailnix:Auth:SetupCode", "ABCD-EFGH-JKMN");
+        (await app.CreateApiClient().PostAsJsonAsync("/api/auth/register", new { email = "owner@example.com", password = HttpClientAuthExtensions.DefaultPassword, setupCode = "ABCD-EFGH-JKMN" }, Ct))
+            .EnsureSuccessStatusCode();
+
+        (await app.CreateApiClient().RegisterAsync("second@example.com")).StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
     public async Task Disabled_registration_still_allows_the_first_user_only()
     {
         await using var app = new MailnixAppFactory().WithSetting("Mailnix:Auth:AllowRegistration", "false");

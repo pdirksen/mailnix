@@ -35,6 +35,12 @@ public sealed class EmailOptions
 
     public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(30);
 
+    /// <summary>
+    /// Invitations sent by email per organization within 24 hours. Every SaaS signup administers its own
+    /// organization, so without a limit anyone could send mass mail through this server.
+    /// </summary>
+    public int InvitationsPerDay { get; set; } = 20;
+
     /// <summary>Email is switched on once a server and a sender address are set.</summary>
     public bool IsConfigured => !string.IsNullOrWhiteSpace(Host) && !string.IsNullOrWhiteSpace(FromAddress);
 

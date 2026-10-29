@@ -46,7 +46,9 @@ npm install
 npm run dev
 ```
 
-The first account you register becomes the administrator (unless a bootstrap admin is configured).
+The first account you register becomes the administrator (unless a bootstrap admin is configured). Outside development
+it needs the setup code that mailnix logs at startup while no account exists, so nobody who reaches a fresh server
+first can take it. Further users join by invitation (page *Team*), unless `Mailnix__Auth__AllowRegistration` is on.
 
 After changing API endpoints, rebuild the backend and run `npm run gen:api` in `frontend/` to regenerate the typed client.
 
@@ -138,8 +140,9 @@ The update address is built into each release (`release.ps1 -UpdateUrl`); `{ "Ma
 "https://…" } } }` in `appsettings.json` in the data folder overrides it, and may also be a folder or a file share.
 Without an address, an installed copy does not look for updates.
 
-The installer and the programs are not code-signed yet, so Windows SmartScreen warns before the first start of the
-installer ("More info" → "Run anyway").
+Releases built without a code-signing certificate (see "Releases") are unsigned: Windows SmartScreen warns before the
+first start of the installer ("More info" → "Run anyway"), and nothing but the HTTPS download proves where an
+update comes from.
 
 ## Standalone Linux and macOS app
 
@@ -183,6 +186,13 @@ and the next release builds its delta updates from it. Installed apps look for u
 Each runtime is its own update channel (`win-x64`, `win-arm64`); pre-releases go to `win-x64-beta` and so on, so
 installed stable versions never get a pre-release. `-NoInstaller` skips all this. macOS builds have to be signed on a Mac: build them there with
 `build-unix.sh --archive`, add them to the folder and update `SHA256SUMS`.
+
+Code signing: with a certificate, pass the signing command with `-SignTemplate` (or the environment variable
+`MAILNIX_SIGN_TEMPLATE`); `{{file}}` stands for the quoted path of each file, e.g.
+`signtool sign /a /fd sha256 /tr http://timestamp.digicert.com /td sha256 {{file}}` (AzureSignTool or osslsigncode work
+the same way). It signs `mailnix.exe` and `mailnix-desktop.exe` before they are zipped, and Velopack signs the
+installer, the updater and the other files of the update packages with it. Without it the release is unsigned (with a
+warning): then whoever gets hold of the upload password can ship an update to every installed desktop app.
 
 `publish-release.ps1 <version>` uploads a release over FTPS (TLS required) to
 `ftp://deploy@rainbow.cloudsteps.de/mailnix/releases`, served at `https://cloudsteps.de/u/mailnix/releases`
@@ -285,12 +295,15 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Email__Security` | `StartTls` | `StartTls`, `SslOnConnect` or `None` (e.g. a relay on the local network) |
 | `Mailnix__Email__Username` / `Password` | – | SMTP sign-in; leave empty for relays that need none |
 | `Mailnix__Email__FromAddress` / `FromName` | – / `mailnix` | Sender of the emails; the address is required for sending |
+| `Mailnix__Email__InvitationsPerDay` | `20` | Invitations an organization may send by email within 24 hours (links to pass on yourself are not limited) |
 | `Mailnix__StopWhenInputCloses` | `false` | Stop when standard input closes; the Windows desktop app runs mailnix this way |
 | `Mailnix__Database__Provider` | `Sqlite` | `Sqlite` or `Postgres` |
 | `Mailnix__DataDirectory` | `data` | Folder for the SQLite database and an optional `appsettings.json` whose settings rank above the `appsettings.json` next to the executable (environment variables and the command line still win), so they survive updates. Relative to the executable's folder in published builds, otherwise to the working directory. Can't be set in that file itself |
 | `Mailnix__Database__ConnectionString` | SQLite: `mailnix.db` in the data directory | Required for Postgres |
 | `Mailnix__Database__AutoMigrate` | `true` | Apply database migrations on startup |
-| `Mailnix__Auth__AllowRegistration` | `true` | Self-service signup (the first user can always register; invited users always can) |
+| `Mailnix__Auth__AllowRegistration` | `false` | Self-service signup for anyone who reaches the server (the first user can always register; invited users always can). Needed for SaaS, where every signup founds an organization |
+| `Mailnix__Auth__RequireSetupCode` | `true` | The first account (the administrator) needs the setup code that mailnix logs at startup while no account exists. Off in development and in the Windows desktop app, which only this computer can reach |
+| `Mailnix__Auth__SetupCode` | random | A fixed setup code, e.g. when several API processes run (each would log its own random one) |
 | `Mailnix__Tenancy__Mode` | `SingleTenant` | `SingleTenant` (everybody in one organization, self-hosted) or `MultiTenant` (every signup founds its own organization, SaaS) |
 | `Mailnix__Tenancy__DefaultMaxAccounts` | – | Mailbox limit for new organizations (unlimited without); the operator can change it per organization on the System page |
 | `Mailnix__OAuth__Google__ClientId` / `ClientSecret` | – | OAuth app for Gmail and Google Workspace mailboxes (see [docs/oauth-setup.md](docs/oauth-setup.md)) |
@@ -302,11 +315,11 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__DataProtection__KeyProtection` | `Auto` | `Auto` (= `MasterKey` when one is configured, otherwise `WindowsUser` on Windows and `None` elsewhere), `None`, `MasterKey`, `WindowsUser` (DPAPI, only the Windows account mailnix runs as can read the keys) or `WindowsMachine` (DPAPI, any account on this machine, e.g. for a Windows service). Keys stored the old way are replaced on the next start (users then sign in again); a wrong or missing master key stops the start instead |
 | `Mailnix__Bootstrap__AdminEmail` / `AdminPassword` | – | Create this admin account on first start |
 | `Mailnix__Mail__AllowInsecureConnections` | `false` | Allow unencrypted IMAP (passwords in clear text) |
-| `Mailnix__Mail__BlockPrivateNetworks` | `false` | Refuse mail servers on private/local addresses (recommended for SaaS) |
+| `Mailnix__Mail__BlockPrivateNetworks` | `MultiTenant`: `true`, else `false` | Refuse mail servers on private, local and similar addresses, so users cannot probe the internal network |
 | `Mailnix__Mail__ConnectTimeout` | `00:00:30` | Timeout for connecting and logging in |
 | `Mailnix__RateLimits__MailConnectionsPerMinute` | `20` | Per-user limit for requests that open IMAP connections |
 | `Mailnix__RateLimits__PreviewsPerMinute` | `60` | Per-user limit for rule previews |
-| `Mailnix__RateLimits__AuthPerMinute` | `30` | Sign-in and signup attempts per IP address (behind a proxy, set `ASPNETCORE_FORWARDEDHEADERS_ENABLED` so the client's address is used) |
+| `Mailnix__RateLimits__AuthPerMinute` | `30` | Sign-in and signup attempts per IP address (behind a proxy, set `Mailnix__TrustedProxies` so the client's address is used) |
 | `Mailnix__RateLimits__ApiRequestsPerMinute` | `600` | All API requests per user (or IP address when signed out) |
 | `Mailnix__RateLimits__McpRequestsPerMinute` | `120` | Requests to the MCP endpoint per token or connected app |
 | `Mailnix__Worker__Enabled` | `true` | Watch mailboxes and execute rules (modes `AllInOne` and `Worker`) |
@@ -322,7 +335,9 @@ All settings can be given as environment variables (`__` separates sections).
 | `Mailnix__Worker__LeaseDuration` | `00:01:30` | A worker that stops renewing loses its mailboxes after this time |
 | `Mailnix__Worker__MaxAccountsPerWorker` | `500` | Mailboxes one worker watches at most |
 | `Mailnix__Worker__QueuePollInterval` | `00:00:02` | How often a worker looks for runs queued by an API process |
-| `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | `false` | Set to `true` behind a TLS-terminating reverse proxy |
+| `Mailnix__TrustedProxies` | – | Behind a TLS-terminating reverse proxy: its addresses or networks, comma-separated (e.g. `172.16.0.0/12` for a proxy container on the same Docker host). Only their `X-Forwarded-For`/`-Proto` headers count, so cookies are marked Secure and rate limits see the client's address |
+| `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | `false` | The ASP.NET Core switch: trusts `X-Forwarded-*` from every sender (mailnix warns at startup). Use `Mailnix__TrustedProxies` instead, or make sure only the proxy can reach the port |
+| `AllowedHosts` | `*` | Host names mailnix answers to, `;`-separated (e.g. `mail.example.com;localhost`); others get 400. The desktop app only answers to `localhost`, against DNS rebinding |
 
 ## Licensing
 

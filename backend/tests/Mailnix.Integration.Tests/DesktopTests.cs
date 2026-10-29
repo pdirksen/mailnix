@@ -106,6 +106,11 @@ public sealed class DesktopTests : IDisposable
         config!.RegistrationOpen.ShouldBeFalse("appsettings.Desktop.json closes registration after the first user");
         File.Exists(Path.Combine(_directory, "data", "mailnix.db")).ShouldBeTrue();
 
+        // Only this computer's names: a web page that points its own domain at 127.0.0.1 (DNS rebinding) gets nothing.
+        using var rebound = new HttpRequestMessage(HttpMethod.Get, "/api/auth/config");
+        rebound.Headers.Host = $"attacker.example:{server.Url.Port}";
+        (await client.SendAsync(rebound, Ct)).StatusCode.ShouldBe(System.Net.HttpStatusCode.BadRequest);
+
         var exited = false;
         server.ExitedUnexpectedly += _ => exited = true;
         (await server.StopAsync(TimeSpan.FromSeconds(30))).ShouldBeTrue("it stops by itself once its input closes");

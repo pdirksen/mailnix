@@ -1,6 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Mailnix.Integration.Tests;
 
@@ -63,5 +66,41 @@ public sealed class HostingTests
 
         (await client.GetAsync("/healthz", Ct)).StatusCode.ShouldBe(HttpStatusCode.OK);
         (await client.GetAsync("/api/auth/config", Ct)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+    }
+
+    [Theory]
+    [InlineData("172.18.0.0/16", true)]
+    [InlineData("10.0.0.0/8", false)]
+    public async Task Forwarded_headers_count_only_from_trusted_proxies(string trusted, bool honored)
+    {
+        await using var app = new MailnixAppFactory()
+            .WithSetting("Mailnix:TrustedProxies", trusted)
+            .WithServices(s => s.AddSingleton<IStartupFilter>(new FromAddress(IPAddress.Parse("172.18.0.2"))));
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/auth/register")
+        {
+            Content = JsonContent.Create(new { email = "user@example.com", password = HttpClientAuthExtensions.DefaultPassword }),
+        };
+        request.Headers.Add("X-Forwarded-Proto", "https");
+        request.Headers.Add("X-Forwarded-For", "203.0.113.7");
+
+        var response = await app.CreateApiClient().SendAsync(request, Ct);
+
+        response.EnsureSuccessStatusCode();
+        var cookie = response.Headers.GetValues("Set-Cookie").Single(c => c.StartsWith("mailnix.auth=", StringComparison.Ordinal));
+        cookie.Contains("secure", StringComparison.OrdinalIgnoreCase).ShouldBe(honored, "HTTPS as reported by a trusted proxy only");
+    }
+
+    /// <summary>Requests appear to come from this address (as from a reverse proxy in the same network).</summary>
+    private sealed class FromAddress(IPAddress address) : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
+        {
+            app.Use((context, nextMiddleware) =>
+            {
+                context.Connection.RemoteIpAddress = address;
+                return nextMiddleware(context);
+            });
+            next(app);
+        };
     }
 }

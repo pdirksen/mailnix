@@ -49,7 +49,12 @@ param(
     [string] $Feed,
 
     # Only the zip/tar.gz builds, no Windows installer.
-    [switch] $NoInstaller
+    [switch] $NoInstaller,
+
+    # Code signing for the Windows programs, installers and update packages: a command in which {{file}} stands for
+    # the quoted path (see build-windows.ps1 -SignTemplate and vpk --signTemplate). Without it the release is
+    # unsigned: Windows warns about the installer, and nothing proves that an update comes from you.
+    [string] $SignTemplate = $env:MAILNIX_SIGN_TEMPLATE
 )
 
 $ErrorActionPreference = 'Stop'
@@ -89,6 +94,11 @@ if ($installers -and -not $UpdateUrl) {
     Write-Warning 'No -UpdateUrl: installed apps of this release only look for updates once Mailnix:Desktop:UpdateUrl is set in their data folder.'
 }
 if ($UpdateUrl -and $UpdateUrl -notmatch '^https?://') { throw "-UpdateUrl must be an http(s) address, not '$UpdateUrl'." }
+if (($Runtimes -like 'win-*') -and -not $SignTemplate) {
+    Write-Warning 'No -SignTemplate (or MAILNIX_SIGN_TEMPLATE): the Windows programs, installers and updates are not code-signed.'
+}
+$sign = if ($SignTemplate) { @{ SignTemplate = $SignTemplate } } else { @{} }
+$vpkSign = if ($SignTemplate) { @('--signTemplate', $SignTemplate) } else { @() }
 
 $bash = $null
 if ($Runtimes -like 'linux-*') {
@@ -137,13 +147,13 @@ try {
     foreach ($runtime in $Runtimes) {
         $build = Join-Path $staging "mailnix-$Version-$runtime"
         if ($runtime -like 'win-*') {
-            Invoke-Step "Building $runtime" { & (Join-Path $PSScriptRoot 'build-windows.ps1') -Runtime $runtime -Output $build -Zip }
+            Invoke-Step "Building $runtime" { & (Join-Path $PSScriptRoot 'build-windows.ps1') -Runtime $runtime -Output $build -Zip @sign }
             $built = (Get-Item (Join-Path $build 'mailnix.exe')).VersionInfo.ProductVersion
             if ($built -ne $Version -and -not $built.StartsWith("$Version+")) { throw "mailnix.exe reports version '$built', not $Version." }
 
             if ($installers) {
                 $desktop = Join-Path $staging "desktop-$runtime"
-                Invoke-Step "Building the desktop app ($runtime)" { & (Join-Path $PSScriptRoot 'build-windows.ps1') -Runtime $runtime -Output $desktop -Desktop }
+                Invoke-Step "Building the desktop app ($runtime)" { & (Join-Path $PSScriptRoot 'build-windows.ps1') -Runtime $runtime -Output $desktop -Desktop @sign }
                 $channel = if ($Version -like '*-*') { "$runtime-beta" } else { $runtime }
                 Push-Location (Join-Path $root 'backend')
                 try {
@@ -152,7 +162,7 @@ try {
                             --mainExe mailnix-desktop.exe --packTitle mailnix --packAuthors mailnix `
                             --icon (Join-Path $root 'backend\src\Mailnix.Api\mailnix.ico') `
                             --runtime $runtime --channel $channel --outputDir $Feed --noPortable `
-                            --exclude '(^|[\\/])data[\\/]|\.pdb$'
+                            --exclude '(^|[\\/])data[\\/]|\.pdb$' @vpkSign
                     }
                 }
                 finally {

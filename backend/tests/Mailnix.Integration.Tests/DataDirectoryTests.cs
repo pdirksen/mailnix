@@ -28,7 +28,7 @@ public sealed class DataDirectoryTests : IDisposable
     public async Task The_database_and_settings_come_from_the_data_directory()
     {
         Directory.CreateDirectory(_directory);
-        await File.WriteAllTextAsync(Path.Combine(_directory, "appsettings.json"), """{ "Mailnix": { "Auth": { "AllowRegistration": false } } }""", Ct);
+        await File.WriteAllTextAsync(Path.Combine(_directory, "appsettings.json"), """{ "Mailnix": { "Tenancy": { "Mode": "MultiTenant" } } }""", Ct);
 
         await using var app = new MailnixAppFactory()
             .WithSetting(DataDirectory.Key, _directory)
@@ -38,7 +38,7 @@ public sealed class DataDirectoryTests : IDisposable
 
         File.Exists(Path.Combine(_directory, "mailnix.db")).ShouldBeTrue();
         var config = await client.GetFromJsonAsync<AuthConfigResponse>("/api/auth/config", Ct);
-        config!.RegistrationOpen.ShouldBeFalse("the settings in the data directory close registration after the first user");
+        config!.MultiTenant.ShouldBeTrue("the settings in the data directory apply");
     }
 
     [Fact]

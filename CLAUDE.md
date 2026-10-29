@@ -172,6 +172,14 @@ step; see `docker/compose.saas.yml`.
     `Mailnix:Worker:Enabled=true`. `SharingDatabaseWith()` simulates a second process.
   - Mail servers are faked with `FakeMailServer` (in-memory `IMailboxSessionFactory`) or `FakeImapServer` (a real IMAP
     socket).
+- **Security rules:**
+  - The first account (installation admin) needs the setup code (`FirstAccount`, logged at startup); sign-ups are
+    decided one at a time until it exists. Registration is closed by default; Development, the desktop app and
+    `MailnixAppFactory` switch the code off (and the factory opens registration).
+  - A stored mailbox password only ever goes to the server it was entered for: changing host, port, security or
+    user name needs the password again.
+  - `X-Forwarded-*` only from `Mailnix:TrustedProxies`; `BlockPrivateNetworks` defaults to on in `MultiTenant`.
+  - Invitation emails are limited per organization and day (`Mailnix:Email:InvitationsPerDay`).
 - **Real-mailbox tests:** these run only when `test-email-credentials.ini` exists in the repo root (git-ignored;
   never print or commit it).
   - Read-only everywhere, except inside `INBOX.mailnix-test` and its subfolders, which are filled via IMAP APPEND.

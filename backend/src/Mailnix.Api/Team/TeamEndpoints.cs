@@ -5,10 +5,12 @@ using Mailnix.Api.Email;
 using Mailnix.Api.Hosting;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Infrastructure.Identity;
+using Mailnix.Mail.Email;
 using Mailnix.Worker;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Mailnix.Api.Team;
 
@@ -79,7 +81,7 @@ internal static class TeamEndpoints
         return TypedResults.NoContent();
     }
 
-    private static async Task<Ok<CreatedInvitation>> Invite(
+    private static async Task<Results<Ok<CreatedInvitation>, ProblemHttpResult>> Invite(
         CreateInvitationRequest request,
         ClaimsPrincipal user,
         HttpRequest http,
@@ -87,15 +89,29 @@ internal static class TeamEndpoints
         UserManager<AppUser> users,
         PublicLinks links,
         AccountEmails emails,
+        IOptions<EmailOptions> emailOptions,
         TimeProvider time,
         CancellationToken ct)
     {
         var token = SecretTokens.Create();
         var now = time.GetUtcNow();
+        var tenantId = user.GetTenantId(db);
+
+        // Invitations for an address are the ones that can go out by email: limited per organization and day.
+        var dayAgo = now - TimeSpan.FromDays(1);
+        if (request.SendEmail
+            && await db.Invitations.CountAsync(i => i.TenantId == tenantId && i.Email != null && i.CreatedAt > dayAgo, ct) >= emailOptions.Value.InvitationsPerDay)
+        {
+            return TypedResults.Problem(
+                statusCode: StatusCodes.Status429TooManyRequests,
+                title: $"At most {emailOptions.Value.InvitationsPerDay} invitations can be sent by email per day. Create a link instead.",
+                extensions: new Dictionary<string, object?> { ["errorCode"] = "InvitationEmailLimit", ["limit"] = emailOptions.Value.InvitationsPerDay });
+        }
+
         var invitation = new Invitation
         {
             Id = Guid.CreateVersion7(),
-            TenantId = user.GetTenantId(db),
+            TenantId = tenantId,
             Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
             TokenHash = SecretTokens.Hash(token),
             CreatedByUserId = user.GetUserId(),

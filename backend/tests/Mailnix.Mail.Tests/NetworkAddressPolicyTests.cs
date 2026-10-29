@@ -17,6 +17,11 @@ public sealed class NetworkAddressPolicyTests
     [InlineData("fe80::1")]
     [InlineData("fd00::1")]
     [InlineData("::ffff:192.168.1.1")] // IPv4-mapped
+    [InlineData("::192.168.1.1")] // IPv4-compatible
+    [InlineData("64:ff9b::a00:1")] // NAT64 of 10.0.0.1
+    [InlineData("64:ff9b:1::1")]
+    [InlineData("2002:c0a8:0101::1")] // 6to4 of 192.168.1.1
+    [InlineData("2001:0:4136:e378::1")] // Teredo
     public void Non_public_addresses_are_detected(string address)
     {
         NetworkAddressPolicy.IsNonPublic(IPAddress.Parse(address)).ShouldBeTrue();

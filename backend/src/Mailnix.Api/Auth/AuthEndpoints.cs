@@ -36,11 +36,15 @@ internal static class AuthEndpoints
     }
 
     private static async Task<Ok<AuthConfigResponse>> GetConfig(
-        UserManager<AppUser> userManager, IOptions<AuthOptions> options, IOptions<TenancyOptions> tenancy, AccountEmails emails) =>
-        TypedResults.Ok(new AuthConfigResponse(
-            options.Value.AllowRegistration || !await userManager.Users.AnyAsync(),
+        UserManager<AppUser> userManager, IOptions<AuthOptions> options, IOptions<TenancyOptions> tenancy, AccountEmails emails, FirstAccount first)
+    {
+        var noAccounts = !await userManager.Users.AnyAsync();
+        return TypedResults.Ok(new AuthConfigResponse(
+            options.Value.AllowRegistration || noAccounts,
             tenancy.Value.Mode == TenancyMode.MultiTenant,
-            emails.CanSendLinks));
+            emails.CanSendLinks,
+            noAccounts && first.CodeRequired));
+    }
 
     /// <summary>
     /// Sends a reset link when the address has an account. The answer is the same either way (and the email goes out
@@ -117,10 +121,43 @@ internal static class AuthEndpoints
         MailnixDbContext db,
         IOptions<AuthOptions> options,
         IOptions<TenancyOptions> tenancy,
+        FirstAccount first,
+        TimeProvider timeProvider)
+    {
+        // While there is no account, sign-ups go one at a time: only one of them may become the administrator.
+        if (await userManager.Users.AnyAsync())
+        {
+            return await RegisterAsync(request, userManager, signInManager, db, options, tenancy, first, timeProvider);
+        }
+
+        await first.Lock.WaitAsync();
+        try
+        {
+            return await RegisterAsync(request, userManager, signInManager, db, options, tenancy, first, timeProvider);
+        }
+        finally
+        {
+            first.Lock.Release();
+        }
+    }
+
+    private static async Task<Results<Ok<MeResponse>, ValidationProblem, ProblemHttpResult>> RegisterAsync(
+        RegisterRequest request,
+        UserManager<AppUser> userManager,
+        SignInManager<AppUser> signInManager,
+        MailnixDbContext db,
+        IOptions<AuthOptions> options,
+        IOptions<TenancyOptions> tenancy,
+        FirstAccount first,
         TimeProvider timeProvider)
     {
         var now = timeProvider.GetUtcNow();
         var isFirstUser = !await userManager.Users.AnyAsync();
+        if (isFirstUser && first.CodeRequired && !first.Matches(request.SetupCode))
+        {
+            return Problem(StatusCodes.Status403Forbidden, "SetupCodeInvalid", "The first account needs the setup code from the server log.");
+        }
+
         Invitation? invitation = null;
         if (!string.IsNullOrWhiteSpace(request.InviteToken))
         {

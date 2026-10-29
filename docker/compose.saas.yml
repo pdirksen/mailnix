@@ -27,6 +27,8 @@ x-mailnix: &mailnix
     # Optional limit of mailboxes per new organization (the operator can change it per organization):
     # Mailnix__Tenancy__DefaultMaxAccounts: "5"
     Mailnix__Auth__AllowRegistration: ${MAILNIX_ALLOW_REGISTRATION:-true}
+    # The first account (the operator) needs this setup code; without it every API replica logs its own random one.
+    Mailnix__Auth__SetupCode: ${MAILNIX_SETUP_CODE:-}
     # Customers' mail servers only: no connections into the hosting network.
     Mailnix__Mail__BlockPrivateNetworks: "true"
     Mailnix__OAuth__RedirectBaseUrl: https://${MAILNIX_DOMAIN:-localhost}
@@ -81,7 +83,8 @@ services:
     environment:
       <<: *mailnix-environment
       Mailnix__Mode: Api
-      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      # Only the reverse proxy (caddy) reaches the API replicas: no port is published for them.
+      Mailnix__TrustedProxies: ${MAILNIX_TRUSTED_PROXIES:-10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
 
   # Watch the mailboxes and run the rules. Not reachable from outside.
   worker:

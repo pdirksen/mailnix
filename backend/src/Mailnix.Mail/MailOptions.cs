@@ -14,8 +14,8 @@ public sealed class MailOptions
     public bool AllowInsecureConnections { get; set; }
 
     /// <summary>
-    /// Refuse mail servers on loopback, private, link-local and similar addresses. Recommended for multi-tenant
-    /// (SaaS) deployments so users cannot probe the internal network; self-hosted setups often need LAN servers.
+    /// Refuse mail servers on loopback, private, link-local and similar addresses, so users cannot probe the internal
+    /// network. Unset: on in multi-tenant (SaaS) installations, off otherwise (self-hosted setups often use LAN servers).
     /// </summary>
-    public bool BlockPrivateNetworks { get; set; }
+    public bool? BlockPrivateNetworks { get; set; }
 }

@@ -52,6 +52,10 @@ public sealed class MailnixAppFactory : WebApplicationFactory<Program>
         // Mailbox watchers only run in tests that ask for them (WithSetting("Mailnix:Worker:Enabled", "true")).
         builder.UseSetting("Mailnix:Worker:Enabled", "false");
 
+        // Tests sign up several users without codes; AuthEndpointsTests covers the setup code and closed signup.
+        builder.UseSetting("Mailnix:Auth:AllowRegistration", "true");
+        builder.UseSetting("Mailnix:Auth:RequireSetupCode", "false");
+
         // Tests poll the API quickly; the limits themselves are tested with lower values.
         builder.UseSetting("Mailnix:RateLimits:ApiRequestsPerMinute", "100000");
         builder.UseSetting("Mailnix:RateLimits:AuthPerMinute", "1000");

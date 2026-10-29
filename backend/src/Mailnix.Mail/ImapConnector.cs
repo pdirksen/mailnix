@@ -33,7 +33,7 @@ internal sealed partial class ImapConnector(IOptions<MailOptions> options, ILogg
         Socket? socket = null;
         try
         {
-            socket = await ConnectSocketAsync(settings.Host, settings.Port, mailOptions.BlockPrivateNetworks, timeout.Token);
+            socket = await ConnectSocketAsync(settings.Host, settings.Port, mailOptions.BlockPrivateNetworks == true, timeout.Token);
 
             // MailKit takes ownership of the socket; the host name is still used for SNI and certificate validation.
             var connected = socket;
