@@ -203,6 +203,7 @@ internal static class OAuthEndpoints
         }
 
         AccountEndpoints.ApplySuccess(account, result, now);
+        account.UpdatedAt = now; // new credentials: the watcher reconnects with them
         await db.SaveChangesAsync(ct);
         credentials.Remember(account.Id, refreshToken, tokens);
         signals.AccountsChanged();

@@ -20,6 +20,23 @@ const router = createRouter({
   ],
 })
 
+const failedMove = {
+  id: 'a1',
+  ruleId: 'rule-1',
+  ruleName: 'Newsletters',
+  action: 'MoveTo',
+  keyword: null,
+  sourceFolder: 'INBOX',
+  targetFolder: 'Newsletters',
+  from: 'news@shop.example',
+  subject: 'Weekly deals',
+  dryRun: false,
+  success: false,
+  error: 'Folder is read-only',
+  createdAt: '2026-10-24T10:00:02Z',
+  undoneAt: null,
+}
+
 function mountItem(run = testRun(), initiallyOpen = false) {
   return mount(RunItem, {
     props: { run, initiallyOpen },
@@ -77,30 +94,7 @@ describe('RunItem', () => {
   })
 
   it('loads the actions when opened', async () => {
-    apiMock.GET.mockResolvedValue(
-      apiResult(200, {
-        run: testRun(),
-        pending: [],
-        actions: [
-          {
-            id: 'a1',
-            ruleId: 'rule-1',
-            ruleName: 'Newsletters',
-            action: 'MoveTo',
-            keyword: null,
-            sourceFolder: 'INBOX',
-            targetFolder: 'Newsletters',
-            from: 'news@shop.example',
-            subject: 'Weekly deals',
-            dryRun: false,
-            success: false,
-            error: 'Folder is read-only',
-            createdAt: '2026-10-24T10:00:02Z',
-            undoneAt: null,
-          },
-        ],
-      }),
-    )
+    apiMock.GET.mockResolvedValue(apiResult(200, { run: testRun(), pending: [], actions: [failedMove] }))
     const wrapper = mountItem(testRun(), true)
     await flushPromises()
 
@@ -110,5 +104,21 @@ describe('RunItem', () => {
     expect(row.text()).toContain('Newsletters')
     expect(row.text()).toContain('Failed')
     expect(row.text()).toContain('Folder is read-only')
+  })
+
+  it('shows the latest details when an older load answers last', async () => {
+    let answerOld!: (value: unknown) => void
+    apiMock.GET.mockReturnValueOnce(new Promise((resolve) => (answerOld = resolve)))
+    apiMock.GET.mockResolvedValueOnce(apiResult(200, { run: testRun(), pending: [], actions: [failedMove] }))
+    const wrapper = mountItem(testRun({ state: 'Running', executedActions: 0 }), true)
+
+    // The run finishes while the details of the running run are still loading.
+    await wrapper.setProps({ run: testRun() })
+    await flushPromises()
+    answerOld(apiResult(200, { run: testRun({ state: 'Running' }), pending: [], actions: [] }))
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="action-MoveTo"]').exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('No actions.')
   })
 })

@@ -1,5 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { createHmac } from 'node:crypto'
+import { FIRST_PAGE_LOAD } from './support'
 
 const password = 'e2e password 123'
 
@@ -22,7 +23,7 @@ async function register(page: Page, email: string) {
   await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByLabel('Confirm password').fill(password)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible(FIRST_PAGE_LOAD)
 }
 
 test.use({ timezoneId: 'Europe/Berlin' })
@@ -84,7 +85,7 @@ test('two-factor sign-in: set up, sign in with a code, turn off', async ({ page 
   await expect(page.getByRole('heading', { name: 'Two-factor sign-in' })).toBeVisible()
   await page.getByLabel('Code from the app').fill(totp(key))
   await page.getByTestId('verify-code').click()
-  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible(FIRST_PAGE_LOAD)
 
   await page.goto('/settings/security')
   await page.getByRole('button', { name: 'Turn off' }).click()

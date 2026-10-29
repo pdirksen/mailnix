@@ -100,6 +100,10 @@ step; see `docker/compose.saas.yml`.
   lease executes them.
 - The supervisor polls the queue, so runs queued by a separate API process are picked up.
 - Runs over an account's `BlastRadiusLimit` stop as `AwaitingConfirmation`, with the plan stored on the run.
+- A changed `MailAccount.UpdatedAt` means changed settings: the supervisor restarts the account's watcher, cutting off
+  a run in progress. Status updates, connection tests and folder listings must not touch it.
+- When a watcher (re)connects, `RunProcessor.RecoverInterruptedAsync` handles runs still marked `Running`: queued jobs
+  without logged actions are queued again, the rest are marked failed as interrupted.
 
 **Live events** go through `ILiveNotifier`:
 - `AllInOne`: `HubLiveNotifier` sends straight to the hub.

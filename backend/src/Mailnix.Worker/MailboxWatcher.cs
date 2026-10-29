@@ -61,6 +61,12 @@ internal sealed partial class MailboxWatcher(
                 backoff = Options.MinBackoff;
                 LogConnected(accountId);
 
+                // A previous connection (or watcher) may have been cut off in the middle of a run.
+                await using (var scope = scopes.CreateAsyncScope())
+                {
+                    await scope.ServiceProvider.GetRequiredService<RunProcessor>().RecoverInterruptedAsync(account, ct);
+                }
+
                 while (!ct.IsCancellationRequested)
                 {
                     // Take the wake token before looking for queued jobs, so a job queued meanwhile ends the idle.

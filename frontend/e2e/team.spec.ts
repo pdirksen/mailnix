@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { FIRST_PAGE_LOAD } from './support'
 
 const password = 'e2e password 123'
 
@@ -34,7 +35,7 @@ test('a founder invites a colleague into their organization', async ({ page, bro
   await invited.getByLabel('Password', { exact: true }).fill(password)
   await invited.getByLabel('Confirm password').fill(password)
   await invited.getByRole('button', { name: 'Create account' }).click()
-  await expect(invited.getByRole('heading', { name: /Welcome/ })).toBeVisible()
+  await expect(invited.getByRole('heading', { name: /Welcome/ })).toBeVisible(FIRST_PAGE_LOAD)
   await expect(invited.getByRole('link', { name: 'Team' })).toHaveCount(0)
   await other.close()
 

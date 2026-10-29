@@ -139,6 +139,41 @@ internal sealed partial class RunProcessor(
         await db.SaveChangesAsync(ct);
     }
 
+    /// <summary>
+    /// Runs left "Running" by a watcher that stopped or lost its connection mid-run. Only the watcher holding the
+    /// account's lease runs its jobs, so when it (re)connects, nothing else works on them. A job from the queue that has
+    /// logged no action yet starts over; the others are marked as interrupted (their logged actions stay undoable).
+    /// </summary>
+    public async Task RecoverInterruptedAsync(MailAccount account, CancellationToken ct)
+    {
+        var interrupted = await db.Runs.Where(r => r.AccountId == account.Id && r.State == RunState.Running).ToListAsync(ct);
+        if (interrupted.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var run in interrupted)
+        {
+            if (run.Trigger != RunTrigger.NewMail && !await db.ActionLog.AnyAsync(a => a.RunId == run.Id, ct))
+            {
+                run.State = RunState.Queued;
+                run.StartedAt = null;
+            }
+            else
+            {
+                // New mail needs no run of its own: its messages are fetched again by the next pass.
+                Fail(run, "Interrupted: mailnix stopped or lost the connection to the mail server during this run. The actions listed here were carried out.");
+            }
+        }
+
+        await db.SaveChangesAsync(ct);
+        LogRecovered(account.Id, interrupted.Count);
+        foreach (var run in interrupted)
+        {
+            await NotifyAsync(account, run);
+        }
+    }
+
     /// <summary>Runs queued jobs of the account: manual and scheduled runs, confirmed runs, undo and Trash purges.</summary>
     public async Task ProcessQueuedAsync(IMailboxSession session, MailAccount account, UndoProcessor undo, CancellationToken ct)
     {
@@ -441,6 +476,9 @@ internal sealed partial class RunProcessor(
 
     private Task NotifyAsync(MailAccount account, RuleRun run) =>
         notifier.NotifyAsync(account.UserId, LiveEvents.RunUpdated, new RunEvent(run.Id, account.Id, run.State, run.Trigger));
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Account {AccountId}: {Count} runs were interrupted and have been queued again or marked as failed")]
+    private partial void LogRecovered(Guid accountId, int count);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Run for account {AccountId} would move {Count} messages (threshold {Threshold}); waiting for confirmation")]
     private partial void LogAwaitingConfirmation(Guid accountId, int count, int threshold);

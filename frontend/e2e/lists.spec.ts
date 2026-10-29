@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { FIRST_PAGE_LOAD } from './support'
 
 test('create a list, edit entries, import and export CSV, delete it', async ({ page }) => {
   await page.goto('/register')
@@ -7,7 +8,7 @@ test('create a list, edit entries, import and export CSV, delete it', async ({ p
   await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByLabel('Confirm password').fill(password)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible(FIRST_PAGE_LOAD)
 
   await page.getByRole('link', { name: 'Lists' }).click()
   await expect(page.getByText('No lists yet')).toBeVisible()

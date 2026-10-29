@@ -3,6 +3,12 @@ import type { Page } from '@playwright/test'
 const csrf = { 'X-Requested-With': 'mailnix' }
 
 /**
+ * For the dashboard right after signing up: the first visit loads the chart library (~0.5 MB). On a freshly started
+ * server with several browsers in parallel that can take longer than the default 5 seconds.
+ */
+export const FIRST_PAGE_LOAD = { timeout: 15_000 }
+
+/**
  * The server's worker watches every enabled account. Tests that use the real mailbox therefore pause accounts that
  * watch real folders (so their rules never act on incoming mail) and delete all their accounts afterwards.
  */

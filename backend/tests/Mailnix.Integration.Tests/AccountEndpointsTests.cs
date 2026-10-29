@@ -246,6 +246,27 @@ public sealed class AccountEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Testing_the_connection_or_listing_folders_does_not_count_as_changed_settings()
+    {
+        var account = await CreateAccountAsync();
+        async Task<MailAccount> StoredAsync()
+        {
+            await using var scope = _app.Services.CreateAsyncScope();
+            return await scope.ServiceProvider.GetRequiredService<MailnixDbContext>().MailAccounts.AsNoTracking().SingleAsync(a => a.Id == account.Id, Ct);
+        }
+
+        var before = await StoredAsync();
+
+        (await _client.PostAsync($"/api/accounts/{account.Id}/test", null, Ct)).EnsureSuccessStatusCode();
+        (await _client.GetAsync($"/api/accounts/{account.Id}/folders?counts=false", Ct)).EnsureSuccessStatusCode();
+
+        // The worker restarts an account's watcher when UpdatedAt changes, cutting off a run in progress.
+        var after = await StoredAsync();
+        after.UpdatedAt.ShouldBe(before.UpdatedAt);
+        after.LastCheckedAt.ShouldNotBe(before.LastCheckedAt);
+    }
+
+    [Fact]
     public async Task Deleting_removes_the_account()
     {
         var account = await CreateAccountAsync();

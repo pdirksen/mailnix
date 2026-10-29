@@ -1,5 +1,6 @@
 import { type APIRequestContext, expect, type Page, test } from '@playwright/test'
 import { createHash, randomBytes } from 'node:crypto'
+import { FIRST_PAGE_LOAD } from './support'
 
 const password = 'e2e password 123'
 
@@ -9,7 +10,7 @@ async function register(page: Page, email: string) {
   await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByLabel('Confirm password').fill(password)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible(FIRST_PAGE_LOAD)
 }
 
 /** One JSON-RPC request to the MCP endpoint, as an MCP client sends it; the answer may come as an SSE event. */

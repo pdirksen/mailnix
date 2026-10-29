@@ -8,7 +8,7 @@ namespace Mailnix.Integration.Tests;
 internal static class Seed
 {
     /// <summary>Adds a mail account for an existing user directly in the database (no IMAP involved).</summary>
-    public static async Task<Guid> AccountAsync(MailnixAppFactory app, string userEmail, string name = "Work")
+    public static async Task<Guid> AccountAsync(MailnixAppFactory app, string userEmail, string name = "Work", bool enabled = true)
     {
         await using var scope = app.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<MailnixDbContext>();
@@ -25,6 +25,7 @@ internal static class Seed
             Username = userEmail,
             EncryptedSecret = scope.ServiceProvider.GetRequiredService<MailSecretProtector>().Protect("secret"),
             Status = MailAccountStatus.Ok,
+            Enabled = enabled,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow,
         };

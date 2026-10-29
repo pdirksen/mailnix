@@ -1,7 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { deleteAllAccounts } from './support'
+import { deleteAllAccounts, FIRST_PAGE_LOAD } from './support'
 
 /**
  * Real mailbox credentials (read-only use: connection test, folder listing) from the git-ignored
@@ -34,7 +34,7 @@ async function registerNewUser(page: Page) {
   await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByLabel('Confirm password').fill(password)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible(FIRST_PAGE_LOAD)
 }
 
 // Normally deleted by the test itself; this covers failures half-way.

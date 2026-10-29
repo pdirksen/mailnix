@@ -42,7 +42,9 @@ internal sealed class LeaseManager(MailnixDbContext db, WorkerIdentity me, IOpti
         var enabled = await db.MailAccounts.CountAsync(a => a.Enabled, ct);
         var workers = Math.Max(1, await db.Workers.CountAsync(w => w.LastSeenAt > now - ActiveWindow, ct));
         var share = Math.Min(Options.MaxAccountsPerWorker, (int)Math.Ceiling((double)enabled / workers));
-        var held = await mine.CountAsync(ct);
+        // Counted after the enabled accounts and only for enabled ones: an account paused in between (after the
+        // release above) would otherwise count here but not there, and a mailbox would be handed back for nothing.
+        var held = await mine.CountAsync(l => db.MailAccounts.Any(a => a.Id == l.AccountId && a.Enabled), ct);
 
         if (held < share)
         {

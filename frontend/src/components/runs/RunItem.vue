@@ -24,15 +24,19 @@ const { describeRequestError } = useConnectionErrors()
 const open = ref(props.initiallyOpen ?? false)
 const detail = ref<RunDetail | null>(null)
 const loading = ref(false)
+// Live updates can start a load while the previous one is still on its way; only the latest one is shown.
+let latest = 0
 
 async function load() {
+  const request = ++latest
   loading.value = true
   try {
-    detail.value = await runs.fetchDetail(props.run.id)
+    const result = await runs.fetchDetail(props.run.id)
+    if (request === latest) detail.value = result
   } catch (error) {
-    toast.error(describeRequestError(error).message)
+    if (request === latest) toast.error(describeRequestError(error).message)
   } finally {
-    loading.value = false
+    if (request === latest) loading.value = false
   }
 }
 

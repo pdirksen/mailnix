@@ -217,6 +217,72 @@ public sealed class WorkerTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task A_run_cut_off_by_a_lost_connection_starts_over_after_reconnecting()
+    {
+        _mail.Append("INBOX", Mail("existing", newsletter: true));
+        await StartWatchingAsync();
+        await CreateRuleAsync("Flag newsletters", Newsletter, [new { type = "Flag" }]);
+        _mail.SearchError = new IOException("Connection reset by peer.");
+
+        var started = await _client.PostAsJsonAsync($"/api/accounts/{_accountId}/runs", new { limit = 10 }, Ct);
+        started.StatusCode.ShouldBe(HttpStatusCode.Accepted);
+
+        await EventuallyAsync(async () => (await RunsAsync()).Single().State == Infrastructure.Data.RunState.Completed);
+        _mail.SearchError.ShouldBeNull("the run met the dropped connection");
+        _mail.Messages("INBOX").Single().IsFlagged.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Interrupted_runs_that_already_acted_are_marked_as_interrupted()
+    {
+        // Paused, so no watcher of its own touches the runs.
+        _accountId = await Seed.AccountAsync(_app, "owner@example.com", enabled: false);
+        await using var scope = _app.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<MailnixDbContext>();
+        var account = await db.MailAccounts.SingleAsync(Ct);
+        RuleRun Interrupted(RunTrigger trigger) => new()
+        {
+            Id = Guid.CreateVersion7(),
+            TenantId = account.TenantId,
+            UserId = account.UserId,
+            AccountId = account.Id,
+            Trigger = trigger,
+            State = Infrastructure.Data.RunState.Running,
+            Folder = "INBOX",
+            CreatedAt = DateTimeOffset.UtcNow,
+            StartedAt = DateTimeOffset.UtcNow,
+        };
+        var acted = Interrupted(RunTrigger.Manual);
+        var newMail = Interrupted(RunTrigger.NewMail);
+        var notYetActed = Interrupted(RunTrigger.Undo);
+        db.Runs.AddRange(acted, newMail, notYetActed);
+        db.ActionLog.Add(new ActionLogEntry
+        {
+            Id = Guid.CreateVersion7(),
+            RunId = acted.Id,
+            AccountId = account.Id,
+            UserId = account.UserId,
+            Action = ActionType.Flag,
+            SourceFolder = "INBOX",
+            Success = true,
+            CreatedAt = DateTimeOffset.UtcNow,
+        });
+        await db.SaveChangesAsync(Ct);
+
+        await scope.ServiceProvider.GetRequiredService<Worker.RunProcessor>().RecoverInterruptedAsync(account, Ct);
+
+        var runs = await db.Runs.AsNoTracking().ToDictionaryAsync(r => r.Id, Ct);
+        runs[acted.Id].ShouldSatisfyAllConditions(
+            r => r.State.ShouldBe(Infrastructure.Data.RunState.Failed),
+            r => r.Error.ShouldStartWith("Interrupted"),
+            r => r.FinishedAt.ShouldNotBeNull());
+        runs[newMail.Id].State.ShouldBe(Infrastructure.Data.RunState.Failed);
+        runs[notYetActed.Id].ShouldSatisfyAllConditions(
+            r => r.State.ShouldBe(Infrastructure.Data.RunState.Queued),
+            r => r.StartedAt.ShouldBeNull());
+    }
+
+    [Fact]
     public async Task Dry_run_rules_only_log()
     {
         await StartWatchingAsync();

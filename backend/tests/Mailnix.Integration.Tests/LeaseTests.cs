@@ -1,6 +1,8 @@
+using System.Data.Common;
 using Mailnix.Infrastructure.Data;
 using Mailnix.Worker;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -38,10 +40,17 @@ public sealed class LeaseTests : IAsyncLifetime
     {
         public WorkerIdentity Identity { get; } = new();
 
-        public async Task<HashSet<Guid>> ReconcileAsync()
+        public async Task<HashSet<Guid>> ReconcileAsync(IInterceptor? interceptor = null)
         {
             await using var scope = test._app.Services.CreateAsyncScope();
-            var leases = new LeaseManager(scope.ServiceProvider.GetRequiredService<MailnixDbContext>(), Identity, Options.Create(new WorkerOptions()), test._time);
+            var options = new DbContextOptionsBuilder<SqliteMailnixDbContext>(scope.ServiceProvider.GetRequiredService<DbContextOptions<SqliteMailnixDbContext>>());
+            if (interceptor is not null)
+            {
+                options.AddInterceptors(interceptor);
+            }
+
+            await using var db = new SqliteMailnixDbContext(options.Options);
+            var leases = new LeaseManager(db, Identity, Options.Create(new WorkerOptions()), test._time);
             return [.. (await leases.ReconcileAsync(Ct)).Keys];
         }
 
@@ -114,5 +123,39 @@ public sealed class LeaseTests : IAsyncLifetime
 
         held.ShouldNotContain(_accounts[0]);
         held.Count.ShouldBe(3);
+    }
+
+    [Fact]
+    public async Task An_account_paused_during_a_pass_does_not_cost_another_mailbox_its_watcher()
+    {
+        Worker a = new(this);
+        await a.ReconcileAsync();
+        var pause = new PauseBeforeCountingAccounts(this, _accounts[1]);
+
+        var held = await a.ReconcileAsync(pause);
+
+        pause.Paused.ShouldBeTrue();
+        held.ShouldBe(_accounts.Where(id => id != _accounts[1]), ignoreOrder: true);
+    }
+
+    /// <summary>Pauses an account right before the pass counts the enabled accounts (as another request might).</summary>
+    private sealed class PauseBeforeCountingAccounts(LeaseTests test, Guid accountId) : DbCommandInterceptor
+    {
+        public bool Paused { get; private set; }
+
+        public override async ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(
+            DbCommand command, CommandEventData eventData, InterceptionResult<DbDataReader> result, CancellationToken cancellationToken = default)
+        {
+            if (!Paused && command.CommandText.Contains("COUNT(*)", StringComparison.Ordinal) && command.CommandText.Contains("FROM \"MailAccounts\"", StringComparison.Ordinal))
+            {
+                Paused = true;
+                await using var scope = test._app.Services.CreateAsyncScope();
+                await scope.ServiceProvider.GetRequiredService<MailnixDbContext>().MailAccounts
+                    .Where(x => x.Id == accountId)
+                    .ExecuteUpdateAsync(u => u.SetProperty(x => x.Enabled, false), cancellationToken);
+            }
+
+            return result;
+        }
     }
 }

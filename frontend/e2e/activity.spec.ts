@@ -1,7 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { deleteAllAccounts } from './support'
+import { deleteAllAccounts, FIRST_PAGE_LOAD } from './support'
 
 /** Same credentials file as accounts.spec.ts. */
 function loadImapCredentials() {
@@ -35,7 +35,7 @@ async function register(page: Page, prefix: string) {
   await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByLabel('Confirm password').fill(password)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible(FIRST_PAGE_LOAD)
 }
 
 function run(overrides: Record<string, unknown>) {
@@ -157,7 +157,8 @@ test('run rules now and undo a rule, with live status updates (real mailbox, tes
   await expect(page.getByText('Nothing happened yet')).toBeVisible()
 
   await page.getByRole('link', { name: 'Rules', exact: true }).click()
-  await expect(page.getByTestId('rule-Nightly e2e')).toContainText(/Scheduled · next in \d+ hours?/)
+  // 3 o'clock is minutes or hours away, depending on when the test runs.
+  await expect(page.getByTestId('rule-Nightly e2e')).toContainText(/Scheduled · next (in \d+ \w+|now)/)
   await page.getByTestId('run-now').click()
   await expect(page.getByTestId('run-folder')).toContainText(TEST_FOLDER)
   await page.getByTestId('start-run').click()

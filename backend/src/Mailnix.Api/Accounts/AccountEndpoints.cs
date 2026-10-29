@@ -143,6 +143,7 @@ internal static class AccountEndpoints
             BlastRadiusLimit = request.BlastRadiusLimit,
             PurgeTrashAfterDays = request.PurgeTrashAfterDays,
             CreatedAt = now,
+            UpdatedAt = now,
         };
         ApplySuccess(account, result, now);
 
@@ -385,6 +386,10 @@ internal static class AccountEndpoints
         return [];
     }
 
+    /// <remarks>
+    /// Not UpdatedAt: that marks changed settings and restarts the account's watcher, which would cut off a run in
+    /// progress whenever someone merely tests the connection or lists the folders.
+    /// </remarks>
     internal static void ApplySuccess(MailAccount account, MailboxProbeResult result, DateTimeOffset now)
     {
         account.Status = MailAccountStatus.Ok;
@@ -393,7 +398,6 @@ internal static class AccountEndpoints
         account.LastCheckedAt = now;
         account.Capabilities = [.. result.Capabilities.All];
         account.FolderDelimiter = result.Delimiter.ToString();
-        account.UpdatedAt = now;
     }
 
     private static void ApplyFailure(MailAccount account, MailConnectionException error, DateTimeOffset now)

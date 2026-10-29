@@ -28,6 +28,9 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
     /// <summary>Every search a session ran (null = all messages), in order.</summary>
     public List<SearchFilter?> Searches { get; } = [];
 
+    /// <summary>When set, the next search fails with this error (once), e.g. a connection dropped mid-run.</summary>
+    public Exception? SearchError { get; set; }
+
     public Task<IMailboxSession> OpenAsync(ImapConnectionSettings settings, CancellationToken ct)
     {
         lock (_lock)
@@ -124,6 +127,12 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
         {
             lock (server._lock)
             {
+                if (server.SearchError is { } error)
+                {
+                    server.SearchError = null;
+                    throw error;
+                }
+
                 server.Searches.Add(filter);
                 var uids = server.Get(folder).Messages.Where(m => ImapSearchModel.Matches(filter, m.Snapshot)).Select(m => m.Uid).Order().ToList();
                 return Task.FromResult(new SearchResult(uids, filter is not null));

@@ -27,6 +27,35 @@ describe('runs store', () => {
     expect(runs.pending.map((r) => r.id)).toEqual(['run-2'])
   })
 
+  it('keeps the newer list when an older request answers last', async () => {
+    const runs = useRunsStore()
+    let answerOld!: (value: unknown) => void
+    apiMock.GET.mockReturnValueOnce(new Promise((resolve) => (answerOld = resolve)))
+    apiMock.GET.mockResolvedValueOnce(apiResult(200, [testRun({ state: 'Completed' })]))
+
+    // The page's first load is still on its way when a live update triggers another one.
+    const old = runs.fetchRecent(200)
+    await runs.fetchRecent()
+    answerOld(apiResult(200, [testRun({ state: 'Running' })]))
+    await old
+
+    expect(runs.runs[0]!.state).toBe('Completed')
+  })
+
+  it('does not let a late answer to "run now" undo a newer list', async () => {
+    const runs = useRunsStore()
+    let answerStart!: (value: unknown) => void
+    apiMock.POST.mockReturnValueOnce(new Promise((resolve) => (answerStart = resolve)))
+    apiMock.GET.mockResolvedValueOnce(apiResult(200, [testRun({ id: 'run-2', state: 'Completed' })]))
+
+    const started = runs.start('account-1', { limit: 50 })
+    await runs.fetchRecent()
+    answerStart(apiResult(202, testRun({ id: 'run-2', state: 'Queued' })))
+    await started
+
+    expect(runs.runs.map((r) => r.state)).toEqual(['Completed'])
+  })
+
   it('adds a started run in front and replaces it when it changes', async () => {
     const runs = useRunsStore()
     runs.runs = [testRun()]

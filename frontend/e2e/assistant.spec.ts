@@ -1,7 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import { deleteAllAccounts, pauseAccount } from './support'
+import { deleteAllAccounts, FIRST_PAGE_LOAD, pauseAccount } from './support'
 
 /** Same credentials file as rules.spec.ts. */
 function loadImapCredentials() {
@@ -42,7 +42,7 @@ async function setUp(page: Page) {
   await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByLabel('Confirm password').fill(password)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible(FIRST_PAGE_LOAD)
 
   const response = await page.request.post('/api/accounts', {
     headers: { 'X-Requested-With': 'mailnix' },

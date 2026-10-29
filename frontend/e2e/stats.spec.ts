@@ -1,5 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { mockStats } from './fixtures/stats'
+import { FIRST_PAGE_LOAD } from './support'
 
 async function register(page: Page) {
   await page.goto('/register')
@@ -8,7 +9,7 @@ async function register(page: Page) {
   await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByLabel('Confirm password').fill(password)
   await page.getByRole('button', { name: 'Create account' }).click()
-  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible(FIRST_PAGE_LOAD)
 }
 
 test('a new user sees an empty dashboard, stats and activity (real server)', async ({ page }) => {
