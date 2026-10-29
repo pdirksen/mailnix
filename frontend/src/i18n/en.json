@@ -1,7 +1,6 @@
 {
   "app": {
-    "name": "mailnix",
-    "tagline": "Rule-based mail sorting for IMAP, Google and Microsoft 365"
+    "name": "mailnix"
   },
   "nav": {
     "dashboard": "Dashboard",

@@ -20,9 +20,6 @@ import { RouterView } from 'vue-router'
       <!-- The card floats above the backdrop. -->
       <div class="w-full max-w-sm [&_[data-slot=card]]:shadow-xl [&_[data-slot=card]]:shadow-black/5 dark:[&_[data-slot=card]]:shadow-black/40">
         <RouterView />
-        <p class="text-muted-foreground mt-6 text-center text-xs">
-          <span class="bg-background/70 rounded-full px-3 py-1 backdrop-blur-sm">{{ $t('app.tagline') }}</span>
-        </p>
       </div>
     </main>
   </div>
