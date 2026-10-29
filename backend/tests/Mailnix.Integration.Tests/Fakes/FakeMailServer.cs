@@ -66,6 +66,15 @@ internal sealed class FakeMailServer : IMailboxSessionFactory
         }
     }
 
+    /// <summary>Every folder, including the ones sessions created.</summary>
+    public IReadOnlyList<string> FolderPaths()
+    {
+        lock (_lock)
+        {
+            return [.. _folders.Keys.Order(StringComparer.Ordinal)];
+        }
+    }
+
     public IReadOnlyList<MessageSnapshot> Messages(string folder)
     {
         lock (_lock)

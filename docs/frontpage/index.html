@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>mailnix – mail sorting with rules you can see</title>
+  <meta name="description" content="mailnix sorts the mail in your IMAP, Gmail and Microsoft 365 mailboxes by rules you build in the browser, with a preview that explains every match. Open source, self-hosted.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#171717">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="canonical" href="https://cloudsteps.de/mailnix/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cloudsteps.de/mailnix/">
+  <meta property="og:title" content="mailnix – mail sorting with rules you can see">
+  <meta property="og:description" content="Build rules in the browser, preview them on real mail, and let mailnix sort, flag and file your mail. Open source, self-hosted.">
+  <meta property="og:image" content="https://cloudsteps.de/mailnix/assets/rule-editor-light.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --surface-2: #f4f4f5;
+      --fg: #171717;
+      --muted: #5c5c63;
+      --border: #e4e4e7;
+      --ink: #171717;
+      --gold: #eda100;
+      --gold-glow: rgb(237 161 0 / 0.32);
+      --gold-soft: rgb(237 161 0 / 0.12);
+      --dot: rgb(23 23 23 / 0.09);
+      --tile-ring: transparent;
+      --shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 24px 60px -24px rgb(0 0 0 / 0.28);
+      --radius: 16px;
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0a0a0b;
+        --surface: #141416;
+        --surface-2: #1c1c1f;
+        --fg: #f4f4f5;
+        --muted: #a1a1aa;
+        --border: #2a2a2e;
+        --gold-glow: rgb(237 161 0 / 0.22);
+        --gold-soft: rgb(237 161 0 / 0.1);
+        --dot: rgb(255 255 255 / 0.07);
+        --tile-ring: rgb(255 255 255 / 0.1);
+        --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 24px 70px -20px rgb(0 0 0 / 0.75);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 16px/1.6 var(--font);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    img { max-width: 100%; height: auto; display: block; }
+    a { color: inherit; }
+    code { font-family: var(--mono); font-size: 0.88em; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 0.05em 0.35em; }
+    :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+
+    .wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+    @media (max-width: 480px) { .wrap { padding: 0 16px; } }
+
+    /* Header */
+    .top { position: sticky; top: 0; z-index: 10; backdrop-filter: saturate(1.4) blur(12px); -webkit-backdrop-filter: saturate(1.4) blur(12px); background: color-mix(in srgb, var(--bg) 78%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
+    .top .wrap { display: flex; align-items: center; gap: 16px; height: 64px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 600; font-size: 1.2rem; letter-spacing: -0.01em; }
+    .brand img { width: 32px; height: 32px; border-radius: 8px; box-shadow: 0 0 0 1px var(--tile-ring); }
+    .nav { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .nav a, .lang { text-decoration: none; color: var(--muted); font-size: 0.95rem; padding: 8px 12px; border-radius: 10px; transition: color 0.15s, background 0.15s; }
+    .nav a:hover, .lang:hover { color: var(--fg); background: var(--surface-2); }
+    .lang { font: inherit; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em; background: none; border: 1px solid var(--border); cursor: pointer; color: var(--fg); margin-left: 6px; padding: 6px 10px; }
+    @media (max-width: 640px) { .nav .hide-sm { display: none; } }
+
+    /* Hero */
+    .hero { position: relative; padding: 88px 0 40px; text-align: center; isolation: isolate; overflow-x: clip; }
+    .hero::before {
+      content: ""; position: absolute; inset: 0; z-index: -2;
+      background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+      background-size: 22px 22px;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, #000 30%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, #000 30%, transparent 75%);
+    }
+    .hero::after { content: ""; position: absolute; z-index: -1; left: 50%; top: -120px; width: min(900px, 120vw); height: 520px; transform: translateX(-50%); background: radial-gradient(closest-side, var(--gold-soft), transparent); }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px 6px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); font-size: 0.85rem; color: var(--muted); box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); }
+    .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px var(--gold-soft); }
+    .pill strong { color: var(--fg); font-weight: 600; }
+    h1 { font-size: clamp(2.3rem, 6vw, 4.1rem); line-height: 1.05; letter-spacing: -0.035em; margin: 24px auto 0; max-width: 15ch; font-weight: 700; text-wrap: balance; }
+    h1 .accent { background: linear-gradient(100deg, #f7c04a, var(--gold) 30%, #c97f00 55%, var(--gold) 80%, #f7c04a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lead { font-size: clamp(1.05rem, 2.2vw, 1.25rem); color: var(--muted); max-width: 640px; margin: 22px auto 0; text-wrap: pretty; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 34px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 10px 20px; border-radius: 12px; font-weight: 600; text-decoration: none; border: 1px solid var(--border); background: var(--surface); color: var(--fg); transition: transform 0.15s, box-shadow 0.15s, background 0.15s; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px -12px rgb(0 0 0 / 0.35); }
+    .btn svg { width: 20px; height: 20px; flex: none; }
+    .btn-primary { background: var(--ink); color: #fafafa; border-color: var(--ink); box-shadow: 0 0 0 1px var(--tile-ring), 0 10px 30px -12px var(--gold-glow); }
+    @media (prefers-color-scheme: dark) { .btn-primary { background: #fafafa; color: #171717; border-color: #fafafa; } }
+    .btn-primary .sub { display: block; font-size: 0.78rem; font-weight: 500; opacity: 0.7; }
+    .btn-primary .label { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.25; text-align: left; }
+    .note { margin-top: 16px; font-size: 0.88rem; color: var(--muted); }
+
+    /* Screenshot frames */
+    .shot { position: relative; margin: 56px auto 0; max-width: 1080px; }
+    .shot::before { content: ""; position: absolute; inset: 12% 8% -6%; z-index: -1; background: radial-gradient(closest-side, var(--gold-glow), transparent); filter: blur(28px); }
+    .frame { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+    .frame .bar { display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+    .frame .bar i { width: 11px; height: 11px; border-radius: 50%; background: var(--border); }
+    .frame .bar i:first-child { background: var(--gold); opacity: 0.85; }
+    .frame .bar span { margin: 0 auto; transform: translateX(-24px); font: 0.78rem var(--mono); color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 2px 12px; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 520px) { .frame .bar span { display: none; } }
+
+    /* Sections */
+    section { padding: 88px 0; }
+    .section-head { text-align: center; max-width: 680px; margin: 0 auto 48px; }
+    .eyebrow { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+    .eyebrow::before { content: ""; width: 18px; height: 2px; border-radius: 2px; background: var(--gold); }
+    h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.12; letter-spacing: -0.025em; margin: 12px 0 0; text-wrap: balance; }
+    .section-head p { color: var(--muted); font-size: 1.08rem; margin: 14px 0 0; text-wrap: pretty; }
+
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+    .card { position: relative; padding: 26px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+    .card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--gold) 45%, var(--border)); box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.35); }
+    .card h3 { margin: 18px 0 8px; font-size: 1.12rem; letter-spacing: -0.01em; }
+    .card p { margin: 0; color: var(--muted); }
+    .icon { width: 44px; height: 44px; border-radius: 12px; background: var(--ink); display: grid; place-items: center; box-shadow: 0 0 0 1px var(--tile-ring), 0 6px 16px -8px var(--gold-glow); }
+    .icon svg { width: 22px; height: 22px; stroke: var(--gold); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    .pair { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); align-items: start; }
+    figure { margin: 0; }
+    figcaption { margin-top: 14px; color: var(--muted); font-size: 0.95rem; }
+    figcaption strong { color: var(--fg); }
+
+    .alt { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .alt .card { background: var(--bg); }
+    .providers { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 32px; }
+    .providers span { border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; font-size: 0.9rem; color: var(--muted); background: var(--bg); }
+
+    /* Downloads */
+    .downloads { max-width: 880px; margin: 0 auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; box-shadow: 0 1px 2px rgb(0 0 0 / 0.04); }
+    .dl { display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center; padding: 16px 20px; border-top: 1px solid var(--border); }
+    .dl:first-child { border-top: 0; }
+    .dl .what strong { display: block; font-weight: 600; }
+    .dl .what span { color: var(--muted); font-size: 0.92rem; }
+    .dl .size { color: var(--muted); font-size: 0.92rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .dl .btn { min-height: 40px; padding: 8px 14px; font-size: 0.92rem; }
+    .dl.recommended { background: linear-gradient(90deg, var(--gold-soft), transparent 60%); }
+    .dl.recommended .what strong::after { content: attr(data-badge); margin-left: 10px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; color: var(--fg); border: 1px solid color-mix(in srgb, var(--gold) 60%, var(--border)); border-radius: 999px; padding: 1px 8px; vertical-align: 2px; }
+    @media (max-width: 560px) {
+      .dl { grid-template-columns: 1fr auto; }
+      .dl .size { grid-column: 1; grid-row: 2; margin-top: -12px; }
+      .dl .btn { grid-column: 2; grid-row: 1 / span 2; }
+    }
+    .dl-meta { max-width: 880px; margin: 18px auto 0; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; color: var(--muted); font-size: 0.92rem; }
+    .dl-meta a { color: var(--fg); text-underline-offset: 3px; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border); padding: 36px 0 48px; color: var(--muted); font-size: 0.92rem; }
+    footer .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+    footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
+    footer a { text-decoration: none; }
+    footer a:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+    footer .brand { font-size: 1rem; color: var(--fg); }
+    footer .brand img { width: 24px; height: 24px; border-radius: 6px; }
+
+    /* Effects, only with JavaScript and when motion is welcome */
+    @media (prefers-reduced-motion: no-preference) {
+      .js .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.6s ease, transform 0.6s ease; }
+      .js .reveal.shown { opacity: 1; transform: none; }
+
+      /* The hero screenshot leans back and straightens up while the page scrolls (--tilt from the script). */
+      .js .hero .shot { perspective: 1800px; }
+      .js .hero .shot .frame { transform: rotateX(calc(var(--tilt, 0) * 14deg)) scale(calc(1 - var(--tilt, 0) * 0.04)); transform-origin: 50% 0; will-change: transform; }
+
+      /* A soft light follows the pointer over the cards (--x/--y from the script). */
+      .card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.3s; background: radial-gradient(360px circle at var(--x, 50%) var(--y, 50%), var(--gold-soft), transparent 70%); }
+      .card:hover::before { opacity: 1; }
+      .card > * { position: relative; }
+
+      h1 .accent { background-size: 200% 100%; animation: shine 7s ease-in-out infinite; }
+      @keyframes shine { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="#"><img src="assets/logo-mark.svg" alt="" width="32" height="32">mailnix</a>
+      <nav class="nav" aria-label="Main">
+        <a class="hide-sm" href="#features" data-i18n="nav.features">Features</a>
+        <a class="hide-sm" href="#download" data-i18n="nav.download">Download</a>
+        <a href="https://github.com/pdirksen/mailnix" rel="noopener">GitHub</a>
+        <button class="lang" type="button" id="lang" aria-label="Deutsch">DE</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <span class="pill"><span class="dot"></span><span data-i18n="hero.badge">Early release</span> <strong data-version>1.4.0</strong></span>
+        <h1 data-i18n-html="hero.title">Your inbox, sorted by rules <span class="accent">you can see.</span></h1>
+        <p class="lead" data-i18n="hero.lead">mailnix watches your IMAP, Gmail and Microsoft 365 mailboxes and moves, flags and files incoming mail by rules you build in the browser – with a preview that explains every match before anything changes.</p>
+        <div class="cta">
+          <a class="btn btn-primary" id="primary-download" href="#download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
+            <span class="label"><span data-i18n="hero.download">Download</span><span class="sub" id="primary-sub" hidden></span></span>
+          </a>
+          <a class="btn" href="https://github.com/pdirksen/mailnix" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
+            <span data-i18n="hero.github">View on GitHub</span>
+          </a>
+        </div>
+        <p class="note" data-i18n="hero.note">Free and open source under the MIT license. Runs on your computer or your own server.</p>
+
+        <div class="shot reveal">
+          <div class="frame">
+            <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>localhost:5080/rules</span></div>
+            <picture>
+              <source srcset="assets/rule-editor-dark.jpg" media="(prefers-color-scheme: dark)">
+              <img src="assets/rule-editor-light.jpg" width="2880" height="1800" alt="The rule editor: conditions on the left, the preview on the right explains why a newsletter matches." data-i18n-alt="shot.editor">
+            </picture>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-i18n="features.eyebrow">Features</span>
+          <h2 data-i18n="features.title">Like imapfilter, with a face</h2>
+          <p data-i18n="features.lead">Everything a mail filter on the server should do – built so you always know what it did, and why.</p>
+        </div>
+        <div class="grid">
+          <article class="card reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M8.5 6h2.5a4 4 0 0 1 4 4v.2M8.5 18h2.5a4 4 0 0 0 4-4v-.2"/></svg></div>
+            <h3 data-i18n="f1.title">Rules you build, not code</h3>
+            <p data-i18n-html="f1.text">Conditions on sender, subject, headers, attachments, mailing lists or sender checks, in all/any/none groups. Folder templates like <code>Archive/{year}</code> or <code>Shops/{plusTag}</code> create folders as needed.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <h3 data-i18n="f2.title">See before it acts</h3>
+            <p data-i18n="f2.text">The preview runs a rule on real messages and explains every match, condition by condition. Nothing changes on the server until you switch the rule on.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6Z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg></div>
+            <h3 data-i18n="f3.title">Safe by design</h3>
+            <p data-i18n="f3.text">mailnix never deletes for good: “delete” means Trash. Every action is logged and can be undone, large runs wait for your confirmation, and dry runs only write down what they would do.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2.5 4.5 13.5H11l-1 8 8.5-11H12Z"/></svg></div>
+            <h3 data-i18n="f4.title">Quick on new mail</h3>
+            <p data-i18n="f4.text">IMAP IDLE picks up new mail within seconds. Scheduled rules tidy up older mail, with the search done on the mail server.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-6M21 20H3"/></svg></div>
+            <h3 data-i18n="f5.title">Know what happens</h3>
+            <p data-i18n="f5.text">A dashboard and stats show what each rule does, your top senders, newsletters and failed sender checks. The activity log lists every move.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9Z"/><path d="m18.5 15 .8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8Z"/></svg></div>
+            <h3 data-i18n="f6.title">Works with AI assistants</h3>
+            <p data-i18n="f6.text">A built-in MCP server lets Claude and other assistants read your rules and draft new ones. Drafts stay switched off until you turn them on.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-i18n="look.eyebrow">A closer look</span>
+          <h2 data-i18n="look.title">Every move on the record</h2>
+          <p data-i18n="look.lead">See at a glance what your rules did today and over the last month – and take back anything with one click.</p>
+        </div>
+        <div class="pair">
+          <figure class="reveal">
+            <div class="frame">
+              <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>localhost:5080</span></div>
+              <picture>
+                <source srcset="assets/dashboard-dark.jpg" media="(prefers-color-scheme: dark)">
+                <img src="assets/dashboard-light.jpg" width="2880" height="1800" loading="lazy" alt="The dashboard: today's numbers, actions of the last 30 days and the most active rules." data-i18n-alt="shot.dashboard">
+              </picture>
+            </div>
+            <figcaption data-i18n-html="look.dashboard"><strong>Dashboard.</strong> Today's numbers, 30 days of actions, the busiest rules.</figcaption>
+          </figure>
+          <figure class="reveal">
+            <div class="frame">
+              <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>localhost:5080/activity</span></div>
+              <picture>
+                <source srcset="assets/activity-dark.jpg" media="(prefers-color-scheme: dark)">
+                <img src="assets/activity-light.jpg" width="2880" height="1800" loading="lazy" alt="The activity view: runs with their actions, each with an undo button." data-i18n-alt="shot.activity">
+              </picture>
+            </div>
+            <figcaption data-i18n-html="look.activity"><strong>Activity.</strong> Every run and every action, ready to be undone.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="platforms">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-i18n="run.eyebrow">Your mail, your machine</span>
+          <h2 data-i18n="run.title">Runs where you want it</h2>
+          <p data-i18n="run.lead">No cloud service in between: mailnix talks to your mail server directly and keeps its data with you.</p>
+        </div>
+        <div class="grid">
+          <article class="card reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div>
+            <h3 data-i18n="r1.title">Windows desktop app</h3>
+            <p data-i18n="r1.text">Installs for your user, lives in the tray and opens in your browser. Updates arrive by themselves.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg></div>
+            <h3 data-i18n="r2.title">Your own server</h3>
+            <p data-i18n="r2.text">One program for Windows or Linux with a built-in database. Or Docker, with PostgreSQL if you like.</p>
+          </article>
+          <article class="card reveal">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><path d="M15.5 5.2a3.2 3.2 0 0 1 0 5.6M17.5 14.8c1.6.7 2.7 2.4 3 4.7"/></svg></div>
+            <h3 data-i18n="r3.title">For teams, too</h3>
+            <p data-i18n="r3.text">Several users and organizations, two-factor sign-in, and separate web and worker processes for larger setups.</p>
+          </article>
+        </div>
+        <div class="providers reveal" aria-label="Supported mailboxes"><span>IMAP</span><span>Gmail</span><span>Microsoft 365</span><span>IMAP IDLE</span><span>OAuth 2.0</span></div>
+      </div>
+    </section>
+
+    <section id="download" class="alt">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-i18n="dl.eyebrow">Download</span>
+          <h2><span data-i18n="dl.title">Get mailnix</span> <span data-version>1.4.0</span></h2>
+          <p data-i18n="dl.lead">The desktop app is the quickest start on Windows. The server packages run on Windows and Linux without installation.</p>
+        </div>
+        <div class="downloads reveal" id="downloads">
+          <div class="dl"><div class="what"><strong>Windows (x64)</strong><span>Desktop app · installer</span></div><span class="size">73.3 MB</span><a class="btn" href="https://cloudsteps.de/u/mailnix/releases/1.4.0/mailnix-1.4.0-win-x64-setup.exe">Download</a></div>
+          <div class="dl"><div class="what"><strong>Windows (ARM64)</strong><span>Desktop app · installer</span></div><span class="size">69.4 MB</span><a class="btn" href="https://cloudsteps.de/u/mailnix/releases/1.4.0/mailnix-1.4.0-win-arm64-setup.exe">Download</a></div>
+          <div class="dl"><div class="what"><strong>Windows (x64)</strong><span>Server · zip</span></div><span class="size">57.7 MB</span><a class="btn" href="https://cloudsteps.de/u/mailnix/releases/1.4.0/mailnix-1.4.0-win-x64.zip">Download</a></div>
+          <div class="dl"><div class="what"><strong>Windows (ARM64)</strong><span>Server · zip</span></div><span class="size">55.8 MB</span><a class="btn" href="https://cloudsteps.de/u/mailnix/releases/1.4.0/mailnix-1.4.0-win-arm64.zip">Download</a></div>
+          <div class="dl"><div class="what"><strong>Linux (x64)</strong><span>Server · tar.gz</span></div><span class="size">56.7 MB</span><a class="btn" href="https://cloudsteps.de/u/mailnix/releases/1.4.0/mailnix-1.4.0-linux-x64.tar.gz">Download</a></div>
+          <div class="dl"><div class="what"><strong>Linux (ARM64)</strong><span>Server · tar.gz</span></div><span class="size">54.4 MB</span><a class="btn" href="https://cloudsteps.de/u/mailnix/releases/1.4.0/mailnix-1.4.0-linux-arm64.tar.gz">Download</a></div>
+        </div>
+        <div class="dl-meta">
+          <span><span data-i18n="dl.released">Released</span> <span id="released">October 29, 2026</span> · <a id="checksums" href="https://cloudsteps.de/u/mailnix/releases/1.4.0/SHA256SUMS" data-i18n="dl.checksums">SHA-256 checksums</a></span>
+          <span data-i18n-html="dl.other">macOS or Docker? <a href="https://github.com/pdirksen/mailnix#readme" rel="noopener">Build it from source</a>.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <a class="brand" href="#"><img src="assets/logo-mark.svg" alt="" width="24" height="24">mailnix</a>
+      <nav aria-label="Footer">
+        <a href="https://github.com/pdirksen/mailnix" rel="noopener">GitHub</a>
+        <a href="https://github.com/pdirksen/mailnix/blob/main/LICENSE" rel="noopener" data-i18n="footer.license">MIT license</a>
+        <a href="https://cloudsteps.de/impressum.html" data-i18n="footer.imprint">Legal notice</a>
+        <a href="https://cloudsteps.de/datenschutz.html" data-i18n="footer.privacy">Privacy</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    document.documentElement.classList.add('js');
+    (() => {
+      // Published by scripts/publish-release.ps1; the links above (1.4.0) stay when it cannot be read.
+      const RELEASES = 'https://cloudsteps.de/u/mailnix/releases'
+
+      const german = {
+        'nav.features': 'Funktionen',
+        'nav.download': 'Download',
+        'hero.badge': 'Frühe Version',
+        'hero.title': 'Dein Posteingang, sortiert nach Regeln, <span class="accent">die du siehst.</span>',
+        'hero.lead': 'mailnix beobachtet deine Postfächer bei IMAP, Gmail und Microsoft 365 und verschiebt, markiert und sortiert neue Mails nach Regeln, die du im Browser baust – mit einer Vorschau, die jeden Treffer erklärt, bevor sich etwas ändert.',
+        'hero.download': 'Download',
+        'hero.github': 'Auf GitHub ansehen',
+        'hero.note': 'Kostenlos und Open Source unter der MIT-Lizenz. Läuft auf deinem Rechner oder deinem eigenen Server.',
+        'shot.editor': 'Der Regeleditor: links die Bedingungen, rechts erklärt die Vorschau, warum ein Newsletter passt.',
+        'features.eyebrow': 'Funktionen',
+        'features.title': 'Wie imapfilter, nur mit Gesicht',
+        'features.lead': 'Alles, was ein Mailfilter auf dem Server können soll – so gebaut, dass du immer weißt, was er getan hat und warum.',
+        'f1.title': 'Regeln bauen statt programmieren',
+        'f1.text': 'Bedingungen zu Absender, Betreff, Headern, Anhängen, Mailinglisten oder Absenderprüfungen, in Gruppen mit alle/eine/keine. Ordnervorlagen wie <code>Archiv/{year}</code> oder <code>Shops/{plusTag}</code> legen Ordner bei Bedarf an.',
+        'f2.title': 'Erst sehen, dann handeln',
+        'f2.text': 'Die Vorschau probiert eine Regel an echten Mails aus und erklärt jeden Treffer Bedingung für Bedingung. Auf dem Server ändert sich nichts, bis du die Regel einschaltest.',
+        'f3.title': 'Sicher von Grund auf',
+        'f3.text': 'mailnix löscht nie endgültig: „Löschen“ heißt Papierkorb. Jede Aktion wird protokolliert und lässt sich rückgängig machen, große Läufe warten auf deine Bestätigung, und Testläufe schreiben nur auf, was sie tun würden.',
+        'f4.title': 'Schnell bei neuer Post',
+        'f4.text': 'IMAP IDLE bemerkt neue Mails innerhalb von Sekunden. Geplante Regeln räumen ältere Mails auf, die Suche erledigt der Mailserver.',
+        'f5.title': 'Wissen, was passiert',
+        'f5.text': 'Dashboard und Statistiken zeigen, was jede Regel tut, deine häufigsten Absender, Newsletter und fehlgeschlagene Absenderprüfungen. Die Aktivität listet jede Verschiebung.',
+        'f6.title': 'Arbeitet mit KI-Assistenten',
+        'f6.text': 'Ein eingebauter MCP-Server lässt Claude und andere Assistenten deine Regeln lesen und neue entwerfen. Entwürfe bleiben ausgeschaltet, bis du sie einschaltest.',
+        'look.eyebrow': 'Ein genauerer Blick',
+        'look.title': 'Jede Verschiebung nachvollziehbar',
+        'look.lead': 'Auf einen Blick sehen, was deine Regeln heute und im letzten Monat getan haben – und alles mit einem Klick zurücknehmen.',
+        'look.dashboard': '<strong>Dashboard.</strong> Die Zahlen von heute, 30 Tage Aktionen, die fleißigsten Regeln.',
+        'look.activity': '<strong>Aktivität.</strong> Jeder Lauf und jede Aktion, bereit zum Rückgängigmachen.',
+        'shot.dashboard': 'Das Dashboard: die Zahlen von heute, die Aktionen der letzten 30 Tage und die aktivsten Regeln.',
+        'shot.activity': 'Die Aktivität: Läufe mit ihren Aktionen, jeweils mit einem Knopf zum Rückgängigmachen.',
+        'run.eyebrow': 'Deine Mails, dein Rechner',
+        'run.title': 'Läuft, wo du willst',
+        'run.lead': 'Kein Cloud-Dienst dazwischen: mailnix spricht direkt mit deinem Mailserver und behält seine Daten bei dir.',
+        'r1.title': 'Desktop-App für Windows',
+        'r1.text': 'Installiert sich für deinen Benutzer, sitzt im Infobereich und öffnet sich im Browser. Updates kommen von selbst.',
+        'r2.title': 'Dein eigener Server',
+        'r2.text': 'Ein Programm für Windows oder Linux mit eingebauter Datenbank. Oder Docker, auf Wunsch mit PostgreSQL.',
+        'r3.title': 'Auch für Teams',
+        'r3.text': 'Mehrere Benutzer und Organisationen, Anmeldung mit zweitem Faktor und getrennte Web- und Worker-Prozesse für größere Installationen.',
+        'dl.eyebrow': 'Download',
+        'dl.title': 'mailnix herunterladen',
+        'dl.lead': 'Unter Windows ist die Desktop-App der schnellste Start. Die Server-Pakete laufen unter Windows und Linux ohne Installation.',
+        'dl.released': 'Erschienen am',
+        'dl.checksums': 'SHA-256-Prüfsummen',
+        'dl.other': 'macOS oder Docker? <a href="https://github.com/pdirksen/mailnix#readme" rel="noopener">Aus dem Quellcode bauen</a>.',
+        'footer.license': 'MIT-Lizenz',
+        'footer.imprint': 'Impressum',
+        'footer.privacy': 'Datenschutz',
+      }
+
+      // Texts the script writes itself (downloads, the main button).
+      const words = {
+        en: {
+          title: 'mailnix – mail sorting with rules you can see',
+          description: 'mailnix sorts the mail in your IMAP, Gmail and Microsoft 365 mailboxes by rules you build in the browser, with a preview that explains every match. Open source, self-hosted.',
+          installer: 'Desktop app · installer', zip: 'Server · zip', 'tar.gz': 'Server · tar.gz',
+          download: 'Download', downloadFor: 'Download for {os}', recommended: 'For you', switchTo: 'Deutsch',
+        },
+        de: {
+          title: 'mailnix – Mails sortieren mit Regeln, die du siehst',
+          description: 'mailnix sortiert die Mails in deinen Postfächern bei IMAP, Gmail und Microsoft 365 nach Regeln, die du im Browser baust – mit einer Vorschau, die jeden Treffer erklärt. Open Source, selbst gehostet.',
+          installer: 'Desktop-App · Installer', zip: 'Server · zip', 'tar.gz': 'Server · tar.gz',
+          download: 'Download', downloadFor: 'Download für {os}', recommended: 'Für dich', switchTo: 'English',
+        },
+      }
+
+      let release = {
+        version: '1.4.0',
+        published: '2026-10-29',
+        files: [
+          { name: 'mailnix-1.4.0-win-x64-setup.exe', runtime: 'win-x64', kind: 'installer', size: 73310090 },
+          { name: 'mailnix-1.4.0-win-arm64-setup.exe', runtime: 'win-arm64', kind: 'installer', size: 69372892 },
+          { name: 'mailnix-1.4.0-win-x64.zip', runtime: 'win-x64', kind: 'zip', size: 57660692 },
+          { name: 'mailnix-1.4.0-win-arm64.zip', runtime: 'win-arm64', kind: 'zip', size: 55766365 },
+          { name: 'mailnix-1.4.0-linux-x64.tar.gz', runtime: 'linux-x64', kind: 'tar.gz', size: 56713313 },
+          { name: 'mailnix-1.4.0-linux-arm64.tar.gz', runtime: 'linux-arm64', kind: 'tar.gz', size: 54447416 },
+        ],
+      }
+      let detected = null
+
+      // The English texts are the ones in the page.
+      const english = {}
+      document.querySelectorAll('[data-i18n]').forEach((el) => (english[el.dataset.i18n] = el.textContent))
+      document.querySelectorAll('[data-i18n-html]').forEach((el) => (english[el.dataset.i18nHtml] = el.innerHTML))
+      document.querySelectorAll('[data-i18n-alt]').forEach((el) => (english[el.dataset.i18nAlt] = el.alt))
+
+      function stored() {
+        try { return localStorage.getItem('mailnix-lang') } catch { return null }
+      }
+      // A choice made here wins; otherwise the browser's preferred language.
+      let lang = stored()
+      if (lang !== 'de' && lang !== 'en') lang = /^de\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || '') ? 'de' : 'en'
+
+      const text = (key) => (lang === 'de' ? german[key] : english[key]) ?? english[key]
+      const word = (key) => words[lang][key]
+
+      function platform(runtime) {
+        const [os, ...rest] = runtime.split('-')
+        const arch = rest.at(-1) === 'arm64' ? 'ARM64' : 'x64'
+        const name = os === 'win' ? 'Windows' : os === 'osx' ? 'macOS' : 'Linux'
+        return { name, label: `${name}${rest.includes('musl') ? ' (musl)' : ''} (${arch})` }
+      }
+
+      const url = (file) => `${RELEASES}/${encodeURIComponent(release.version)}/${encodeURIComponent(file.name)}`
+      const megabytes = (bytes) => `${new Intl.NumberFormat(lang, { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(bytes / 1e6)} MB`
+      const order = (f) => (f.kind === 'installer' ? 0 : 1) * 10 + (f.runtime.startsWith('win') ? 0 : 5) + (f.runtime.endsWith('arm64') ? 1 : 0)
+
+      function renderDownloads() {
+        const list = document.getElementById('downloads')
+        list.replaceChildren()
+        for (const file of [...release.files].sort((a, b) => order(a) - order(b))) {
+          const row = document.createElement('div')
+          row.className = 'dl'
+          const what = document.createElement('div')
+          what.className = 'what'
+          const name = document.createElement('strong')
+          name.textContent = platform(file.runtime).label
+          const kind = document.createElement('span')
+          kind.textContent = word(file.kind) ?? file.kind
+          what.append(name, kind)
+          const size = document.createElement('span')
+          size.className = 'size'
+          size.textContent = megabytes(file.size)
+          const link = document.createElement('a')
+          link.className = 'btn'
+          link.href = url(file)
+          link.textContent = word('download')
+          if (file.sha256) link.title = `SHA-256: ${file.sha256}`
+          if (detected && file.runtime === detected.runtime && file.kind === detected.kind) {
+            row.classList.add('recommended')
+            name.dataset.badge = word('recommended')
+          }
+          row.append(what, size, link)
+          list.append(row)
+        }
+        document.querySelectorAll('[data-version]').forEach((el) => (el.textContent = release.version))
+        document.getElementById('checksums').href = `${RELEASES}/${encodeURIComponent(release.version)}/SHA256SUMS`
+        const date = new Date(`${release.published}T12:00:00Z`)
+        document.getElementById('released').textContent = Number.isNaN(date.getTime()) ? release.published : new Intl.DateTimeFormat(lang, { dateStyle: 'long' }).format(date)
+      }
+
+      function renderPrimary() {
+        const button = document.getElementById('primary-download')
+        const label = button.querySelector('[data-i18n="hero.download"]')
+        const sub = document.getElementById('primary-sub')
+        const file = detected && release.files.find((f) => f.runtime === detected.runtime && f.kind === detected.kind)
+        if (file) {
+          button.href = url(file)
+          label.textContent = word('downloadFor').replace('{os}', platform(file.runtime).name)
+          sub.textContent = `${release.version} · ${word(file.kind)} · ${megabytes(file.size)}`
+          sub.hidden = false
+        } else {
+          button.href = '#download'
+          label.textContent = word('download')
+          sub.hidden = true
+        }
+      }
+
+      function apply() {
+        document.documentElement.lang = lang
+        document.querySelectorAll('[data-i18n]').forEach((el) => (el.textContent = text(el.dataset.i18n)))
+        document.querySelectorAll('[data-i18n-html]').forEach((el) => (el.innerHTML = text(el.dataset.i18nHtml)))
+        document.querySelectorAll('[data-i18n-alt]').forEach((el) => (el.alt = text(el.dataset.i18nAlt)))
+        document.title = word('title')
+        document.querySelector('meta[name="description"]').content = word('description')
+        const toggle = document.getElementById('lang')
+        toggle.textContent = lang === 'de' ? 'EN' : 'DE'
+        toggle.setAttribute('aria-label', word('switchTo'))
+        renderDownloads()
+        renderPrimary()
+      }
+
+      document.getElementById('lang').addEventListener('click', () => {
+        lang = lang === 'de' ? 'en' : 'de'
+        try { localStorage.setItem('mailnix-lang', lang) } catch { /* private mode: not remembered */ }
+        apply()
+      })
+
+      async function detect() {
+        const ua = navigator.userAgent
+        const data = navigator.userAgentData
+        const os = data?.platform || (/Windows/.test(ua) ? 'Windows' : /Android|iPhone|iPad/.test(ua) ? 'Mobile' : /Mac/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : '')
+        let arm = /\b(arm|aarch64)/i.test(ua)
+        if (data?.getHighEntropyValues) {
+          try { arm = (await data.getHighEntropyValues(['architecture'])).architecture === 'arm' } catch { /* keep the guess */ }
+        }
+        if (os === 'Windows') return { runtime: arm ? 'win-arm64' : 'win-x64', kind: 'installer' }
+        if (os === 'Linux') return { runtime: arm ? 'linux-arm64' : 'linux-x64', kind: 'tar.gz' }
+        return null
+      }
+
+      function valid(data) {
+        return data && typeof data.version === 'string' && /^\d+\.\d+\.\d+$/.test(data.version) && Array.isArray(data.files) && data.files.length > 0 &&
+          data.files.every((f) => f && typeof f.name === 'string' && typeof f.runtime === 'string' && typeof f.kind === 'string' && Number.isFinite(f.size))
+      }
+
+      apply()
+      detect().then((found) => { detected = found; apply() })
+      fetch(`${RELEASES}/latest.json`, { cache: 'no-cache' })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((data) => { if (valid(data)) { release = data; apply() } })
+        .catch(() => { /* offline or blocked: the version in the page stays */ })
+
+      const motion = matchMedia('(prefers-reduced-motion: no-preference)').matches
+
+      // Fade sections in as they scroll into view.
+      const reveal = document.querySelectorAll('.reveal')
+      if ('IntersectionObserver' in window && motion) {
+        const observer = new IntersectionObserver((entries) => {
+          for (const entry of entries) if (entry.isIntersecting) { entry.target.classList.add('shown'); observer.unobserve(entry.target) }
+        }, { rootMargin: '0px 0px -8% 0px' })
+        reveal.forEach((el) => observer.observe(el))
+      } else {
+        reveal.forEach((el) => el.classList.add('shown'))
+      }
+
+      if (!motion) return
+
+      // The hero screenshot straightens up over the first part of the scroll.
+      const shot = document.querySelector('.hero .shot')
+      let pending = false
+      function tilt() {
+        pending = false
+        const top = shot.getBoundingClientRect().top
+        const progress = Math.min(Math.max(top / (window.innerHeight * 0.75), 0), 1)
+        shot.style.setProperty('--tilt', progress.toFixed(3))
+      }
+      window.addEventListener('scroll', () => { if (!pending) { pending = true; requestAnimationFrame(tilt) } }, { passive: true })
+      window.addEventListener('resize', tilt)
+      tilt()
+
+      // The light on the cards follows the pointer.
+      document.querySelectorAll('.card').forEach((card) => {
+        card.addEventListener('pointermove', (event) => {
+          const box = card.getBoundingClientRect()
+          card.style.setProperty('--x', `${event.clientX - box.left}px`)
+          card.style.setProperty('--y', `${event.clientY - box.top}px`)
+        })
+      })
+    })()
+  </script>
+</body>
+</html>

@@ -6,6 +6,7 @@
     Remote layout below -FtpUrl (served at -WebUrl):
         <version>/    the release folder: zip/tar.gz builds, Windows installers and SHA256SUMS
         updates/      the Velopack update feed (release.ps1 -UpdateUrl <WebUrl>/updates)
+        latest.json   the newest stable version and its files, read by the front page (docs/frontpage)
 
     1. Checks the release folder against its SHA256SUMS.
     2. Signs in once and lists what is on the server. A failed sign-in stops at once; it is never retried.
@@ -14,7 +15,8 @@
     4. Uploads the feed: packages that are not on the server yet, then the installers, and the index files
        (releases.<channel>.json, RELEASES-<channel>, assets.<channel>.json) last, so installed apps never see a version
        whose packages are still missing.
-    5. Checks every uploaded file at -WebUrl (size) and that the feed's index lists the version.
+    5. Stable versions only (no "-" in the version): uploads latest.json, after everything else.
+    6. Checks every uploaded file at -WebUrl (size) and that the feed's index lists the version.
 
     The connection requires TLS (explicit FTPS). The password comes from the environment variable
     MAILNIX_FTP_PASSWORD or is asked for; it goes to curl through standard input, never on a command line.
@@ -23,6 +25,8 @@
     .\scripts\publish-release.ps1 1.4.0
 .EXAMPLE
     .\scripts\publish-release.ps1 1.4.0 -WhatIf
+.EXAMPLE
+    .\scripts\publish-release.ps1 1.4.0 -LatestOnly
 #>
 [CmdletBinding(SupportsShouldProcess)]
 param(
@@ -47,6 +51,9 @@ param(
 
     # Upload the release folder although the server has it already.
     [switch] $Force,
+
+    # Only latest.json, for a version that is published already (e.g. one released before latest.json existed).
+    [switch] $LatestOnly,
 
     # Accept any TLS certificate. Only for testing against a local server.
     [switch] $SkipCertificateCheck
@@ -86,16 +93,40 @@ foreach ($name in $sums.Keys) {
 # Index files are rewritten by every release; packages carry their version in the name and never change.
 $isIndex = { param($name) $name -like 'releases.*.json' -or $name -like 'RELEASES-*' -or $name -like 'assets.*.json' }
 $feedFiles = @()
-if (-not $NoFeed) {
+if (-not $NoFeed -and -not $LatestOnly) {
     if (-not (Test-Path $Feed)) { throw "The feed folder $Feed does not exist (-NoFeed for a release without installers)." }
     $feedFiles = @(Get-ChildItem $Feed -File | Sort-Object Name)
     if (-not ($feedFiles | Where-Object Name -like "mailnix-$Version-*-full.nupkg")) { throw "The feed $Feed has no package of $Version." }
 }
 
+# What the front page shows: the files of the newest stable version. Pre-releases leave it alone.
+$stable = $Version -notlike '*-*'
+if ($LatestOnly -and -not $stable) { throw "$Version is a pre-release; latest.json only names stable versions." }
+$latest = $null
+if ($stable) {
+    $latest = [ordered]@{
+        version = $Version
+        published = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd')
+        files = @($files | ForEach-Object {
+            if ($_.Name -notmatch "^mailnix-$([regex]::Escape($Version))-(?<runtime>[a-z0-9-]+?)(?<kind>-setup\.exe|\.zip|\.tar\.gz)$") { throw "Unexpected file name in the release folder: $($_.Name)" }
+            [ordered]@{
+                name = $_.Name
+                runtime = $Matches.runtime
+                kind = @{ '-setup.exe' = 'installer'; '.zip' = 'zip'; '.tar.gz' = 'tar.gz' }[$Matches.kind]
+                size = $_.Length
+                sha256 = $sums[$_.Name]
+            }
+        })
+    }
+}
+
 if ($WhatIfPreference) {
     Write-Host "Would upload to $ftpBase (web: $webBase):"
-    $files + @(Get-Item (Join-Path $Output 'SHA256SUMS')) | ForEach-Object { Write-Host "  $Version/$($_.Name)" }
-    $feedFiles | ForEach-Object { Write-Host "  updates/$($_.Name)$(if (-not (& $isIndex $_.Name) -and $_.Name -like '*.nupkg') { ' (if not on the server yet)' })" }
+    if (-not $LatestOnly) {
+        $files + @(Get-Item (Join-Path $Output 'SHA256SUMS')) | ForEach-Object { Write-Host "  $Version/$($_.Name)" }
+        $feedFiles | ForEach-Object { Write-Host "  updates/$($_.Name)$(if (-not (& $isIndex $_.Name) -and $_.Name -like '*.nupkg') { ' (if not on the server yet)' })" }
+    }
+    if ($latest) { Write-Host "  latest.json:"; Write-Host ($latest | ConvertTo-Json -Depth 4) }
     return
 }
 
@@ -119,7 +150,7 @@ function Invoke-Curl([string[]] $Lines, [string[]] $Arguments) {
 }
 
 function FtpUrlOf([string] $folder, [string] $name = '') {
-    "$ftpBase/$folder/$(if ($name) { [Uri]::EscapeDataString($name) })"
+    "$ftpBase/$(if ($folder) { "$folder/" })$(if ($name) { [Uri]::EscapeDataString($name) })"
 }
 
 # Names in a folder on the server; an empty list if the folder does not exist yet.
@@ -147,14 +178,20 @@ function Send-Files([string] $folder, [System.IO.FileInfo[]] $items) {
 # --- Upload ------------------------------------------------------------------------------------------
 Write-Host "==> Signing in to $($ftp.Host) as $user" -ForegroundColor Cyan
 $remoteRelease = Get-RemoteNames $Version
-if ($remoteRelease -contains 'SHA256SUMS' -and -not $Force) {
-    throw "$Version is published already ($webBase/$Version/SHA256SUMS exists). A released version is never uploaded again; -Force overrides this."
+$uploaded = @()
+if ($LatestOnly) {
+    if ($remoteRelease -notcontains 'SHA256SUMS') { throw "$Version is not published yet; upload it without -LatestOnly first." }
 }
+else {
+    if ($remoteRelease -contains 'SHA256SUMS' -and -not $Force) {
+        throw "$Version is published already ($webBase/$Version/SHA256SUMS exists). A released version is never uploaded again; -Force overrides this (-LatestOnly for just latest.json)."
+    }
 
-Write-Host "==> Release folder $Version/" -ForegroundColor Cyan
-Send-Files $Version $files
-Send-Files $Version @(Get-Item (Join-Path $Output 'SHA256SUMS'))
-$uploaded = @($files + @(Get-Item (Join-Path $Output 'SHA256SUMS')) | ForEach-Object { [pscustomobject]@{ Path = "$Version/$($_.Name)"; Length = $_.Length } })
+    Write-Host "==> Release folder $Version/" -ForegroundColor Cyan
+    Send-Files $Version $files
+    Send-Files $Version @(Get-Item (Join-Path $Output 'SHA256SUMS'))
+    $uploaded += @($files + @(Get-Item (Join-Path $Output 'SHA256SUMS')) | ForEach-Object { [pscustomobject]@{ Path = "$Version/$($_.Name)"; Length = $_.Length } })
+}
 
 if ($feedFiles) {
     Write-Host '==> Update feed updates/' -ForegroundColor Cyan
@@ -168,6 +205,29 @@ if ($feedFiles) {
     Send-Files 'updates' $others
     Send-Files 'updates' $indexes
     $uploaded += @($packages + $others + $indexes | ForEach-Object { [pscustomobject]@{ Path = "updates/$($_.Name)"; Length = $_.Length } })
+}
+
+if ($latest) {
+    Write-Host '==> latest.json' -ForegroundColor Cyan
+    # A patch of an older line (1.3.1 after 1.4.0) must not replace the newest version.
+    $current = try { Invoke-RestMethod -Uri "$webBase/latest.json" -SkipCertificateCheck:$SkipCertificateCheck } catch { $null }
+    if ($current -and [version] $current.version -gt [version] $Version) {
+        Write-Host "  stays at $($current.version) (newer than $Version)"
+        $latest = $null
+    }
+    else {
+        $temp = Join-Path ([System.IO.Path]::GetTempPath()) "mailnix-latest-$([guid]::NewGuid().ToString('N'))"
+        New-Item -ItemType Directory $temp | Out-Null
+        try {
+            $file = Join-Path $temp 'latest.json'
+            [System.IO.File]::WriteAllText($file, ($latest | ConvertTo-Json -Depth 4) + "`n")
+            Send-Files '' @(Get-Item $file)
+            $uploaded += [pscustomobject]@{ Path = 'latest.json'; Length = (Get-Item $file).Length }
+        }
+        finally {
+            Remove-Item $temp -Recurse -Force
+        }
+    }
 }
 
 # --- Check on the web server -------------------------------------------------------------------------
@@ -185,8 +245,12 @@ foreach ($index in $feedFiles | Where-Object Name -like 'releases.*.json') {
     $local = (Get-Content $index.FullName -Raw | ConvertFrom-Json).Assets.Version
     if ($local -contains $Version -and $listed -notcontains $Version) { $problems += "updates/$($index.Name) on the web server does not list $Version" }
 }
+if ($latest -and (Invoke-RestMethod -Uri "$webBase/latest.json" -SkipCertificateCheck:$SkipCertificateCheck).version -ne $Version) {
+    $problems += "latest.json on the web server does not name $Version"
+}
 if ($problems) { throw "Uploaded, but the web server does not serve everything correctly:`n$($problems -join "`n")" }
 
 Write-Host "Published $Version ($($uploaded.Count) files):" -ForegroundColor Green
 Write-Host "  Downloads:  $webBase/$Version/"
 if ($feedFiles) { Write-Host "  Updates:    $webBase/updates (release.ps1 -UpdateUrl)" }
+if ($latest) { Write-Host "  Latest:     $webBase/latest.json (front page)" }

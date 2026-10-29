@@ -193,6 +193,9 @@ that name):
   whose folder on the server has it counts as published and is not uploaded again (`-Force` overrides this).
 - `updates/`: the feed. Packages already on the server are skipped; the index files (`releases.<channel>.json` and
   the like) go up last, so installed apps never see a version whose packages are still missing.
+- `latest.json`: the newest stable version and its files, for the front page ([docs/frontpage](docs/frontpage/README.md)).
+  Uploaded last, only for stable versions, and never replaced by an older one; `-LatestOnly` uploads just this file
+  for a version that is published already.
 
 The password comes from the environment variable `MAILNIX_FTP_PASSWORD` or is asked for; it is never stored. A failed
 sign-in stops the script at once, without retrying. Afterwards it checks every uploaded file on the web server and
