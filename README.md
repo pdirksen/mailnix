@@ -166,22 +166,37 @@ Versions follow [semantic versioning](https://semver.org). A release is built on
 checkout of the commit to release:
 
 ```powershell
-.\scripts\release.ps1 1.4.0 -UpdateUrl https://downloads.example.com/mailnix/updates   # 1.5.0-beta.1: a pre-release
+.\scripts\release.ps1 1.4.0                              # 1.5.0-beta.1: a pre-release
 .\scripts\release.ps1 1.4.0 -NoTag -Runtimes win-x64     # trial run: no tag, uncommitted changes allowed
+.\scripts\publish-release.ps1 1.4.0                      # upload to the download server (-WhatIf: only list the files)
 ```
 
 It runs the backend and frontend tests (not the e2e tests: run those before), builds the standalone apps for
 `win-x64`, `win-arm64`, `linux-x64` and `linux-arm64` with that version (the Linux ones in Git Bash), writes them with a
-`SHA256SUMS` file to `artifacts/releases/<version>/` and tags the commit `v<version>`. Push the tag and upload the
-folder to the download server yourself.
+`SHA256SUMS` file to `artifacts/releases/<version>/` and tags the commit `v<version>`. Push the tag yourself.
 
 For each Windows runtime it also builds the desktop app and packs it with Velopack (`vpk`, a local dotnet tool in
 `backend/`): the installer goes into the release folder, the update packages into the feed folder
 `artifacts/releases/updates/` (`-Feed` for another one). Keep that folder between releases: it lists every version,
-and the next release builds its delta updates from it. Upload its content to the address given with `-UpdateUrl`.
+and the next release builds its delta updates from it. Installed apps look for updates at `-UpdateUrl` (by default
+`https://cloudsteps.de/u/mailnix/releases/updates`, where `publish-release.ps1` puts the feed).
 Each runtime is its own update channel (`win-x64`, `win-arm64`); pre-releases go to `win-x64-beta` and so on, so
 installed stable versions never get a pre-release. `-NoInstaller` skips all this. macOS builds have to be signed on a Mac: build them there with
 `build-unix.sh --archive`, add them to the folder and update `SHA256SUMS`.
+
+`publish-release.ps1 <version>` uploads a release over FTPS (TLS required) to
+`ftp://deploy@rainbow.cloudsteps.de/mailnix/releases`, served at `https://cloudsteps.de/u/mailnix/releases`
+(`-FtpUrl` and `-WebUrl` for other servers; `rainbow.cloudsteps.de` because the FTP server's certificate is issued for
+that name):
+
+- `<version>/`: the release folder, checked against its `SHA256SUMS` first. `SHA256SUMS` goes up last; a version
+  whose folder on the server has it counts as published and is not uploaded again (`-Force` overrides this).
+- `updates/`: the feed. Packages already on the server are skipped; the index files (`releases.<channel>.json` and
+  the like) go up last, so installed apps never see a version whose packages are still missing.
+
+The password comes from the environment variable `MAILNIX_FTP_PASSWORD` or is asked for; it is never stored. A failed
+sign-in stops the script at once, without retrying. Afterwards it checks every uploaded file on the web server and
+that the feed lists the new version.
 
 Every other build (`dotnet run`, the build scripts, Docker) is a development build `0.0.0-dev` unless `MailnixVersion`
 is set: as an environment variable, with `-p:MailnixVersion=1.4.0`, or with `--build-arg MailnixVersion=1.4.0` for

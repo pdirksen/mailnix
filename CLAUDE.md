@@ -45,9 +45,12 @@ Standalone builds: `scripts/build-windows.ps1` / `scripts/run-windows.ps1` on Wi
 `scripts/run-unix.sh` on Linux and macOS (output in `artifacts/`). `build-windows.ps1 -Desktop` builds the Windows
 desktop app instead: `mailnix-desktop.exe` next to a multi-file `mailnix.exe`, in `artifacts/windows-desktop/`.
 
-Releases: `scripts/release.ps1 <version> -UpdateUrl <feed address>` runs locally (tests, Windows and Linux builds,
+Releases: `scripts/release.ps1 <version>` runs locally (tests, Windows and Linux builds,
 Windows installers, `SHA256SUMS`, tag `v<version>`) into `artifacts/releases/<version>/`, and the Velopack update feed
-into `artifacts/releases/updates/` (kept across releases for delta updates); nothing depends on GitHub. The version comes from `MailnixVersion` (environment
+into `artifacts/releases/updates/` (kept across releases for delta updates); nothing depends on GitHub.
+`scripts/publish-release.ps1 <version>` uploads both over FTPS to `rainbow.cloudsteps.de/mailnix/releases`
+(`<version>/` and `updates/`), served at `https://cloudsteps.de/u/mailnix/releases`; the password comes from
+`MAILNIX_FTP_PASSWORD` or a prompt. Never retry a failed sign-in there. The version comes from `MailnixVersion` (environment
 variable or MSBuild property); without it builds are `0.0.0-dev`.
 
 ## Architecture

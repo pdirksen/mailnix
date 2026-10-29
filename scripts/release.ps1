@@ -15,14 +15,14 @@
        previous one. Pre-releases go to their own channel (<runtime>-beta), so installed stable versions never get them.
     5. Output: <Output>\mailnix-<version>-<runtime>.zip / .tar.gz / -setup.exe and SHA256SUMS, as they go on the
        download server.
-    6. Tags the commit v<version>. Pushing the tag and uploading the folders are up to you: <Output> to the download
-       area, the content of <Feed> to the address given with -UpdateUrl.
+    6. Tags the commit v<version>. Pushing the tag is up to you; publish-release.ps1 <version> uploads <Output> and
+       the feed to the download server.
 
     macOS builds have to be signed on a Mac (see README): build them there with build-unix.sh --archive, add them to
     the folder and update SHA256SUMS.
 
 .EXAMPLE
-    .\scripts\release.ps1 1.4.0 -UpdateUrl https://downloads.example.com/mailnix/updates
+    .\scripts\release.ps1 1.4.0
 .EXAMPLE
     .\scripts\release.ps1 1.5.0-beta.1 -Runtimes win-x64 -NoTag
 #>
@@ -40,9 +40,10 @@ param(
     # A trial run: no tag, and uncommitted changes are allowed. Delete the folder afterwards.
     [switch] $NoTag,
 
-    # Where installed desktop apps look for updates: the web address the content of the feed folder is uploaded to.
-    # Built into mailnix-desktop.exe; Mailnix:Desktop:UpdateUrl in the data folder's appsettings.json overrides it.
-    [string] $UpdateUrl,
+    # Where installed desktop apps look for updates: the web address the content of the feed folder is uploaded to
+    # (publish-release.ps1 uploads it to updates/ there). Built into mailnix-desktop.exe; Mailnix:Desktop:UpdateUrl in
+    # the data folder's appsettings.json overrides it.
+    [string] $UpdateUrl = 'https://cloudsteps.de/u/mailnix/releases/updates',
 
     # The Velopack feed folder, kept across releases. Defaults to artifacts\releases\updates in the repository.
     [string] $Feed,
@@ -188,8 +189,9 @@ else {
     Invoke-Step "Tagging $tag" { git -C $root tag -a $tag -m "mailnix $Version" }
     Write-Host "Release $Version ($(git -C $root rev-parse --short HEAD)): $Output" -ForegroundColor Green
     Write-Host "Push the tag with: git push origin $tag"
+    Write-Host "Upload it with:    .\scripts\publish-release.ps1 $Version"
 }
 Get-ChildItem $Output | Format-Table Name, @{ n = 'MB'; e = { '{0:N1}' -f ($_.Length / 1MB) } } -AutoSize
 if ($installers) {
-    Write-Host "Update feed: $Feed$(if ($UpdateUrl) { " (upload its content to $UpdateUrl)" })"
+    Write-Host "Update feed: $Feed$(if ($UpdateUrl) { " (served at $UpdateUrl)" })"
 }
